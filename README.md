@@ -1,0 +1,2 @@
+# EmergencyContact
+緊急連絡網を使って安否確認を自動化する
