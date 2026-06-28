@@ -1,0 +1,286 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "01000000-0000-0000-0000-000000000001",
+  "Metadata": {
+    "entryPointPosition": { "x": 40, "y": 40 },
+    "ActionMetadata": {
+      "01000000-0000-0000-0000-000000000001": {
+        "position": { "x": 200, "y": 40 }
+      },
+      "02000000-0000-0000-0000-000000000002": {
+        "position": { "x": 400, "y": 40 }
+      },
+      "03000000-0000-0000-0000-000000000003": {
+        "position": { "x": 600, "y": 40 }
+      },
+      "04000000-0000-0000-0000-000000000004": {
+        "position": { "x": 800, "y": 40 }
+      },
+      "05000000-0000-0000-0000-000000000005": {
+        "position": { "x": 1000, "y": 40 }
+      },
+      "06000000-0000-0000-0000-000000000006": {
+        "position": { "x": 1200, "y": 40 }
+      },
+      "07000000-0000-0000-0000-000000000007": {
+        "position": { "x": 1400, "y": 40 }
+      },
+      "08000000-0000-0000-0000-000000000008": {
+        "position": { "x": 1600, "y": 40 }
+      },
+      "09000000-0000-0000-0000-000000000009": {
+        "position": { "x": 1000, "y": 220 }
+      },
+      "0A000000-0000-0000-0000-00000000000A": {
+        "position": { "x": 1000, "y": 400 }
+      },
+      "0B000000-0000-0000-0000-00000000000B": {
+        "position": { "x": 1000, "y": 580 }
+      },
+      "0C000000-0000-0000-0000-00000000000C": {
+        "position": { "x": 1800, "y": 40 }
+      }
+    },
+    "Annotations": [],
+    "name": "SafetyConfirmationInboundFlow",
+    "description": "Safety Confirmation inbound voice flow (Phase 9.1). Sets Polly ja-JP/Mizuki voice, invokes InboundHandler Lambda with step=identify to classify the caller (E.164 lookup against Employee_Master.PhoneNumberIndex GSI + nearest active Cycle selection), then branches on the returned 'flow' Contact Attribute into one of four paths: ACTIVE_CYCLE (record + InboundGuidanceText TTS + 30s Wait + InboundHandler step=finalize + Disconnect), NO_CYCLE / NOT_REGISTERED / CYCLE_TERMINATED (guidance playback + Disconnect, no recording, no Response update). Substitution placeholders: ${InboundHandlerFnArn}, ${InboundGuidanceText}. DTMF is intentionally absent per Requirement 5.6. Inbound_Contact record write, Cycle-tied Response update (callResultCodes += INBOUND), and TranscribeStarter chaining are owned by the InboundHandler Lambda (Phase 9.2), not by this flow.",
+    "type": "contactFlow",
+    "status": "PUBLISHED",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Identifier": "01000000-0000-0000-0000-000000000001",
+      "Type": "UpdateContactTextToSpeechVoice",
+      "Parameters": {
+        "TextToSpeechVoice": "Mizuki"
+      },
+      "Transitions": {
+        "NextAction": "02000000-0000-0000-0000-000000000002",
+        "Errors": [],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "02000000-0000-0000-0000-000000000002",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${InboundHandlerFnArn}",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "step": "identify"
+        },
+        "ResponseValidation": {
+          "ResponseType": "STRING_MAP"
+        }
+      },
+      "Transitions": {
+        "NextAction": "03000000-0000-0000-0000-000000000003",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "03000000-0000-0000-0000-000000000003",
+      "Type": "UpdateContactAttributes",
+      "Parameters": {
+        "Attributes": {
+          "flow": "$.External.flow"
+        },
+        "TargetContact": "Current"
+      },
+      "Transitions": {
+        "NextAction": "04000000-0000-0000-0000-000000000004",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "04000000-0000-0000-0000-000000000004",
+      "Type": "Compare",
+      "Parameters": {
+        "ComparisonValue": "$.Attributes.flow"
+      },
+      "Transitions": {
+        "NextAction": "0C000000-0000-0000-0000-00000000000C",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "05000000-0000-0000-0000-000000000005",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["ACTIVE_CYCLE"]
+            }
+          },
+          {
+            "NextAction": "09000000-0000-0000-0000-000000000009",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["NO_CYCLE"]
+            }
+          },
+          {
+            "NextAction": "0A000000-0000-0000-0000-00000000000A",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["NOT_REGISTERED"]
+            }
+          },
+          {
+            "NextAction": "0B000000-0000-0000-0000-00000000000B",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": ["CYCLE_TERMINATED"]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Identifier": "05000000-0000-0000-0000-000000000005",
+      "Type": "UpdateContactRecordingBehavior",
+      "Parameters": {
+        "RecordingBehavior": "Both"
+      },
+      "Transitions": {
+        "NextAction": "06000000-0000-0000-0000-000000000006",
+        "Errors": [],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "06000000-0000-0000-0000-000000000006",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "${InboundGuidanceText}",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "07000000-0000-0000-0000-000000000007",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "07000000-0000-0000-0000-000000000007",
+      "Type": "Wait",
+      "Parameters": {
+        "TimeLimitSeconds": "30"
+      },
+      "Transitions": {
+        "NextAction": "08000000-0000-0000-0000-000000000008",
+        "Errors": [
+          {
+            "NextAction": "08000000-0000-0000-0000-000000000008",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "08000000-0000-0000-0000-000000000008",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${InboundHandlerFnArn}",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "step": "finalize"
+        },
+        "ResponseValidation": {
+          "ResponseType": "STRING_MAP"
+        }
+      },
+      "Transitions": {
+        "NextAction": "0C000000-0000-0000-0000-00000000000C",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "09000000-0000-0000-0000-000000000009",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "現在受付対象のサイクルがありません。お電話ありがとうございました。",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "0C000000-0000-0000-0000-00000000000C",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "0A000000-0000-0000-0000-00000000000A",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "番号が登録されていないため受付できません。お電話ありがとうございました。",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "0C000000-0000-0000-0000-00000000000C",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "0B000000-0000-0000-0000-00000000000B",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "対象のサイクルは既に終了しています。お電話ありがとうございました。",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "0C000000-0000-0000-0000-00000000000C",
+        "Errors": [
+          {
+            "NextAction": "0C000000-0000-0000-0000-00000000000C",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "0C000000-0000-0000-0000-00000000000C",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    }
+  ]
+}

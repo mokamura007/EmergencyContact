@@ -1,0 +1,265 @@
+# cfn-nag deny-list (suppression) configuration for infrastructure/template.yaml
+#
+# Task 14.12 (Smoke test: cfn-nag major issue 0 verification) suppresses the
+# 15 unique rule_ids below because each one is a documented design decision
+# or a known cfn-nag rule limitation. After applying this deny-list,
+# `cfn_nag` reports Failures: 0 and Warnings: 0 against template.yaml.
+#
+# Classification summary (Task 14.12 baseline scan):
+#   - Failures  : 1 unique rule_id (F78)
+#   - Warnings  : 14 unique rule_ids (W10, W11, W28, W35, W47, W48, W51,
+#                 W58, W59, W64, W68, W84, W89, W92)
+#   - True Positive corrections to template.yaml : 0 (zero)
+#   - False Positive suppressions in this file   : 15
+#
+# Style: each entry's `reason` field follows the same one-line format as the
+# four entries in infrastructure/.cfnlintrc:
+#     "<rule_id> -- <one-line summary> -- <design source>".
+# Detailed prose lives in the YAML comments above each entry, matching the
+# file-comment style of .cfnlintrc.
+#
+# Tracking: docs/notes/_progress.md "Task 14.12" entry (Session 17).
+
+RulesToSuppress:
+  # ---------------------------------------------------------------------
+  # F78 -- CognitoUserPool MfaConfiguration OFF
+  #
+  # design.md L845 explicitly records `MFA: OFF (初期構築)` for the User
+  # Pool. The mitigation stack is:
+  #   - 12-char password policy with upper / lower / digit / symbol
+  #     requirement (design.md L847, tasks.md L334)
+  #   - Administrator-group-only API authorization (design.md L197)
+  #   - Account lockout via LockoutTable + PreAuthentication Lambda
+  #     (design.md L227-228, Requirement 1.6)
+  # MFA activation is a Phase 14/15 production-readiness decision and is
+  # non-breaking (change MfaConfiguration to OPTIONAL or ON without data
+  # migration).
+  - id: F78
+    reason: F78 -- MfaConfiguration OFF is initial-build design -- design.md L845 "MFA OFF (初期構築)"; mitigated by 12-char password policy + Administrator group + LockoutTable; MFA activation deferred to Phase 14/15
+
+  # ---------------------------------------------------------------------
+  # W10 -- CloudFront Distribution access logging disabled
+  #
+  # SpaDistribution serves a low-traffic admin-only SPA. Per-request audit
+  # is covered server-side by:
+  #   - API Gateway access log (ApiGwAccessLogGroup) and execution log
+  #     (ApiGwExecutionLogGroup) — Phase 5.1
+  #   - AuditLogGroup populated by Lambda AuditLogWriter pattern —
+  #     Requirement 16.1-16.6 (Phase 16 Observability)
+  # CloudFront access logging would duplicate this audit trail and incur
+  # S3 storage cost without additional security value for admin-only
+  # traffic patterns.
+  - id: W10
+    reason: W10 -- CloudFront access log disabled -- admin-only low-traffic SPA; server-side audit via API Gateway access log + AuditLogGroup (Req 16.1-16.6) is the audit-of-record
+
+  # ---------------------------------------------------------------------
+  # W11 -- IAM role allows "*" resource
+  #
+  # Three roles legitimately require Resource: "*", and each location has
+  # an inline comment in template.yaml explaining why:
+  #
+  # (a) TranscribeStarterFnExecutionRole / TranscribeStartJob (L2200-04)
+  #     The transcribe:StartTranscriptionJob and
+  #     transcribe:GetTranscriptionJob actions do not support
+  #     resource-level permissions per the AWS IAM Service Authorization
+  #     Reference for Amazon Transcribe.
+  #
+  # (b) CycleFinalizerFnExecutionRole / CloudWatchPutMetric (L2478-83)
+  #     AWS docs explicitly state cloudwatch:PutMetricData does not
+  #     support Resource ARN scoping; namespace scoping is enforced by
+  #     the request body via the CLOUDWATCH_NAMESPACE env var.
+  #
+  # (c) CycleStateMachineExecutionRole / CloudWatchLogsForSfn (L3333-44)
+  #     The SFN CloudWatch Logs service-linked actions
+  #     (CreateLogDelivery / GetLogDelivery / UpdateLogDelivery /
+  #     DeleteLogDelivery / ListLogDeliveries / PutResourcePolicy /
+  #     DescribeResourcePolicies / DescribeLogGroups) require Resource
+  #     "*" per the AWS Step Functions logging-configuration docs; this
+  #     mirrors the AWS-managed policy
+  #     "AWSStepFunctionsConsoleFullAccess" wildcard pattern.
+  - id: W11
+    reason: W11 -- IAM "*" resource is AWS API requirement -- 3 occurrences (Transcribe StartTranscriptionJob, CloudWatch PutMetricData, SFN CloudWatch Logs service-linked); see inline comments at each Policy block
+
+  # ---------------------------------------------------------------------
+  # W28 -- Resource found with explicit name disallows replacement updates
+  #
+  # 38 resources carry explicit names (DynamoDB tables, IAM roles,
+  # managed policies, CloudWatch alarms, Lambda functions, SNS topic,
+  # SFN state machine, etc.). Predictable names are required because:
+  #   - DynamoDB table names appear in Lambda env vars and SFN
+  #     DefinitionSubstitutions (ResponseTableName placeholder, etc.).
+  #   - IAM role names are referenced by forward-named ARNs in cross-
+  #     resource policies (e.g. SfnStopExecution policy in
+  #     CycleFinalizerFnExecutionRole references the SFN execution ARN
+  #     before the SFN resource itself is declared).
+  #   - SNS topic / SFN state-machine names follow the
+  #     `safety-confirmation-<role>-${EnvironmentName}` convention so
+  #     Lambda env vars can be assembled with !Sub at template-parse
+  #     time without circular Ref dependencies (template.yaml comments
+  #     at OperatorTopicPublish, EventRuleDelete, etc.).
+  # The CloudFormation replacement-update constraint is accepted; per-
+  # environment splits use the EnvironmentName Parameter to avoid name
+  # collisions across dev/stg/prod accounts.
+  - id: W28
+    reason: W28 -- Explicit resource names required by !Sub-built ARN pattern -- 38 resources need predictable names for forward-named ARNs / Lambda env vars / SFN DefinitionSubstitutions; env split via EnvironmentName Parameter
+
+  # ---------------------------------------------------------------------
+  # W35 -- S3 Bucket access logging disabled
+  #
+  # RecordingsBucket / TranscriptsBucket / SpaBucket all have
+  # PublicAccessBlockConfiguration with the four flags set to `true`
+  # (BlockPublicAcls / BlockPublicPolicy / IgnorePublicAcls /
+  # RestrictPublicBuckets). External access is therefore impossible.
+  # Object-level access audit, when needed, is covered by CloudTrail
+  # S3 Data Events (a Phase 16 Observability follow-up). S3 server
+  # access logging would duplicate that audit trail and incur storage
+  # cost without additional security value.
+  - id: W35
+    reason: W35 -- S3 access log disabled -- PublicAccessBlock all-true on all 3 buckets blocks external access; CloudTrail S3 Data Events (Phase 16) covers object-level audit when needed
+
+  # ---------------------------------------------------------------------
+  # W47 -- SNS Topic missing KmsMasterKeyId
+  #
+  # OperatorTopic carries operator notifications only (SLA warnings,
+  # Cycle TIMEOUT messages — design.md L1518-1539 Operator notification
+  # design). No PII flows through this topic; the message body is
+  # cycle metadata (cycleId, status, counts). AWS-managed default
+  # encryption-in-transit (HTTPS) is sufficient. KMS CMK is
+  # intentionally scoped to resources that store PII at rest (DynamoDB
+  # tables, S3 buckets, Transcribe output) per the KMS scope decision
+  # mapped in design.md L1445 ("15.1, 15.6 ... KMS CMK + IAM 最小権限").
+  - id: W47
+    reason: W47 -- OperatorTopic CMK skipped -- operator notifications carry no PII (cycleId/status/counts only); CMK scope intentionally limited to PII-bearing rest stores (DDB / S3 / Transcript) per design.md L1445
+
+  # ---------------------------------------------------------------------
+  # W48 -- SQS Queue missing KmsMasterKeyId
+  #
+  # RecordingMetadataWriterDLQ receives Lambda async-invoke failure
+  # payloads — S3 EventBridge events containing object keys
+  # (s3://recordings/<cycleId>/<employeeIdSeq>/<file>.wav). The actual
+  # recording media stays SSE-KMS in RecordingsBucket; only the key
+  # string lands in the DLQ. AWS-managed SQS default encryption is
+  # sufficient for this metadata payload.
+  - id: W48
+    reason: W48 -- DLQ CMK skipped -- payload is EventBridge metadata (object keys), no PII; real recording media stays SSE-KMS in RecordingsBucket
+
+  # ---------------------------------------------------------------------
+  # W51 -- S3 bucket should likely have a bucket policy
+  #
+  # RecordingsBucket / TranscriptsBucket: explicit AWS::S3::BucketPolicy
+  # resources are intentionally omitted. Access control is enforced by
+  # two layers:
+  #   1. PublicAccessBlockConfiguration all-true (no public principal
+  #      can reach the buckets).
+  #   2. IAM role scoping — only specific Lambda execution roles carry
+  #      s3:GetObject / s3:PutObject for these buckets:
+  #        - TranscribeStarterFnExecutionRole.RecordingsBucketRead
+  #          (s3:GetObject on RecordingsBucket/*)
+  #        - TranscribeStarterFnExecutionRole.TranscriptsBucketWrite
+  #          (s3:PutObject + s3:PutObjectTagging on TranscriptsBucket/*)
+  #        - KeywordMatcherFnExecutionRole.TranscriptsBucketRead, etc.
+  #     Every other principal hits the IAM implicit deny.
+  # Phase 2.10 / 2.11 Done When ("認可外プリンシパルからの GetObject が
+  # AccessDenied") is satisfied by these two layers. The legacy
+  # template.yaml comment at L899-901 ("BucketPolicy is added in Phase 6
+  # once Lambda execution roles exist") references an early plan note
+  # that was not carried through to the final design.
+  # NOTE: SpaBucket DOES have an explicit AWS::S3::BucketPolicy
+  # (SpaBucketPolicy at L4197) because CloudFront OAC requires an
+  # explicit allow-from-OAC statement; cfn-nag correctly accepts that
+  # one and only flags the Recordings/Transcripts pair.
+  - id: W51
+    reason: W51 -- Recordings/Transcripts BucketPolicy omitted -- PublicAccessBlock all-true + IAM Role-scoped GetObject/PutObject enforce AccessDenied for non-authorized principals; Phase 2.10/2.11 Done When satisfied without explicit BucketPolicy
+
+  # ---------------------------------------------------------------------
+  # W58 -- Lambda functions require CloudWatch Logs permission
+  #
+  # All 19 Lambda functions attach LambdaBaseLogsManagedPolicy via the
+  # ManagedPolicyArns list on their execution roles. That managed
+  # policy grants logs:CreateLogGroup, logs:CreateLogStream, and
+  # logs:PutLogEvents on the dedicated Lambda LogGroups (each Lambda
+  # has a paired AWS::Logs::LogGroup created in Phase 12.1). cfn-nag
+  # W58 does not follow ManagedPolicyArns references — it only
+  # inspects Policies / inline policy documents — so it flags all 19
+  # roles as missing log permissions. This is a known limitation of
+  # the W58 rule and is acknowledged in cfn-nag GitHub issues.
+  - id: W58
+    reason: W58 -- cfn-nag rule limitation -- all 19 Lambda roles attach LambdaBaseLogsManagedPolicy via ManagedPolicyArns (logs:CreateLogGroup/CreateLogStream/PutLogEvents); W58 does not resolve ManagedPolicyArns refs
+
+  # ---------------------------------------------------------------------
+  # W59 -- ApiGateway Method AuthorizationType=NONE outside HttpMethod OPTIONS
+  #
+  # AuthRecordFailureMethod is the public endpoint
+  # `POST /auth/record-failure` that the SPA hits AFTER it detects a
+  # Cognito NotAuthorizedException (design.md L227, tasks.md L470-473).
+  # By definition the SPA has no valid Cognito ID/Access token at that
+  # moment, so requiring Cognito authorization on this endpoint would
+  # be a tautological dead end — the very failure being reported is
+  # the absence of a valid token.
+  # Brute-force abuse of this unauthenticated path is mitigated by
+  # API Gateway stage throttling configured at 10 req/sec/IP
+  # (tasks.md L471). Rate exceedance returns HTTP 429.
+  - id: W59
+    reason: W59 -- AuthRecordFailureMethod is the unauthenticated public failure-reporting endpoint -- design.md L227 / tasks.md L470-473; SPA has no valid Cognito token at the moment of POST; brute force throttled to 10 req/sec/IP
+
+  # ---------------------------------------------------------------------
+  # W64 -- ApiGateway Stage missing UsagePlan
+  # W68 -- ApiGateway Deployment missing UsagePlan
+  #
+  # UsagePlan is the AWS construct for API-Key quota management. This
+  # system authorizes every API call via Cognito User Pool JWT (no API
+  # Keys exist), and rate-limit enforcement is implemented at the
+  # Stage level using ApiThrottleRate / ApiThrottleBurst Mappings
+  # entries (design.md L870-871, tasks.md L484, dev=50/100,
+  # stg=100/200, prod=100/200). Introducing a UsagePlan would add
+  # API-Key infrastructure that the design does not use.
+  - id: W64
+    reason: W64 -- UsagePlan unused -- Cognito JWT authorization (no API Keys); rate-limit via Stage ApiThrottleRate/Burst (design.md L870-871, tasks.md L484)
+  - id: W68
+    reason: W68 -- UsagePlan unused -- same rationale as W64; this system has no API Keys, rate-limit is Stage-level throttling
+
+  # ---------------------------------------------------------------------
+  # W84 -- CloudWatchLogs LogGroup missing KmsKeyId
+  #
+  # 23 LogGroups (19 Lambda log groups + CycleStateMachineLogGroup +
+  # ApiGwExecutionLogGroup + ApiGwAccessLogGroup + AuditLogGroup) rely
+  # on the AWS-managed CloudWatch Logs default encryption (service-
+  # managed key, automatic). KMS CMK is intentionally scoped to PII-
+  # bearing rest stores (DynamoDB tables, S3 buckets, Transcribe
+  # output). Log content is treated as masked at source: the
+  # `maskPhone` shared function (design.md L1446 "Observability ...
+  # maskPhone 関数") redacts phone numbers and other PII before any
+  # logger emits, so logs never carry raw PII to begin with.
+  - id: W84
+    reason: W84 -- LogGroup CMK skipped -- PII masked at source via shared maskPhone (design.md L1446); LogGroups rely on AWS-managed default encryption; CMK scope limited to PII-bearing rest stores
+
+  # ---------------------------------------------------------------------
+  # W89 -- Lambda functions should be deployed inside a VPC
+  #
+  # The system architecture excludes VPC by design:
+  #   - design.md L194: "VPC は使用しない。"
+  #   - design.md L209: "ネットワーク | VPC 不使用"
+  # All AWS service integrations (API Gateway, DynamoDB, S3, Cognito,
+  # Connect, Transcribe, SFN, SNS, EventBridge) are public-endpoint
+  # managed services reached over the AWS backbone with TLS 1.2+
+  # (design.md L196). No private resources are touched, so VPC
+  # deployment would only add cold-start latency (ENI attachment) and
+  # NAT cost without security benefit.
+  - id: W89
+    reason: W89 -- VPC unused by design -- design.md L194/L209 "VPC 不使用"; all deps are AWS managed services reached via public endpoints over TLS 1.2+
+
+  # ---------------------------------------------------------------------
+  # W92 -- Lambda functions should define ReservedConcurrentExecutions
+  #
+  # All 19 Lambdas run within the AWS default per-region concurrency
+  # pool (1000 concurrent executions). Throughput throttling is
+  # enforced upstream at two layers:
+  #   - SFN Map MaxConcurrency=10 caps outbound dispatch
+  #     (design.md L1515: "Connect 同時アクティブコール 10 が上限")
+  #   - API Gateway stage throttling caps inbound API calls
+  #     (50-100 req/sec depending on env, design.md L870-871)
+  # Reserving concurrency per function would partition the regional
+  # pool without adding back-pressure beyond what the upstream
+  # throttles already provide.
+  - id: W92
+    reason: W92 -- ReservedConcurrentExecutions unset by design -- SFN Map MaxConcurrency=10 + API Gateway stage throttle cap upstream rates (design.md L1515 / L870-871); per-function reservation adds no back-pressure

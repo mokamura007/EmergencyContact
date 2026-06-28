@@ -1,0 +1,173 @@
+# cfn-lint configuration for infrastructure/template.yaml
+
+#
+
+# Task 14.10 (Smoke test: CFn structure inspection) requires "cfn-lint warning 0".
+
+# Task 15.24 (Session 22) re-baselined the suppressed warnings to actual counts:
+
+#
+
+# Baseline (cfn-lint 1.52.0, 2026-06-27 セッション 22 末時点):
+
+# - Total warnings: 32
+
+# - W2001 (Parameter not used): 8
+
+# - W3002 (Code may only work with 'package' cli command): 21
+
+# - W3037 (action not in IAM action list): 2
+
+# - W8001 (Condition not used): 1
+
+#
+
+# 2026-06-28 Task 15.27a 完了で 2 件解消 (DefaultRetryCount / DefaultRetryIntervalMinutes):
+
+# - Total warnings: 30
+
+# - W2001 (Parameter not used): 6
+
+#
+
+# 2026-06-28 Task 15.27c 完了で 1 件解消 (TranscribeLanguageCode):
+
+# - Total warnings: 29
+
+# - W2001 (Parameter not used): 5
+
+#
+
+# 2026-06-28 Task 15.27h 完了で 1 件解消 (IsProd Condition 撤去):
+
+# - Total warnings: 28
+
+# - W8001 (Condition not used): 0
+
+#
+
+# 2026-06-28 Task 15.27b 完了で 1 件解消 (InboundReceptionWindowDays):
+
+# - Total warnings: 27
+
+# - W2001 (Parameter not used): 4
+
+#
+
+# 各 ignore は実装による根本解消を別タスク (15.27a〜15.27h) として分割起票済:
+
+#
+
+# W2001 (Parameter not used) — 4 件 ----
+
+# これら Parameter は parameters/{env}.json の契約面として宣言済だが、
+
+# handler / SFN / Contact Flow からの実消費経路が未実装 or リテラル使用で
+
+# CFn template 上では `!Ref` されていない。実装による根本解消は別タスクへ:
+
+#
+
+# - ConnectInboundPhoneNumberArn -> 15.27f (Connect 依存)
+
+# - InboundContactFlowId -> 15.27g (Connect 依存)
+
+# - OutboundGuidanceText -> 15.27d (Connect 依存, Contact Flow 経路)
+
+# - InboundGuidanceText -> 15.27e (Connect 依存, Contact Flow 経路)
+
+#
+
+# OperatorEmail は Phase 12.4 で SNS Subscription.Endpoint から !Ref 参照済のため対象外。
+
+# DefaultRetryCount / DefaultRetryIntervalMinutes は 15.27a で env 注入済 (CycleApiFn)。
+
+# TranscribeLanguageCode は 15.27c で env 注入済 (TranscribeStarterFn)。
+
+# InboundReceptionWindowDays は 15.27b で env 注入済 (InboundHandlerFn)。
+
+#
+
+# W3002 (Code may only work with 'package' cli command) — 21 件 ----
+
+# AWS::Lambda::Function Code: ../backend/lambdas/X/ + SharedLayer Content + SFN DefinitionS3Location の
+
+# local パス参照。標準ワークフローは `aws cloudformation package` が deploy 前に S3 URI へ書換える
+
+# ため、本警告は想定通り。Tracking: B3 (docs/notes/\_progress.md)。
+
+#
+
+# W3037 (action not in IAM action list) — 2 件 ----
+
+# cfn-lint 1.52.0 の IAM action database が AWS 最新仕様に追従していない既知 lag:
+
+# - dynamodb:TransactWriteItems (employee_api 系)
+
+# - その他 1 件
+
+# 実際の IAM では有効、cfn-lint アップデートで自動解消見込み。
+
+#
+
+# W8001 (Condition not used) — 0 件 (15.27h 完了で IsProd Condition 撤去) ----
+
+# Requirement 17.3 が「環境差分は Parameters または Mappings で切替」と明示しているため、
+
+# Conditions による prod 分岐は要件外。現行 requirements.md / design.md に PITR /
+
+# DeletionProtection / Backup Policy / 強化版アラーム閾値などの本番限定強化要件は
+
+# 存在せず、IsProd は Resources / Outputs / 他 Condition から参照されていなかったため
+
+# 未使用 Condition として撤去 (template.yaml L270 削除、design.md Conditions 同期更新)。
+
+# 残る Conditions は HasCustomDomain / UseCustomCert / HasHostedZoneId /
+
+# HasCustomDomainAndHostedZone / ManageConnectStorageConfigCond / IsDev でいずれも
+
+# 実 Resources から参照済。
+
+#
+
+# 分割起票一覧:
+
+# Connect 非依存 (本セッション以降で消化可能, 残 0 件 — 全完了 ✅):
+
+#
+
+# 完了済 (Connect 非依存):
+
+# 15.27a: CycleApi env 化 (DefaultRetryCount / DefaultRetryIntervalMinutes) — 2026-06-28
+
+# 15.27b: InboundHandler env 化 + 受付ウィンドウロジック実装 — 2026-06-28
+
+# 15.27c: TranscribeStarter env 化 (TranscribeLanguageCode) — 2026-06-28
+
+# 15.27h: IsProd Condition 活用 / 撤去判定 — 2026-06-28
+
+#
+
+# Connect 依存 (ADR-0009 §3 完了後, 4 件):
+
+# 15.27d: OutboundGuidanceText を Contact Flow / Lambda env 経由化
+
+# 15.27e: InboundGuidanceText を Contact Flow / Lambda env 経由化
+
+# 15.27f: ConnectInboundPhoneNumberArn の参照 / 削除判定
+
+# 15.27g: InboundContactFlowId の SFN DefinitionSubstitutions / 削除判定
+
+#
+
+# 解消されたら ignore_checks から該当 rule 削除 + 本コメントも更新すること。
+
+templates:
+
+- template.yaml
+
+ignore_checks:
+
+- W2001
+- W3002
+- W3037

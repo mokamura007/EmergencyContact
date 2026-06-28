@@ -1,0 +1,14 @@
+{
+    "UserPoolClients": [
+        {
+            "ClientId": "7h8mt6jrieu5grm9s8uqdn94en",
+            "UserPoolId": "ap-northeast-1_5uYfaQMLJ",
+            "ClientName": "safety-confirmation-spa-dev"
+        },
+        {
+            "ClientId": "7vtk89lqmce7ou1lr76rv4dhss",
+            "UserPoolId": "ap-northeast-1_5uYfaQMLJ",
+            "ClientName": "safety-confirmation-cli-test-dev"
+        }
+    ]
+}

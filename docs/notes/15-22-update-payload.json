@@ -1,0 +1,40 @@
+{
+  "UserPoolId": "ap-northeast-1_5uYfaQMLJ",
+  "Policies": {
+    "PasswordPolicy": {
+      "MinimumLength": 12,
+      "RequireUppercase": true,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireSymbols": true,
+      "TemporaryPasswordValidityDays": 7
+    }
+  },
+  "DeletionProtection": "INACTIVE",
+  "LambdaConfig": {
+    "PreSignUp": "arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-auth-pre-signup-dev",
+    "PreAuthentication": "arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-auth-pre-auth-dev",
+    "PostAuthentication": "arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-auth-post-auth-dev"
+  },
+  "AutoVerifiedAttributes": [],
+  "VerificationMessageTemplate": {
+    "DefaultEmailOption": "CONFIRM_WITH_CODE"
+  },
+  "EmailConfiguration": {
+    "EmailSendingAccount": "COGNITO_DEFAULT"
+  },
+  "AdminCreateUserConfig": {
+    "AllowAdminCreateUserOnly": true
+  },
+  "AccountRecoverySetting": {
+    "RecoveryMechanisms": [
+      {
+        "Priority": 1,
+        "Name": "admin_only"
+      }
+    ]
+  },
+  "UserAttributeUpdateSettings": {
+    "AttributesRequireVerificationBeforeUpdate": []
+  }
+}

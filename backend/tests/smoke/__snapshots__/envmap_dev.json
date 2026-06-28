@@ -1,0 +1,6 @@
+{
+  "ApiThrottleBurst": 100,
+  "ApiThrottleRate": 50,
+  "DynamoBillingMode": "PAY_PER_REQUEST",
+  "LogLevel": "INFO"
+}

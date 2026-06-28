@@ -1,0 +1,26 @@
+[
+    {
+        "Action": "Add",
+        "LogicalId": "CognitoUserPoolClientTest",
+        "Type": "AWS::Cognito::UserPoolClient",
+        "Replacement": null
+    },
+    {
+        "Action": "Modify",
+        "LogicalId": "CycleFinalizerFn",
+        "Type": "AWS::Lambda::Function",
+        "Replacement": "False"
+    },
+    {
+        "Action": "Modify",
+        "LogicalId": "CycleStateMachineExecutionRole",
+        "Type": "AWS::IAM::Role",
+        "Replacement": "False"
+    },
+    {
+        "Action": "Modify",
+        "LogicalId": "CycleStateMachine",
+        "Type": "AWS::StepFunctions::StateMachine",
+        "Replacement": "False"
+    }
+]

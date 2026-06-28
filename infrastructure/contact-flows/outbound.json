@@ -1,0 +1,124 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "01000000-0000-0000-0000-000000000001",
+  "Metadata": {
+    "entryPointPosition": { "x": 40, "y": 40 },
+    "ActionMetadata": {
+      "01000000-0000-0000-0000-000000000001": {
+        "position": { "x": 200, "y": 40 }
+      },
+      "02000000-0000-0000-0000-000000000002": {
+        "position": { "x": 400, "y": 40 }
+      },
+      "03000000-0000-0000-0000-000000000003": {
+        "position": { "x": 600, "y": 40 }
+      },
+      "04000000-0000-0000-0000-000000000004": {
+        "position": { "x": 800, "y": 40 }
+      },
+      "05000000-0000-0000-0000-000000000005": {
+        "position": { "x": 1000, "y": 40 }
+      },
+      "06000000-0000-0000-0000-000000000006": {
+        "position": { "x": 1200, "y": 40 }
+      }
+    },
+    "Annotations": [],
+    "name": "SafetyConfirmationOutboundFlow",
+    "description": "Safety Confirmation outbound voice flow (Phase 7.1). Sets Polly ja-JP/Mizuki voice, enables full-call recording (Both sides), plays the OutboundGuidanceText TTS prompt, waits up to 30 seconds for the employee's voice response (recorded by Connect), invokes CallEndHandler Lambda (which writes Response.callResultCode=RECORDED + endedAt and calls SFN SendTaskSuccess to release the Map iteration's TaskToken), then disconnects. Substitution placeholders: ${CallEndHandlerFnArn}, ${OutboundGuidanceText}. NO_ANSWER / BUSY / VOICEMAIL / ERROR / TRANSCRIBE_FAILED classifications are NOT produced here \u2014 they are emitted outside this flow (Connect CTR EventBridge, ConnectDispatcher 6.2, TranscribeStarter 6.4, Phase 7.4 classifyCallResult). DTMF is intentionally absent per Requirement 5.6.",
+    "type": "contactFlow",
+    "status": "PUBLISHED",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Identifier": "01000000-0000-0000-0000-000000000001",
+      "Type": "UpdateContactTextToSpeechVoice",
+      "Parameters": {
+        "TextToSpeechVoice": "Mizuki"
+      },
+      "Transitions": {
+        "NextAction": "02000000-0000-0000-0000-000000000002",
+        "Errors": [],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "02000000-0000-0000-0000-000000000002",
+      "Type": "UpdateContactRecordingBehavior",
+      "Parameters": {
+        "RecordingBehavior": "Both"
+      },
+      "Transitions": {
+        "NextAction": "03000000-0000-0000-0000-000000000003",
+        "Errors": [],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "03000000-0000-0000-0000-000000000003",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "${OutboundGuidanceText}",
+        "TextToSpeechType": "text"
+      },
+      "Transitions": {
+        "NextAction": "04000000-0000-0000-0000-000000000004",
+        "Errors": [
+          {
+            "NextAction": "06000000-0000-0000-0000-000000000006",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "04000000-0000-0000-0000-000000000004",
+      "Type": "Wait",
+      "Parameters": {
+        "TimeLimitSeconds": "30"
+      },
+      "Transitions": {
+        "NextAction": "05000000-0000-0000-0000-000000000005",
+        "Errors": [
+          {
+            "NextAction": "05000000-0000-0000-0000-000000000005",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "05000000-0000-0000-0000-000000000005",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${CallEndHandlerFnArn}",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "callResultCode": "RECORDED"
+        },
+        "ResponseValidation": {
+          "ResponseType": "STRING_MAP"
+        }
+      },
+      "Transitions": {
+        "NextAction": "06000000-0000-0000-0000-000000000006",
+        "Errors": [
+          {
+            "NextAction": "06000000-0000-0000-0000-000000000006",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "06000000-0000-0000-0000-000000000006",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    }
+  ]
+}

@@ -1,0 +1,221 @@
+{
+    "StackResourceDrifts": [
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthRecordFailureOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|vxze7j|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"vxze7j\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"vxze7j\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:45.906000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ojzv3|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:57.189000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsEmployeeIdSeqOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|j2a3au|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"j2a3au\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"j2a3au\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:58.331000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesEmployeeIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|lt1mu4|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"lt1mu4\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"lt1mu4\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:58.824000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|bvrv2f|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:59.842000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdStatusOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|s2av9s|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"s2av9s\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"s2av9s\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:00.244000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsEmployeeIdSeqOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|w5nqu8|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"w5nqu8\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"w5nqu8\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:01.016000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ukj91|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:01.538000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdAnonymizeOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|glz99e|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"glz99e\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"glz99e\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:05.798000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdCognitoUserOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|6xzloc|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"6xzloc\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"6xzloc\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:06.816000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|c7vwml|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:07.604000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesImportOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|r5mzfq|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"r5mzfq\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"r5mzfq\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:08.671000+00:00"
+        }
+    ],
+    "NextToken": "ecVKUoIGEdfkKyWOiucmH2vnV0D9T7rA/YZjv88yUqZmcjpqMi8DfYDHOCL1Lygd/SgzwPe8Vtl1D+0f1GbtBq7ZAntYwvMKUKJn5VU7hdt4FUKwB3dcpSrGk6PtaEIOiVETQwrjl2ZOKnVCxFPI1QulllVrHr4PYQwEqOtbrQ7to46tObvGakIFyQNBEw7Xvnw9fjEGsmxAnglreTxofbOHWmukFC5eYF3er5LuAU+NPydX2wbnz4tnDBlIQhi0q6lqq0cR2nAyEJD3jgxdezGX+7GkrT/0s7/rqF8DY5XXIid/CyPIOQAkPfJHENxWpTun/fVMiImGDqR81DA2TTYD26HR2LpMUzTOmfPsyA8j6P0pSi6YA6RPtYaNjJT47z8FxCoyAFL7lK3qMM6NChC3vcfx3ivTduu4mHK4pXA1c45Cc7WihJHNPdfMP4VGS17bF3OWAYlqxUjqkHBszSM1yVjcul8gSKDy9TwW7myrv6850snLJkI8W9j04V2mLWELIbKY+PEigQFpullE/sB4tv1NTbsppf+wEeMycPCdk7gmrzzqNzqXhdHB25FpzKfn528hYiM5LwW8GRIalOrm1o1l1mtQVpHAwuPRyNF3mdfwRNFX49IXdEBAsjVwRluDxszbL3x+5WqY/nam5CUtAZuyKskh+ArNJz8L44E=|+ubqTZ8H9WQHD7TLZnKKhg==|1|ec6e1574fe7079c948e49f7dc08a71a747628451c89bc44abd1736de988538ea"
+}

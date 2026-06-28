@@ -1,0 +1,29 @@
+{
+    "UserPoolClient": {
+        "UserPoolId": "ap-northeast-1_5uYfaQMLJ",
+        "ClientName": "safety-confirmation-cli-test-dev",
+        "ClientId": "7vtk89lqmce7ou1lr76rv4dhss",
+        "LastModifiedDate": "2026-06-28T02:46:58.905000+09:00",
+        "CreationDate": "2026-06-28T02:46:58.905000+09:00",
+        "RefreshTokenValidity": 30,
+        "AccessTokenValidity": 1,
+        "IdTokenValidity": 1,
+        "TokenValidityUnits": {
+            "AccessToken": "hours",
+            "IdToken": "hours",
+            "RefreshToken": "days"
+        },
+        "ExplicitAuthFlows": [
+            "ALLOW_ADMIN_USER_PASSWORD_AUTH",
+            "ALLOW_REFRESH_TOKEN_AUTH"
+        ],
+        "SupportedIdentityProviders": [
+            "COGNITO"
+        ],
+        "AllowedOAuthFlowsUserPoolClient": false,
+        "PreventUserExistenceErrors": "ENABLED",
+        "EnableTokenRevocation": true,
+        "EnablePropagateAdditionalUserContextData": false,
+        "AuthSessionValidity": 3
+    }
+}

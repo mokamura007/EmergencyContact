@@ -1,0 +1,72 @@
+[
+  { "ParameterKey": "EnvironmentName", "ParameterValue": "prod" },
+
+  {
+    "ParameterKey": "ConnectInstanceId",
+    "ParameterValue": "TBD-PROD-CONNECT-INSTANCE-ID"
+  },
+  {
+    "ParameterKey": "ConnectInstanceArn",
+    "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/TBD-PROD-CONNECT-INSTANCE-ID"
+  },
+  {
+    "ParameterKey": "ConnectOutboundPhoneNumberArn",
+    "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/TBD-PROD-CONNECT-INSTANCE-ID/phone-number/TBD-PROD-OUTBOUND-PHONE-NUMBER-ID"
+  },
+  {
+    "ParameterKey": "ConnectOutboundPhoneNumber",
+    "ParameterValue": "+810000000000"
+  },
+  {
+    "ParameterKey": "ConnectInboundPhoneNumberArn",
+    "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/TBD-PROD-CONNECT-INSTANCE-ID/phone-number/TBD-PROD-INBOUND-PHONE-NUMBER-ID"
+  },
+  {
+    "ParameterKey": "OutboundContactFlowId",
+    "ParameterValue": "TBD-PROD-OUTBOUND-CONTACT-FLOW-ID"
+  },
+  {
+    "ParameterKey": "InboundContactFlowId",
+    "ParameterValue": "TBD-PROD-INBOUND-CONTACT-FLOW-ID"
+  },
+
+  { "ParameterKey": "DefaultRetryCount", "ParameterValue": "3" },
+  { "ParameterKey": "DefaultRetryIntervalMinutes", "ParameterValue": "5" },
+
+  {
+    "ParameterKey": "OutboundGuidanceText",
+    "ParameterValue": "これは安否確認システムからのお電話です。災害発生に伴い、皆様の安否を確認しています。お名前と現在のご状況を、ピーという発信音の後にお話しください。終わりましたら電話を切ってください。"
+  },
+  {
+    "ParameterKey": "InboundGuidanceText",
+    "ParameterValue": "これは安否確認システムからのお電話です。災害発生に伴い、皆様の安否を確認しています。お名前と現在のご状況を、ピーという発信音の後にお話しください。終わりましたら電話を切ってください。"
+  },
+
+  { "ParameterKey": "LogRetentionDays", "ParameterValue": "365" },
+
+  {
+    "ParameterKey": "OperatorEmail",
+    "ParameterValue": "prod-operator@example.com"
+  },
+
+  { "ParameterKey": "RecordingsRetentionDays", "ParameterValue": "90" },
+  { "ParameterKey": "TranscriptsRetentionDays", "ParameterValue": "90" },
+
+  { "ParameterKey": "InboundReceptionWindowDays", "ParameterValue": "30" },
+
+  { "ParameterKey": "DomainName", "ParameterValue": "" },
+  { "ParameterKey": "AcmCertificateArn", "ParameterValue": "" },
+  { "ParameterKey": "HostedZoneId", "ParameterValue": "" },
+
+  { "ParameterKey": "MaxConcurrentCalls", "ParameterValue": "10" },
+
+  { "ParameterKey": "TranscribeLanguageCode", "ParameterValue": "ja-JP" },
+
+  { "ParameterKey": "ManageConnectStorageConfig", "ParameterValue": "false" },
+  {
+    "ParameterKey": "ConnectRecordingsPrefix",
+    "ParameterValue": "connect-raw/"
+  },
+
+  { "ParameterKey": "MockMode", "ParameterValue": "false" }
+]

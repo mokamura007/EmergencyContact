@@ -1,0 +1,374 @@
+{
+  "Comment": "Safety Confirmation Cycle - main orchestration (Phase 6.8). LoadTargets -> StartTimers -> CallMap (parallel per employee, MaxConcurrency=${MaxConcurrentCalls}) -> Aggregate -> Finalize. State Machine is Standard (long-running, 60-minute SLA). Per-iteration loop: InitAttempt -> Dispatch (waitForTaskToken) -> WaitForTranscribe -> ReadResponse -> EvaluateRetry -> (WaitInterval -> Dispatch | FinalizeOne).",
+  "StartAt": "NormalizeInput",
+  "States": {
+    "NormalizeInput": {
+      "Comment": "Phase 17.1: SFN State Machine 入力を defaults で正規化。CycleApi が mode=ALL で referencedCycleId を含めないケースに対し、States.JsonMerge で null を補完する。これにより LoadTargets state の Payload で $.referencedCycleId を無条件解決しても States.Runtime エラーが出ない。Phase 16.5 G1 で CycleApi handler 側で null default を含める応急対応を入れたが、本タスクで ASL 側の根本修正を実装。CycleApi 側応急対応は二重防御として保持。",
+      "Type": "Pass",
+      "Parameters": {
+        "merged.$": "States.JsonMerge(States.StringToJson('{\"referencedCycleId\":null}'), $, false)"
+      },
+      "OutputPath": "$.merged",
+      "Next": "LoadTargets"
+    },
+    "LoadTargets": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${LoadTargetsFnArn}",
+        "Payload": {
+          "cycleId.$": "$.cycleId",
+          "mode.$": "$.mode",
+          "referencedCycleId.$": "$.referencedCycleId"
+        }
+      },
+      "ResultSelector": {
+        "targetCount.$": "$.Payload.targetCount",
+        "targets.$": "$.Payload.targets"
+      },
+      "ResultPath": "$.targetsResult",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "CycleFailed"
+        }
+      ],
+      "Next": "StartTimers"
+    },
+    "StartTimers": {
+      "Type": "Pass",
+      "Comment": "Phase 6.8 v1 simplification: 30/60-minute EventBridge timer Rules (cycle-30min-{cycleId} / cycle-60min-{cycleId}) are NOT created here. Rationale: dynamic putRule via aws-sdk:eventbridge integration requires Target ARN composition that is awkward in ASL Parameters, and the IAM grant surface broadens the SFN role. Phase 14 integration testing will decide whether to (a) provision the Rules via CycleApi Lambda at cycle start, or (b) re-add aws-sdk:eventbridge:putRule as a Task here. Until that decision, the 30-minute SLA warning and 60-minute timeout paths in CycleFinalizer (Phase 6.6 TIMER_30MIN / TIMER_60MIN) require operator-side EventBridge configuration. The MAP_COMPLETED happy path is fully wired through the Finalize state below.",
+      "Next": "CallMap"
+    },
+    "CallMap": {
+      "Type": "Map",
+      "MaxConcurrency": ${MaxConcurrentCalls},
+      "ItemsPath": "$.targetsResult.targets",
+      "Parameters": {
+        "cycleId.$": "$.cycleId",
+        "retryCount.$": "$.retryCount",
+        "retryIntervalMinutes.$": "$.retryIntervalMinutes",
+        "dictionaryVersion.$": "$.dictionaryVersion",
+        "employee.$": "$$.Map.Item.Value",
+        "currentAttempt": 1
+      },
+      "ResultPath": "$.mapResult",
+      "Iterator": {
+        "StartAt": "InitAttempt",
+        "States": {
+          "InitAttempt": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "Parameters": {
+              "TableName": "${ResponseTableName}",
+              "Item": {
+                "cycleId": {"S.$": "$.cycleId"},
+                "employeeId": {"S.$": "$.employee.employeeId"},
+                "voiceStatus": {"S": "PENDING"},
+                "callAttempts": {"N": "0"},
+                "dictionaryVersion": {"N.$": "States.Format('{}', $.dictionaryVersion)"}
+              },
+              "ConditionExpression": "attribute_not_exists(employeeId)"
+            },
+            "ResultPath": null,
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "DynamoDB.AmazonDynamoDBException",
+                  "DynamoDB.SdkClientException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": [
+                  "DynamoDB.ConditionalCheckFailedException"
+                ],
+                "Comment": "Row already exists (e.g., from an earlier retry or Inbound flow). Idempotent: proceed to Dispatch.",
+                "ResultPath": "$.initWarning",
+                "Next": "Dispatch"
+              },
+              {
+                "ErrorEquals": ["States.ALL"],
+                "ResultPath": "$.initError",
+                "Next": "FinalizeOneError"
+              }
+            ],
+            "Next": "Dispatch"
+          },
+          "Dispatch": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+            "TimeoutSeconds": 90,
+            "Parameters": {
+              "FunctionName": "${ConnectDispatcherFnArn}",
+              "Payload": {
+                "cycleId.$": "$.cycleId",
+                "employeeId.$": "$.employee.employeeId",
+                "phoneNumber.$": "$.employee.phoneNumber",
+                "attempt.$": "$.currentAttempt",
+                "taskToken.$": "$$.Task.Token"
+              }
+            },
+            "ResultPath": "$.dispatchResult",
+            "Catch": [
+              {
+                "ErrorEquals": [
+                  "States.Timeout",
+                  "States.TaskFailed",
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException"
+                ],
+                "Comment": "Dispatch failure (timeout, Lambda exception, or non-retryable Connect error). Route to EvaluateRetry to give the retry decision a chance based on the partial Response state.",
+                "ResultPath": "$.dispatchError",
+                "Next": "WaitForTranscribe"
+              },
+              {
+                "ErrorEquals": ["States.ALL"],
+                "ResultPath": "$.dispatchError",
+                "Next": "FinalizeOneError"
+              }
+            ],
+            "Next": "WaitForTranscribe"
+          },
+          "WaitForTranscribe": {
+            "Type": "Wait",
+            "Seconds": 60,
+            "Comment": "Allow the asynchronous Recording -> Transcribe -> KeywordMatcher pipeline (Phase 6.4 / 8) up to 60 seconds to land voiceStatus into the Response row before EvaluateRetry reads it.",
+            "Next": "ReadResponse"
+          },
+          "ReadResponse": {
+            "Type": "Task",
+            "Comment": "Design judgement (Phase 6.8): RetryEvaluator (Phase 6.5) is a pure-computation Lambda with no DynamoDB access, so the SFN owns Response read. Strongly consistent read so KeywordMatcher writes that landed within the last 60s are visible.",
+            "Resource": "arn:aws:states:::dynamodb:getItem",
+            "Parameters": {
+              "TableName": "${ResponseTableName}",
+              "Key": {
+                "cycleId": {"S.$": "$.cycleId"},
+                "employeeId": {"S.$": "$.employee.employeeId"}
+              },
+              "ConsistentRead": true
+            },
+            "ResultPath": "$.responseRow",
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "DynamoDB.AmazonDynamoDBException",
+                  "DynamoDB.SdkClientException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "ResultPath": "$.readResponseError",
+                "Next": "FinalizeOneError"
+              }
+            ],
+            "Next": "EvaluateRetry"
+          },
+          "EvaluateRetry": {
+            "Type": "Task",
+            "Comment": "Phase 6.8 design judgement: callResultCode is intentionally OMITTED from the payload. Two reasons: (1) the retry decision in shared.retry.evaluator.should_retry does not consume callResultCode today (informational-only per the docstring), and (2) callResultCode may be absent from the Response row (Dispatch crashed before _record_success / _record_error, or this is the first iteration before any call ended). retry_evaluator handler defaults missing callResultCode to None via event.get(...). prevEndAt is sourced from $$.State.EnteredTime — this state's entry time approximates 'when the previous call finished' to within the 60-second WaitForTranscribe window, which is good enough for retry-interval arithmetic.",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${RetryEvaluatorFnArn}",
+              "Payload": {
+                "cycleId.$": "$.cycleId",
+                "employeeId.$": "$.employee.employeeId",
+                "voiceStatus.$": "$.responseRow.Item.voiceStatus.S",
+                "attempts.$": "$.currentAttempt",
+                "retryCount.$": "$.retryCount",
+                "retryIntervalMinutes.$": "$.retryIntervalMinutes",
+                "prevEndAt.$": "$$.State.EnteredTime"
+              }
+            },
+            "ResultSelector": {
+              "retry.$": "$.Payload.retry",
+              "retryWaitSeconds.$": "$.Payload.retryWaitSeconds",
+              "nextDispatchAt.$": "$.Payload.nextDispatchAt",
+              "finalStatus.$": "$.Payload.finalStatus"
+            },
+            "ResultPath": "$.evaluateResult",
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "ResultPath": "$.evaluateError",
+                "Next": "FinalizeOneError"
+              }
+            ],
+            "Next": "RetryChoice"
+          },
+          "RetryChoice": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.evaluateResult.retry",
+                "BooleanEquals": true,
+                "Next": "WaitInterval"
+              }
+            ],
+            "Default": "FinalizeOne"
+          },
+          "WaitInterval": {
+            "Type": "Wait",
+            "SecondsPath": "$.evaluateResult.retryWaitSeconds",
+            "Next": "IncrementAttempt"
+          },
+          "IncrementAttempt": {
+            "Type": "Pass",
+            "Comment": "Increment the in-state attempt counter before looping back to Dispatch. ConnectDispatcher reads $.currentAttempt as the 1-based attempt index; EvaluateRetry uses it as 'attempts' for the next decision.",
+            "Parameters": {
+              "cycleId.$": "$.cycleId",
+              "retryCount.$": "$.retryCount",
+              "retryIntervalMinutes.$": "$.retryIntervalMinutes",
+              "dictionaryVersion.$": "$.dictionaryVersion",
+              "employee.$": "$.employee",
+              "currentAttempt.$": "States.MathAdd($.currentAttempt, 1)"
+            },
+            "Next": "Dispatch"
+          },
+          "FinalizeOne": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:updateItem",
+            "Parameters": {
+              "TableName": "${ResponseTableName}",
+              "Key": {
+                "cycleId": {"S.$": "$.cycleId"},
+                "employeeId": {"S.$": "$.employee.employeeId"}
+              },
+              "UpdateExpression": "SET voiceStatus = :vs, finalizedAt = :now",
+              "ExpressionAttributeValues": {
+                ":vs": {"S.$": "$.evaluateResult.finalStatus"},
+                ":now": {"S.$": "$$.State.EnteredTime"}
+              }
+            },
+            "ResultPath": null,
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "DynamoDB.AmazonDynamoDBException",
+                  "DynamoDB.SdkClientException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "End": true
+          },
+          "FinalizeOneError": {
+            "Type": "Task",
+            "Comment": "Fallback path entered when Dispatch / ReadResponse / EvaluateRetry / InitAttempt fail in a non-recoverable way. Write voiceStatus=OTHER with an error marker so the cycle's aggregate completion check (is_cycle_completed) treats this row as terminal.",
+            "Resource": "arn:aws:states:::dynamodb:updateItem",
+            "Parameters": {
+              "TableName": "${ResponseTableName}",
+              "Key": {
+                "cycleId": {"S.$": "$.cycleId"},
+                "employeeId": {"S.$": "$.employee.employeeId"}
+              },
+              "UpdateExpression": "SET voiceStatus = :vs, finalizedAt = :now, sfnError = :err",
+              "ExpressionAttributeValues": {
+                ":vs": {"S": "OTHER"},
+                ":now": {"S.$": "$$.State.EnteredTime"},
+                ":err": {"S": "SFN_ITERATION_FAILED"}
+              }
+            },
+            "ResultPath": null,
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "DynamoDB.AmazonDynamoDBException",
+                  "DynamoDB.SdkClientException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "End": true
+          }
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.mapError",
+          "Next": "CycleFailed"
+        }
+      ],
+      "Next": "Aggregate"
+    },
+    "Aggregate": {
+      "Type": "Pass",
+      "Comment": "Reserved aggregation step. v1 is a no-op pass-through because CycleFinalizer (called from Finalize) recomputes aggregates from Response rows directly. Phase 14 may add intermediate summarization here for observability without changing the downstream contract.",
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${CycleFinalizerFnArn}",
+        "Payload": {
+          "trigger": "MAP_COMPLETED",
+          "cycleId.$": "$.cycleId",
+          "executionArn.$": "$$.Execution.Id"
+        }
+      },
+      "ResultPath": "$.finalizeResult",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "End": true
+    },
+    "CycleFailed": {
+      "Type": "Fail",
+      "Error": "CycleFailed",
+      "Cause": "LoadTargets, CallMap, or another critical step failed. See $.error / $.mapError in the execution input for details."
+    }
+  }
+}

@@ -1,0 +1,5072 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Safety Confirmation System - Single CloudFormation Stack. Phase 1.1\
+  \ ?????????Phase 1.2 ??? Parameters / Mappings / Conditions / Resources / Outputs\
+  \ / Rules ????????\n"
+Parameters:
+  EnvironmentName:
+    Type: String
+    AllowedValues:
+    - dev
+    - stg
+    - prod
+    Description: ????dev/stg/prod ??????
+  ConnectInstanceId:
+    Type: String
+    Description: ?? Amazon Connect ?????? ID?CFn ????
+  ConnectInstanceArn:
+    Type: String
+    Description: ?? Amazon Connect ?????? ARN?IAM Resource ????
+  ConnectOutboundPhoneNumberArn:
+    Type: String
+    Description: ?????????????? ARN?CFn ????
+  ConnectOutboundPhoneNumber:
+    Type: String
+    Default: '+810000000000'
+    AllowedPattern: ^\+[1-9]\d{1,14}$
+    Description: ???????????????E.164 ???ConnectOutboundPhoneNumberArn ????????????Phase
+      6.2 ConnectDispatcher ? SourcePhoneNumber ????
+  ConnectInboundPhoneNumberArn:
+    Type: String
+    Description: ???????????? ARN?CFn ????Requirement 13.1?
+  OutboundContactFlowId:
+    Type: String
+    Description: ??????? Contact Flow ID?CFn ????
+  InboundContactFlowId:
+    Type: String
+    Description: ?????? Contact Flow ID?CFn ????
+  DefaultRetryCount:
+    Type: Number
+    Default: 3
+    MinValue: 0
+    MaxValue: 5
+    Description: Cycle ???? Retry_Count ????0-5?
+  DefaultRetryIntervalMinutes:
+    Type: Number
+    Default: 5
+    MinValue: 1
+    MaxValue: 60
+    Description: Cycle ???? Retry_Interval ????1-60 ??
+  OutboundGuidanceText:
+    Type: String
+    Default: ???????????????????????????????????????????????????????????????????????????????????????????
+    Description: ??????? TTS ????????Polly ????
+  InboundGuidanceText:
+    Type: String
+    Default: ???????????????????????????????????????????????????????????????????????????????????????????
+    Description: ?????? TTS ????????ACTIVE_CYCLE ????Polly ????
+  LogRetentionDays:
+    Type: Number
+    Default: 90
+    AllowedValues:
+    - 1
+    - 3
+    - 5
+    - 7
+    - 14
+    - 30
+    - 60
+    - 90
+    - 120
+    - 150
+    - 180
+    - 365
+    - 400
+    - 545
+    - 731
+    - 1827
+    - 2192
+    - 2557
+    - 2922
+    - 3288
+    - 3653
+    Description: CloudWatch Logs ???????AWS Logs API ????
+  OperatorEmail:
+    Type: String
+    Description: SNS ??? Email ?????????
+  RecordingsRetentionDays:
+    Type: Number
+    Default: 90
+    AllowedValues:
+    - 90
+    Description: ????????????? 10.4 ??? 90 ????
+  TranscriptsRetentionDays:
+    Type: Number
+    Default: 90
+    AllowedValues:
+    - 90
+    Description: Transcript ??????? 6.5 ??? 90 ????
+  InboundReceptionWindowDays:
+    Type: Number
+    Default: 30
+    MinValue: 1
+    MaxValue: 90
+    Description: Cycle ????????????????????1-90??? 30?
+  DomainName:
+    Type: String
+    Default: ''
+    Description: ???????????????? CloudFront ???????
+  AcmCertificateArn:
+    Type: String
+    Default: ''
+    Description: ACM ??? ARN????us-east-1 ???CloudFront ??
+  HostedZoneId:
+    Type: String
+    Default: ''
+    AllowedPattern: ^(|Z[A-Z0-9]+)$
+    Description: Route 53 ?????? ID??????? ALIAS ????????Phase 11.3?
+  MaxConcurrentCalls:
+    Type: Number
+    Default: 10
+    MinValue: 1
+    MaxValue: 10
+    Description: Step Functions Map MaxConcurrency????????1-10?
+  TranscribeLanguageCode:
+    Type: String
+    Default: ja-JP
+    AllowedValues:
+    - ja-JP
+    Description: Amazon Transcribe ??????ja-JP ???
+  ManageConnectStorageConfig:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+    Description: "CFn ?? Amazon Connect ? CALL_RECORDINGS Storage Config ??????\n\
+      ?Phase 7.2??? false??true ??????????? Connect ???????\n??? CALL_RECORDINGS Storage\
+      \ Config ??????????????????\n"
+  ConnectRecordingsPrefix:
+    Type: String
+    Default: connect-raw/
+    AllowedPattern: ^[A-Za-z0-9._/-]+/$
+    Description: Connect ???????? S3 prefix?trailing slash ???Phase 7.2?
+  EmployeeAnonymizeSalt:
+    Type: String
+    NoEcho: true
+    MinLength: 16
+    MaxLength: 256
+    AllowedPattern: ^[A-Za-z0-9._/+=:@!#$%^&*()-]{16,256}$
+    Default: REPLACE-VIA-PARAMETERS-JSON-PER-ENV-MIN16CHARS
+    Description: "EmployeeApi anonymize ?????? system-wide salt?Task 15.12??\nNoEcho=true?dev/stg/prod\
+      \ ???? parameters/<env>.json ???????\nDefault ?????????fail-fast ?????\n???????????????????????????????????\n"
+Mappings:
+  EnvMap:
+    dev:
+      LogLevel: INFO
+      DynamoBillingMode: PAY_PER_REQUEST
+      ApiThrottleRate: 50
+      ApiThrottleBurst: 100
+    stg:
+      LogLevel: INFO
+      DynamoBillingMode: PAY_PER_REQUEST
+      ApiThrottleRate: 100
+      ApiThrottleBurst: 200
+    prod:
+      LogLevel: WARN
+      DynamoBillingMode: PAY_PER_REQUEST
+      ApiThrottleRate: 100
+      ApiThrottleBurst: 200
+Conditions:
+  IsProd:
+    Fn::Equals:
+    - Ref: EnvironmentName
+    - prod
+  HasCustomDomain:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: DomainName
+      - ''
+  UseCustomCert:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: AcmCertificateArn
+      - ''
+  HasHostedZoneId:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: HostedZoneId
+      - ''
+  HasCustomDomainAndHostedZone:
+    Fn::And:
+    - Condition: HasCustomDomain
+    - Condition: HasHostedZoneId
+  ManageConnectStorageConfigCond:
+    Fn::Equals:
+    - Ref: ManageConnectStorageConfig
+    - 'true'
+Resources:
+  KmsCmk:
+    Type: AWS::KMS::Key
+    Properties:
+      Description:
+        Fn::Sub: '?????????? KMS CMK???: ${EnvironmentName}??DynamoDB / S3 / Lambda
+          ??????????'
+      KeySpec: SYMMETRIC_DEFAULT
+      KeyUsage: ENCRYPT_DECRYPT
+      EnableKeyRotation: true
+      PendingWindowInDays: 7
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id:
+          Fn::Sub: ${EnvironmentName}-safety-confirmation-key-policy
+        Statement:
+        - Sid: EnableIAMUserPermissions
+          Effect: Allow
+          Principal:
+            AWS:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+          Action: kms:*
+          Resource: '*'
+  KmsCmkAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName:
+        Fn::Sub: alias/${EnvironmentName}-safety-confirmation
+      TargetKeyId:
+        Ref: KmsCmk
+  LambdaBaseLogsManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: ${EnvironmentName}-safety-confirmation-lambda-base-logs
+      Description:
+        Fn::Sub: '? Lambda ?? CloudWatch Logs ?????????? (??: ${EnvironmentName})????
+          Role ? ManagedPolicyArns ????????????'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowCreateLogGroup
+          Effect: Allow
+          Action: logs:CreateLogGroup
+          Resource:
+            Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+        - Sid: AllowWriteLambdaLogStreams
+          Effect: Allow
+          Action:
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+            Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*
+  AuditLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/safety-confirmation/audit-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  AuditLogWriteManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: ${EnvironmentName}-safety-confirmation-audit-log-write
+      Description:
+        Fn::Sub: 'Phase 12.3: AuditLogGroup ???? (??: ${EnvironmentName})?auth / dictionary
+          / employee / cycle / inbound 6 Lambda ? Role ??????'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowAuditLogWrite
+          Effect: Allow
+          Action:
+          - logs:DescribeLogStreams
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+            Fn::GetAtt:
+            - AuditLogGroup
+            - Arn
+  AuditReaderManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: ${EnvironmentName}-safety-confirmation-audit-log-read
+      Description:
+        Fn::Sub: 'Phase 15.15: AuditLogGroup ???? (??: ${EnvironmentName})???????
+          IAM User / Role / Group ? AWS Console / CLI ????????? CloudWatch Logs Insights
+          ????????'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowAuditLogRead
+          Effect: Allow
+          Action:
+          - logs:GetLogEvents
+          - logs:FilterLogEvents
+          - logs:StartQuery
+          - logs:StopQuery
+          - logs:GetQueryResults
+          - logs:DescribeLogStreams
+          - logs:DescribeLogGroups
+          Resource:
+            Fn::GetAtt:
+            - AuditLogGroup
+            - Arn
+  OperatorTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Fn::Sub: safety-confirmation-operator-${EnvironmentName}
+      DisplayName:
+        Fn::Sub: Safety Confirmation Operator (${EnvironmentName})
+  OperatorEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: OperatorTopic
+      Protocol: email
+      Endpoint:
+        Ref: OperatorEmail
+  SLAWarning30MinAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-sla-warning-30min-${EnvironmentName}
+      AlarmDescription: Cycle ???? 30 ??????????? 100% ?????????? (Requirement 14.5)
+      Namespace: SafetyConfirmation
+      MetricName: SlaWarning30Min
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  CycleTimeoutAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-cycle-timeout-${EnvironmentName}
+      AlarmDescription: Cycle ? 60 ???????????????? (Requirements 14.4 / 14.6)
+      Namespace: SafetyConfirmation
+      MetricName: CycleTimeout
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  LambdaErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-lambda-errors-${EnvironmentName}
+      AlarmDescription: ????? Lambda ??? 5 ??? 5 ????????? (????)
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  RecordingUploadFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-recording-upload-failure-${EnvironmentName}
+      AlarmDescription: RecordingMetadataWriter ? 3 ???? DLQ ????????? (Requirement
+        10.9)
+      Namespace: AWS/SQS
+      MetricName: NumberOfMessagesSent
+      Dimensions:
+      - Name: QueueName
+        Value:
+          Fn::GetAtt:
+          - RecordingMetadataWriterDLQ
+          - QueueName
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  TranscribeFailedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-transcribe-failed-${EnvironmentName}
+      AlarmDescription: Transcribe ???? 3 ????? (Requirement 6.6)
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+      - Name: FunctionName
+        Value:
+          Ref: TranscribeStarterFn
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  InboundUnauthorizedFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName:
+        Ref: AuditLogGroup
+      FilterName:
+        Fn::Sub: safety-confirmation-inbound-unauthorized-${EnvironmentName}
+      FilterPattern: '{ $.event = "INBOUND_CONTACT_RECEIVED" && $.flow = "NOT_REGISTERED"
+        }'
+      MetricTransformations:
+      - MetricNamespace: SafetyConfirmation
+        MetricName: InboundUnauthorized
+        MetricValue: '1'
+        DefaultValue: 0
+  InboundUnauthorizedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    DependsOn: InboundUnauthorizedFilter
+    Properties:
+      AlarmName:
+        Fn::Sub: safety-confirmation-inbound-unauthorized-${EnvironmentName}
+      AlarmDescription: ???????? inbound ??? 5 ??? 10 ????? (Out of Scope 9 ?? / brute
+        force ???)
+      Namespace: SafetyConfirmation
+      MetricName: InboundUnauthorized
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+      - Ref: OperatorTopic
+  EmployeeTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: Employee-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: employeeId
+        AttributeType: S
+      - AttributeName: phoneNumber
+        AttributeType: S
+      KeySchema:
+      - AttributeName: employeeId
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: PhoneNumberIndex
+        KeySchema:
+        - AttributeName: phoneNumber
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  CycleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: Cycle-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: cycleId
+        AttributeType: S
+      - AttributeName: status
+        AttributeType: S
+      - AttributeName: startedAt
+        AttributeType: S
+      KeySchema:
+      - AttributeName: cycleId
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: StatusStartedAtIndex
+        KeySchema:
+        - AttributeName: status
+          KeyType: HASH
+        - AttributeName: startedAt
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  ResponseTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: Response-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: cycleId
+        AttributeType: S
+      - AttributeName: employeeId
+        AttributeType: S
+      - AttributeName: contactId
+        AttributeType: S
+      KeySchema:
+      - AttributeName: cycleId
+        KeyType: HASH
+      - AttributeName: employeeId
+        KeyType: RANGE
+      GlobalSecondaryIndexes:
+      - IndexName: ContactIdIndex
+        KeySchema:
+        - AttributeName: contactId
+          KeyType: HASH
+        Projection:
+          ProjectionType: INCLUDE
+          NonKeyAttributes:
+          - cycleId
+          - employeeId
+          - callAttempts
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  RecordingMetaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: RecordingMetadata-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: cycleId
+        AttributeType: S
+      - AttributeName: employeeIdSeq
+        AttributeType: S
+      KeySchema:
+      - AttributeName: cycleId
+        KeyType: HASH
+      - AttributeName: employeeIdSeq
+        KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  TranscriptMetaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: TranscriptMetadata-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: cycleId
+        AttributeType: S
+      - AttributeName: employeeIdSeq
+        AttributeType: S
+      KeySchema:
+      - AttributeName: cycleId
+        KeyType: HASH
+      - AttributeName: employeeIdSeq
+        KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  KeywordDictionaryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: KeywordDictionary-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: category
+        AttributeType: S
+      - AttributeName: keyword
+        AttributeType: S
+      KeySchema:
+      - AttributeName: category
+        KeyType: HASH
+      - AttributeName: keyword
+        KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  KeywordDictionaryHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: KeywordDictionaryHistory-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: version
+        AttributeType: N
+      - AttributeName: categoryKeyword
+        AttributeType: S
+      KeySchema:
+      - AttributeName: version
+        KeyType: HASH
+      - AttributeName: categoryKeyword
+        KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  InboundContactTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: InboundContact-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: contactId
+        AttributeType: S
+      - AttributeName: employeeId
+        AttributeType: S
+      - AttributeName: receivedAt
+        AttributeType: S
+      KeySchema:
+      - AttributeName: contactId
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: EmployeeReceivedAtIndex
+        KeySchema:
+        - AttributeName: employeeId
+          KeyType: HASH
+        - AttributeName: receivedAt
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  LockoutTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: Lockout-${EnvironmentName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: userIdentifier
+        AttributeType: S
+      KeySchema:
+      - AttributeName: userIdentifier
+        KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expireAt
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId:
+          Ref: KmsCmk
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  RecordingsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: safety-confirmation-recordings-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: aws:kms
+            KMSMasterKeyID:
+              Ref: KmsCmk
+          BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+        - Id: DeleteRecordingsAfter90Days
+          Status: Enabled
+          ExpirationInDays:
+            Ref: RecordingsRetentionDays
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+  TranscriptsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: safety-confirmation-transcripts-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: aws:kms
+            KMSMasterKeyID:
+              Ref: KmsCmk
+          BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+        - Id: DeleteTranscriptsAfter90Days
+          Status: Enabled
+          ExpirationInDays:
+            Ref: TranscriptsRetentionDays
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+  SpaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: safety-confirmation-spa-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+        - Id: DeleteOldSpaVersions
+          Status: Enabled
+          NoncurrentVersionExpirationInDays: 30
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName:
+        Fn::Sub: safety-confirmation-${EnvironmentName}
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      UsernameAttributes:
+      - email
+      AutoVerifiedAttributes:
+      - email
+      MfaConfiguration: 'OFF'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+      Schema:
+      - Name: name
+        AttributeDataType: String
+        Required: true
+        Mutable: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+        - Name: admin_only
+          Priority: 1
+      UserPoolTags:
+        Project: safety-confirmation
+        Environment:
+          Ref: EnvironmentName
+      LambdaConfig:
+        PreAuthentication:
+          Fn::GetAtt:
+          - AuthPreAuthFn
+          - Arn
+        PostAuthentication:
+          Fn::GetAtt:
+          - AuthPostAuthFn
+          - Arn
+        PreSignUp:
+          Fn::GetAtt:
+          - AuthPreSignUpFn
+          - Arn
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId:
+        Ref: CognitoUserPool
+      ClientName:
+        Fn::Sub: safety-confirmation-spa-${EnvironmentName}
+      GenerateSecret: false
+      ExplicitAuthFlows:
+      - ALLOW_USER_SRP_AUTH
+      - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      SupportedIdentityProviders:
+      - COGNITO
+      IdTokenValidity: 1
+      AccessTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        IdToken: hours
+        AccessToken: hours
+        RefreshToken: days
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      UserPoolId:
+        Ref: CognitoUserPool
+      GroupName: Administrator
+      Description: ???????????????Requirement 1.9 ??? Employee ???????????
+      Precedence: 1
+  SharedLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: safety-confirmation-shared-${EnvironmentName}
+      Description: backend/shared/ ? Pure helper functions consumed by application
+        Lambdas
+      Content:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 8fee8bf912efda282e3d566110fb8dce
+      CompatibleArchitectures:
+      - arm64
+      CompatibleRuntimes:
+      - python3.12
+  AuthPreAuthFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-auth-pre-auth-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: LockoutTableRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            Resource:
+              Fn::GetAtt:
+              - LockoutTable
+              - Arn
+      - PolicyName: CmkDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  AuthPreAuthFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-auth-pre-auth-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  AuthPreAuthFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AuthPreAuthFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-auth-pre-auth-${EnvironmentName}
+      Description: Cognito PreAuthentication Trigger ? account lockout judgement (Requirement
+        1.6)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 49433160fe4ae6732a2f0fa9cfb8e1c2
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - AuthPreAuthFnExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+      Environment:
+        Variables:
+          LOCKOUT_TABLE_NAME:
+            Ref: LockoutTable
+          LOCKOUT_THRESHOLD: '5'
+          LOCKOUT_WINDOW_SECONDS: '1800'
+  AuthPostAuthFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-auth-post-auth-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: LockoutTableUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - LockoutTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  AuthPostAuthFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-auth-post-auth-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  AuthPostAuthFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AuthPostAuthFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-auth-post-auth-${EnvironmentName}
+      Description: Cognito PostAuthentication Trigger ? clear lockout history and
+        emit AUTH_SUCCESS audit log
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: aa33fdf20b1f268547877391237763b2
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - AuthPostAuthFnExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+      Environment:
+        Variables:
+          LOCKOUT_TABLE_NAME:
+            Ref: LockoutTable
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+  AuthPreSignUpFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-auth-pre-signup-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+  AuthPreSignUpFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-auth-pre-signup-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  AuthPreSignUpFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AuthPreSignUpFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-auth-pre-signup-${EnvironmentName}
+      Description: Cognito PreSignUp Trigger ? admin-only sign-up gate (Requirement
+        1.9)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 7ed3a3892ef154a61047c153b29ea002
+      Role:
+        Fn::GetAtt:
+        - AuthPreSignUpFnExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+  AuthPreAuthFnCognitoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: AuthPreAuthFn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - CognitoUserPool
+        - Arn
+  AuthPostAuthFnCognitoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: AuthPostAuthFn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - CognitoUserPool
+        - Arn
+  AuthPreSignUpFnCognitoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: AuthPreSignUpFn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - CognitoUserPool
+        - Arn
+  DictionaryApiExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-dictionary-api-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: KeywordDictionaryCrud
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:BatchWriteItem
+            Resource:
+            - Fn::GetAtt:
+              - KeywordDictionaryTable
+              - Arn
+            - Fn::GetAtt:
+              - KeywordDictionaryHistoryTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  DictionaryApiFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-dictionary-api-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  DictionaryApiFn:
+    Type: AWS::Lambda::Function
+    DependsOn: DictionaryApiFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-dictionary-api-${EnvironmentName}
+      Description: KeywordDictionary CRUD with optimistic-lock versioning (Requirements
+        8.1-8.7)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: cc6426ef9806e58b33b560f9c255d98b
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - DictionaryApiExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          KEYWORD_DICT_TABLE_NAME:
+            Ref: KeywordDictionaryTable
+          KEYWORD_DICT_HISTORY_TABLE_NAME:
+            Ref: KeywordDictionaryHistoryTable
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+  EmployeeApiExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-employee-api-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: EmployeeTableCrud
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:TransactWriteItems
+            Resource:
+            - Fn::GetAtt:
+              - EmployeeTable
+              - Arn
+            - Fn::Sub: ${EmployeeTable.Arn}/index/*
+      - PolicyName: CycleResponseAnonymizeAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Scan
+            Resource:
+            - Fn::GetAtt:
+              - CycleTable
+              - Arn
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:TransactWriteItems
+            Resource:
+            - Fn::GetAtt:
+              - ResponseTable
+              - Arn
+            - Fn::Sub: ${ResponseTable.Arn}/index/*
+      - PolicyName: CognitoAdminUserManagement
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminAddUserToGroup
+            - cognito-idp:AdminGetUser
+            - cognito-idp:AdminDeleteUser
+            Resource:
+              Fn::GetAtt:
+              - CognitoUserPool
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  EmployeeApiFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-employee-api-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  EmployeeApiFn:
+    Type: AWS::Lambda::Function
+    DependsOn: EmployeeApiFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-employee-api-${EnvironmentName}
+      Description: Employee master CRUD + CSV import (Requirements 2, 3)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 260675a3bbbb66d9f23148674882e9ed
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - EmployeeApiExecutionRole
+        - Arn
+      Timeout: 60
+      MemorySize: 1024
+      Environment:
+        Variables:
+          EMPLOYEE_TABLE_NAME:
+            Ref: EmployeeTable
+          COGNITO_USER_POOL_ID:
+            Ref: CognitoUserPool
+          ADMIN_GROUP_NAME:
+            Ref: AdminGroup
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          EMPLOYEE_ANONYMIZE_SALT:
+            Ref: EmployeeAnonymizeSalt
+  CycleApiExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-cycle-api-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: CycleTableCrud
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            Resource:
+            - Fn::GetAtt:
+              - CycleTable
+              - Arn
+            - Fn::Sub: ${CycleTable.Arn}/index/*
+      - PolicyName: KeywordDictionaryRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:Query
+            Resource:
+              Fn::GetAtt:
+              - KeywordDictionaryTable
+              - Arn
+      - PolicyName: SfnStartExecution
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:StartExecution
+            Resource:
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  CycleApiFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-cycle-api-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  CycleApiFn:
+    Type: AWS::Lambda::Function
+    DependsOn: CycleApiFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-cycle-api-${EnvironmentName}
+      Description: Cycle creation + status retrieval (Requirements 4.1-4.11)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: a6d1242ad2d6daeac8381ea293389cd9
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - CycleApiExecutionRole
+        - Arn
+      Timeout: 15
+      MemorySize: 512
+      Environment:
+        Variables:
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          KEYWORD_DICT_TABLE_NAME:
+            Ref: KeywordDictionaryTable
+          SFN_STATE_MACHINE_ARN:
+            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+  ResponseApiExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-response-api-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: ResponseTablesRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:Query
+            Resource:
+            - Fn::GetAtt:
+              - ResponseTable
+              - Arn
+            - Fn::GetAtt:
+              - EmployeeTable
+              - Arn
+            - Fn::GetAtt:
+              - TranscriptMetaTable
+              - Arn
+      - PolicyName: CmkDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  ResponseApiFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-response-api-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  ResponseApiFn:
+    Type: AWS::Lambda::Function
+    DependsOn: ResponseApiFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-response-api-${EnvironmentName}
+      Description: Read-only response history with transcript excerpts (Requirement
+        12.1)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: e80cbdae296167f5ad14d09efac4c261
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - ResponseApiExecutionRole
+        - Arn
+      Timeout: 10
+      MemorySize: 512
+      Environment:
+        Variables:
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          EMPLOYEE_TABLE_NAME:
+            Ref: EmployeeTable
+          TRANSCRIPT_META_TABLE_NAME:
+            Ref: TranscriptMetaTable
+  RecordingApiExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-recording-api-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: RecordingRelatedRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            Resource:
+            - Fn::GetAtt:
+              - CycleTable
+              - Arn
+            - Fn::GetAtt:
+              - InboundContactTable
+              - Arn
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource:
+            - Fn::Sub: ${RecordingsBucket.Arn}/*
+            - Fn::Sub: ${TranscriptsBucket.Arn}/*
+      - PolicyName: CmkDecryptViaDynamoDBAndS3
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                - Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+                - Fn::Sub: s3.${AWS::Region}.amazonaws.com
+  RecordingApiFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-recording-api-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  RecordingApiFn:
+    Type: AWS::Lambda::Function
+    DependsOn: RecordingApiFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-recording-api-${EnvironmentName}
+      Description: Presigned URL issuance with 90-day expiry guard (Requirement 10.7
+        / 13.7 / Property 23)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 28383b0280720fba804e435dc64d5fe6
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - RecordingApiExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+      Environment:
+        Variables:
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          INBOUND_TABLE_NAME:
+            Ref: InboundContactTable
+          RECORDINGS_BUCKET_NAME:
+            Ref: RecordingsBucket
+          TRANSCRIPTS_BUCKET_NAME:
+            Ref: TranscriptsBucket
+  AuthFailureReporterExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-auth-failure-reporter-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: LockoutTableUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - LockoutTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  AuthFailureReporterFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-auth-failure-reporter-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  AuthFailureReporterFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AuthFailureReporterFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-auth-failure-reporter-${EnvironmentName}
+      Description: Public API for SPA-driven auth-failure recording (Requirement 1.6
+        - record side)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: d938a0f496bf76dfacadbc8a13015a3b
+      Role:
+        Fn::GetAtt:
+        - AuthFailureReporterExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+      Environment:
+        Variables:
+          LOCKOUT_TABLE_NAME:
+            Ref: LockoutTable
+          LOCKOUT_WINDOW_SECONDS: '1800'
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+  LoadTargetsFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-load-targets-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: EmployeeTableRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Scan
+            - dynamodb:BatchGetItem
+            Resource:
+              Fn::GetAtt:
+              - EmployeeTable
+              - Arn
+      - PolicyName: ResponseTableRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  LoadTargetsFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-load-targets-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  LoadTargetsFn:
+    Type: AWS::Lambda::Function
+    DependsOn: LoadTargetsFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-load-targets-${EnvironmentName}
+      Description: Enumerate cycle target employees (Requirements 4.3-4.5, 13.5, Property
+        2)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 2e017386982c81681658ef3be4788893
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - LoadTargetsFnExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          EMPLOYEE_TABLE_NAME:
+            Ref: EmployeeTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+  ConnectDispatcherFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-connect-dispatcher-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: ConnectStartOutboundVoiceContact
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - connect:StartOutboundVoiceContact
+            Resource:
+              Ref: ConnectOutboundPhoneNumberArn
+      - PolicyName: ResponseTableUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: SfnSendTaskOutcome
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:SendTaskSuccess
+            - states:SendTaskFailure
+            Resource:
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  ConnectDispatcherFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-connect-dispatcher-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  ConnectDispatcherFn:
+    Type: AWS::Lambda::Function
+    DependsOn: ConnectDispatcherFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-connect-dispatcher-${EnvironmentName}
+      Description: Initiate one Connect outbound call (Requirements 5.1, 5.2, 9.6)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: b2958f67dde99fe1797a6e77620f30a5
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - ConnectDispatcherFnExecutionRole
+        - Arn
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          CONNECT_INSTANCE_ID:
+            Ref: ConnectInstanceId
+          OUTBOUND_CONTACT_FLOW_ID:
+            Ref: OutboundContactFlowId
+          OUTBOUND_PHONE_NUMBER:
+            Ref: ConnectOutboundPhoneNumber
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          SFN_STATE_MACHINE_ARN:
+            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+  CallEndHandlerFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-call-end-handler-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: ResponseTableUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: SfnSendTaskOutcome
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:SendTaskSuccess
+            - states:SendTaskFailure
+            Resource:
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  CallEndHandlerFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-call-end-handler-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  CallEndHandlerFn:
+    Type: AWS::Lambda::Function
+    DependsOn: CallEndHandlerFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-call-end-handler-${EnvironmentName}
+      Description: Finalise one Connect outbound call (Requirements 5.4, 5.5)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 0c7a895a3dc2748068770073214599f9
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - CallEndHandlerFnExecutionRole
+        - Arn
+      Timeout: 10
+      MemorySize: 512
+      Environment:
+        Variables:
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          SFN_STATE_MACHINE_ARN:
+            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:safety-confirmation-cycle-${EnvironmentName}
+  CallEndHandlerFnConnectPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: CallEndHandlerFn
+      Action: lambda:InvokeFunction
+      Principal: connect.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Ref: ConnectInstanceArn
+  TranscribeStarterFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-transcribe-starter-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: TranscribeStartJob
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - transcribe:StartTranscriptionJob
+            - transcribe:GetTranscriptionJob
+            Resource: '*'
+      - PolicyName: RecordingsBucketRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource:
+              Fn::Sub: ${RecordingsBucket.Arn}/*
+      - PolicyName: TranscriptsBucketWrite
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:PutObjectTagging
+            Resource:
+              Fn::Sub: ${TranscriptsBucket.Arn}/*
+      - PolicyName: TranscriptMetaPutAndResponseUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            Resource:
+              Fn::GetAtt:
+              - TranscriptMetaTable
+              - Arn
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+      - PolicyName: CmkEncryptDecryptViaS3
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: s3.${AWS::Region}.amazonaws.com
+  TranscribeStarterFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-transcribe-starter-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  TranscribeStarterFn:
+    Type: AWS::Lambda::Function
+    DependsOn: TranscribeStarterFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-transcribe-starter-${EnvironmentName}
+      Description: Start one Transcribe job from a Recordings ObjectCreated event
+        (Requirements 6.1, 6.2, 6.6)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 0d9fa8ae18f439f6ee08afac0841dae2
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - TranscribeStarterFnExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          RECORDINGS_BUCKET_NAME:
+            Ref: RecordingsBucket
+          TRANSCRIPTS_BUCKET_NAME:
+            Ref: TranscriptsBucket
+          TRANSCRIPT_META_TABLE_NAME:
+            Ref: TranscriptMetaTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          KMS_CMK_ARN:
+            Fn::GetAtt:
+            - KmsCmk
+            - Arn
+  TranscribeStarterEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name:
+        Fn::Sub: safety-confirmation-recording-uploaded-${EnvironmentName}
+      Description: Fire TranscribeStarter when a design-layout recording lands in
+        RecordingsBucket
+      State: ENABLED
+      EventPattern:
+        source:
+        - aws.s3
+        detail-type:
+        - Object Created
+        detail:
+          bucket:
+            name:
+            - Ref: RecordingsBucket
+          object:
+            key:
+            - prefix: recordings/
+            - prefix: inbound/
+      Targets:
+      - Id: TranscribeStarterFnTarget
+        Arn:
+          Fn::GetAtt:
+          - TranscribeStarterFn
+          - Arn
+  TranscribeStarterFnEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: TranscribeStarterFn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Fn::GetAtt:
+        - TranscribeStarterEventRule
+        - Arn
+  RetryEvaluatorFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-retry-evaluator-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+  RetryEvaluatorFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-retry-evaluator-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  RetryEvaluatorFn:
+    Type: AWS::Lambda::Function
+    DependsOn: RetryEvaluatorFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-retry-evaluator-${EnvironmentName}
+      Description: Decide retry-vs-finalize for a Cycle/Employee pair (Requirements
+        9.1 / 9.3-9.5, Properties 12 / 13)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: cd80b58cfc604789217c610caff6af69
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - RetryEvaluatorFnExecutionRole
+        - Arn
+      Timeout: 5
+      MemorySize: 512
+  CycleFinalizerFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-cycle-finalizer-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: CycleAndResponseTableAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - CycleTable
+              - Arn
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: SfnStopExecution
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:StopExecution
+            Resource:
+              Fn::Sub:
+              - arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${SmName}:*
+              - SmName:
+                  Fn::Sub: safety-confirmation-cycle-${EnvironmentName}
+      - PolicyName: OperatorTopicPublish
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - sns:Publish
+            Resource:
+              Ref: OperatorTopic
+      - PolicyName: CloudWatchPutMetric
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cloudwatch:PutMetricData
+            Resource: '*'
+      - PolicyName: EventRuleDelete
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - events:DeleteRule
+            - events:RemoveTargets
+            Resource:
+              Fn::Sub: arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/cycle-*
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  CycleFinalizerFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-cycle-finalizer-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  CycleFinalizerFn:
+    Type: AWS::Lambda::Function
+    DependsOn: CycleFinalizerFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-cycle-finalizer-${EnvironmentName}
+      Description: Finalize a cycle on Map completion or 30/60-minute timer (Requirements
+        11.4, 14.4-14.6)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: e4f89905a277aae614a7e1cb4d9fda57
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - CycleFinalizerFnExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 1024
+      Environment:
+        Variables:
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          OPERATOR_TOPIC_ARN:
+            Ref: OperatorTopic
+          SFN_STATE_MACHINE_ARN:
+            Fn::Sub:
+            - arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${SmName}
+            - SmName:
+                Fn::Sub: safety-confirmation-cycle-${EnvironmentName}
+          CLOUDWATCH_NAMESPACE: SafetyConfirmation
+  RecordingMetadataWriterDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Sub: safety-confirmation-recording-meta-dlq-${EnvironmentName}
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+  RecordingMetadataWriterFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-recording-meta-writer-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: RecordingMetaPut
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            Resource:
+              Fn::GetAtt:
+              - RecordingMetaTable
+              - Arn
+      - PolicyName: DlqSendMessage
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - sqs:SendMessage
+            Resource:
+              Fn::GetAtt:
+              - RecordingMetadataWriterDLQ
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  RecordingMetadataWriterFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-recording-meta-writer-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  RecordingMetadataWriterFn:
+    Type: AWS::Lambda::Function
+    DependsOn: RecordingMetadataWriterFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-recording-meta-writer-${EnvironmentName}
+      Description: Write one RecordingMeta row from a Recordings ObjectCreated event
+        (Requirements D4, 10.5)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: c5b12179ea5476a2e0d650b5c58be844
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - RecordingMetadataWriterFnExecutionRole
+        - Arn
+      Timeout: 15
+      MemorySize: 512
+      DeadLetterConfig:
+        TargetArn:
+          Fn::GetAtt:
+          - RecordingMetadataWriterDLQ
+          - Arn
+      Environment:
+        Variables:
+          RECORDINGS_BUCKET_NAME:
+            Ref: RecordingsBucket
+          RECORDING_META_TABLE_NAME:
+            Ref: RecordingMetaTable
+  RecordingMetadataWriterEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name:
+        Fn::Sub: safety-confirmation-recording-meta-uploaded-${EnvironmentName}
+      Description: Fire RecordingMetadataWriter when a design-layout recording lands
+        in RecordingsBucket
+      State: ENABLED
+      EventPattern:
+        source:
+        - aws.s3
+        detail-type:
+        - Object Created
+        detail:
+          bucket:
+            name:
+            - Ref: RecordingsBucket
+          object:
+            key:
+            - prefix: recordings/
+            - prefix: inbound/
+      Targets:
+      - Id: RecordingMetadataWriterFnTarget
+        Arn:
+          Fn::GetAtt:
+          - RecordingMetadataWriterFn
+          - Arn
+  RecordingMetadataWriterFnEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: RecordingMetadataWriterFn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Fn::GetAtt:
+        - RecordingMetadataWriterEventRule
+        - Arn
+  RecordingRelocatorFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-recording-relocator-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: ResponseContactIdIndexQuery
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            Resource:
+            - Fn::Sub: ${ResponseTable.Arn}/index/ContactIdIndex
+      - PolicyName: RecordingsBucketRelocate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Resource:
+            - Fn::Sub: ${RecordingsBucket.Arn}/${ConnectRecordingsPrefix}*
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            Resource:
+            - Fn::Sub: ${RecordingsBucket.Arn}/recordings/*
+            - Fn::Sub: ${RecordingsBucket.Arn}/inbound/*
+      - PolicyName: CmkDecryptEncryptViaDynamoDBAndS3
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                - Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+                - Fn::Sub: s3.${AWS::Region}.amazonaws.com
+  RecordingRelocatorFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-recording-relocator-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  RecordingRelocatorFn:
+    Type: AWS::Lambda::Function
+    DependsOn: RecordingRelocatorFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-recording-relocator-${EnvironmentName}
+      Description: Rename Connect-native recordings to design layout (Requirements
+        10.1, 10.2, D5)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 81f7da5a55cd5f6a60178173cdcb198e
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - RecordingRelocatorFnExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          RECORDINGS_BUCKET_NAME:
+            Ref: RecordingsBucket
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          CONTACT_ID_INDEX_NAME: ContactIdIndex
+          CONNECT_RECORDINGS_PREFIX:
+            Ref: ConnectRecordingsPrefix
+  RecordingRelocatorEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name:
+        Fn::Sub: safety-confirmation-recording-relocate-${EnvironmentName}
+      Description: Fire RecordingRelocator when Connect drops a raw recording in RecordingsBucket
+      State: ENABLED
+      EventPattern:
+        source:
+        - aws.s3
+        detail-type:
+        - Object Created
+        detail:
+          bucket:
+            name:
+            - Ref: RecordingsBucket
+          object:
+            key:
+            - prefix:
+                Ref: ConnectRecordingsPrefix
+      Targets:
+      - Id: RecordingRelocatorFnTarget
+        Arn:
+          Fn::GetAtt:
+          - RecordingRelocatorFn
+          - Arn
+  RecordingRelocatorFnEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: RecordingRelocatorFn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Fn::GetAtt:
+        - RecordingRelocatorEventRule
+        - Arn
+  ConnectCallRecordingsStorageConfig:
+    Type: AWS::Connect::InstanceStorageConfig
+    Condition: ManageConnectStorageConfigCond
+    Properties:
+      InstanceArn:
+        Ref: ConnectInstanceArn
+      ResourceType: CALL_RECORDINGS
+      StorageType: S3
+      S3Config:
+        BucketName:
+          Ref: RecordingsBucket
+        BucketPrefix:
+          Ref: ConnectRecordingsPrefix
+        EncryptionConfig:
+          EncryptionType: KMS
+          KeyId:
+            Fn::GetAtt:
+            - KmsCmk
+            - Arn
+  KeywordMatcherFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-keyword-matcher-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      Policies:
+      - PolicyName: TranscriptsBucketRead
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource:
+              Fn::Sub: ${TranscriptsBucket.Arn}/*
+      - PolicyName: CycleGetItem
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:GetItem
+            Resource:
+              Fn::GetAtt:
+              - CycleTable
+              - Arn
+      - PolicyName: KeywordDictionaryHistoryQuery
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            Resource:
+              Fn::GetAtt:
+              - KeywordDictionaryHistoryTable
+              - Arn
+      - PolicyName: ResponseUpdateAndTranscriptMetaUpdate
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:UpdateItem
+            Resource:
+            - Fn::GetAtt:
+              - ResponseTable
+              - Arn
+            - Fn::GetAtt:
+              - TranscriptMetaTable
+              - Arn
+      - PolicyName: CmkDecryptEncryptViaDynamoDBAndS3
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                - Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+                - Fn::Sub: s3.${AWS::Region}.amazonaws.com
+  KeywordMatcherFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-keyword-matcher-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  KeywordMatcherFn:
+    Type: AWS::Lambda::Function
+    DependsOn: KeywordMatcherFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-keyword-matcher-${EnvironmentName}
+      Description: Classify Transcript text into Voice_Status with priority INJURED
+        > UNAVAILABLE > SAFE > OTHER (Requirements 7.1-7.8, Property 10)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: 405feaf1ea031ec9d535a0179f05f912
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - KeywordMatcherFnExecutionRole
+        - Arn
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          TRANSCRIPTS_BUCKET_NAME:
+            Ref: TranscriptsBucket
+          TRANSCRIPT_META_TABLE_NAME:
+            Ref: TranscriptMetaTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          KEYWORD_DICT_HISTORY_TABLE_NAME:
+            Ref: KeywordDictionaryHistoryTable
+  KeywordMatcherEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name:
+        Fn::Sub: safety-confirmation-transcript-created-${EnvironmentName}
+      Description: Fire KeywordMatcher when a transcript lands in TranscriptsBucket
+      State: ENABLED
+      EventPattern:
+        source:
+        - aws.s3
+        detail-type:
+        - Object Created
+        detail:
+          bucket:
+            name:
+            - Ref: TranscriptsBucket
+          object:
+            key:
+            - prefix: transcripts/
+            - prefix: inbound/
+      Targets:
+      - Id: KeywordMatcherFnTarget
+        Arn:
+          Fn::GetAtt:
+          - KeywordMatcherFn
+          - Arn
+  KeywordMatcherFnEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: KeywordMatcherFn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Fn::GetAtt:
+        - KeywordMatcherEventRule
+        - Arn
+  InboundHandlerFnExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-inbound-handler-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - Ref: LambdaBaseLogsManagedPolicy
+      - Ref: AuditLogWriteManagedPolicy
+      Policies:
+      - PolicyName: EmployeeTablePhoneNumberQuery
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            Resource:
+            - Fn::GetAtt:
+              - EmployeeTable
+              - Arn
+            - Fn::Sub: ${EmployeeTable.Arn}/index/PhoneNumberIndex
+      - PolicyName: CycleTableStatusQuery
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Query
+            Resource:
+            - Fn::GetAtt:
+              - CycleTable
+              - Arn
+            - Fn::Sub: ${CycleTable.Arn}/index/StatusStartedAtIndex
+      - PolicyName: InboundContactTableWrite
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - InboundContactTable
+              - Arn
+      - PolicyName: ResponseTableWrite
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  InboundHandlerFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/safety-confirmation-inbound-handler-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  InboundHandlerFn:
+    Type: AWS::Lambda::Function
+    DependsOn: InboundHandlerFnLogGroup
+    Properties:
+      FunctionName:
+        Fn::Sub: safety-confirmation-inbound-handler-${EnvironmentName}
+      Description: Inbound callback flow classifier and finalizer (Requirements 13.1-13.8)
+      Runtime: python3.12
+      Architectures:
+      - arm64
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        S3Key: b01163d2dbcdfd7c3dfb9582a96738af
+      Layers:
+      - Ref: SharedLayer
+      Role:
+        Fn::GetAtt:
+        - InboundHandlerFnExecutionRole
+        - Arn
+      Timeout: 15
+      MemorySize: 512
+      Environment:
+        Variables:
+          EMPLOYEE_TABLE_NAME:
+            Ref: EmployeeTable
+          CYCLE_TABLE_NAME:
+            Ref: CycleTable
+          RESPONSE_TABLE_NAME:
+            Ref: ResponseTable
+          INBOUND_CONTACT_TABLE_NAME:
+            Ref: InboundContactTable
+          AUDIT_LOG_GROUP_NAME:
+            Ref: AuditLogGroup
+  InboundHandlerFnConnectPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: InboundHandlerFn
+      Action: lambda:InvokeFunction
+      Principal: connect.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Ref: ConnectInstanceArn
+  CycleStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/states/safety-confirmation-cycle-${EnvironmentName}
+      RetentionInDays:
+        Ref: LogRetentionDays
+  CycleStateMachineExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-cycle-sfn-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              Fn::Sub: states.${AWS::Region}.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: InvokeCycleLambdas
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            Resource:
+            - Fn::GetAtt:
+              - LoadTargetsFn
+              - Arn
+            - Fn::GetAtt:
+              - ConnectDispatcherFn
+              - Arn
+            - Fn::GetAtt:
+              - RetryEvaluatorFn
+              - Arn
+            - Fn::GetAtt:
+              - CycleFinalizerFn
+              - Arn
+      - PolicyName: ResponseTableReadWrite
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+            Resource:
+              Fn::GetAtt:
+              - ResponseTable
+              - Arn
+      - PolicyName: CloudWatchLogsForSfn
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogDelivery
+            - logs:GetLogDelivery
+            - logs:UpdateLogDelivery
+            - logs:DeleteLogDelivery
+            - logs:ListLogDeliveries
+            - logs:PutResourcePolicy
+            - logs:DescribeResourcePolicies
+            - logs:DescribeLogGroups
+            Resource: '*'
+      - PolicyName: CmkEncryptDecryptViaDynamoDB
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            Resource:
+              Fn::GetAtt:
+              - KmsCmk
+              - Arn
+            Condition:
+              StringEquals:
+                kms:ViaService:
+                  Fn::Sub: dynamodb.${AWS::Region}.amazonaws.com
+  CycleStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName:
+        Fn::Sub: safety-confirmation-cycle-${EnvironmentName}
+      StateMachineType: STANDARD
+      RoleArn:
+        Fn::GetAtt:
+        - CycleStateMachineExecutionRole
+        - Arn
+      DefinitionS3Location:
+        Bucket: safety-confirmation-cfn-artifacts-214046906694-ap-northeast-1
+        Key: efc83391030ad69a869ba7f619ceede2
+      DefinitionSubstitutions:
+        LoadTargetsFnArn:
+          Fn::GetAtt:
+          - LoadTargetsFn
+          - Arn
+        ConnectDispatcherFnArn:
+          Fn::GetAtt:
+          - ConnectDispatcherFn
+          - Arn
+        RetryEvaluatorFnArn:
+          Fn::GetAtt:
+          - RetryEvaluatorFn
+          - Arn
+        CycleFinalizerFnArn:
+          Fn::GetAtt:
+          - CycleFinalizerFn
+          - Arn
+        ResponseTableName:
+          Ref: ResponseTable
+        MaxConcurrentCalls:
+          Ref: MaxConcurrentCalls
+      LoggingConfiguration:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+        - CloudWatchLogsLogGroup:
+            LogGroupArn:
+              Fn::GetAtt:
+              - CycleStateMachineLogGroup
+              - Arn
+  ApiGatewayLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: safety-confirmation-apigw-logs-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: apigateway.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        Fn::GetAtt:
+        - ApiGatewayLogsRole
+        - Arn
+  ApiGwExecutionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/apigateway/safety-confirmation-${EnvironmentName}/execution
+      RetentionInDays:
+        Ref: LogRetentionDays
+  ApiGwAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/apigateway/safety-confirmation-${EnvironmentName}/access
+      RetentionInDays:
+        Ref: LogRetentionDays
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name:
+        Fn::Sub: safety-confirmation-${EnvironmentName}
+      Description: Safety Confirmation System REST API (Administrator-only except
+        /auth/record-failure)
+      EndpointConfiguration:
+        Types:
+        - REGIONAL
+  CognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name:
+        Fn::Sub: CognitoUserPoolAuthorizer-${EnvironmentName}
+      RestApiId:
+        Ref: RestApi
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+      - Fn::GetAtt:
+        - CognitoUserPool
+        - Arn
+  AuthResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Fn::GetAtt:
+        - RestApi
+        - RootResourceId
+      PathPart: auth
+  AuthRecordFailureResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: AuthResource
+      PathPart: record-failure
+  CyclesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Fn::GetAtt:
+        - RestApi
+        - RootResourceId
+      PathPart: cycles
+  CyclesIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesResource
+      PathPart: '{id}'
+  CyclesIdStatusResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdResource
+      PathPart: status
+  CyclesIdResponsesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdResource
+      PathPart: responses
+  CyclesIdResponsesEmployeeIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdResponsesResource
+      PathPart: '{employeeId}'
+  CyclesIdRecordingsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdResource
+      PathPart: recordings
+  CyclesIdRecordingsEmployeeIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdRecordingsResource
+      PathPart: '{employeeId}'
+  CyclesIdRecordingsEmployeeIdSeqResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdRecordingsEmployeeIdResource
+      PathPart: '{seq}'
+  CyclesIdTranscriptsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdResource
+      PathPart: transcripts
+  CyclesIdTranscriptsEmployeeIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdTranscriptsResource
+      PathPart: '{employeeId}'
+  CyclesIdTranscriptsEmployeeIdSeqResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: CyclesIdTranscriptsEmployeeIdResource
+      PathPart: '{seq}'
+  EmployeesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Fn::GetAtt:
+        - RestApi
+        - RootResourceId
+      PathPart: employees
+  EmployeesIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: EmployeesResource
+      PathPart: '{id}'
+  EmployeesIdAnonymizeResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: EmployeesIdResource
+      PathPart: anonymize
+  EmployeesIdCognitoUserResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: EmployeesIdResource
+      PathPart: cognito-user
+  EmployeesImportResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: EmployeesResource
+      PathPart: import
+  KeywordDictionaryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Fn::GetAtt:
+        - RestApi
+        - RootResourceId
+      PathPart: keyword-dictionary
+  KeywordDictionaryVersionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: KeywordDictionaryResource
+      PathPart: version
+  KeywordDictionaryCategoryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: KeywordDictionaryResource
+      PathPart: '{category}'
+  KeywordDictionaryCategoryKeywordResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: KeywordDictionaryCategoryResource
+      PathPart: '{keyword}'
+  InboundResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Fn::GetAtt:
+        - RestApi
+        - RootResourceId
+      PathPart: inbound
+  InboundContactIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: InboundResource
+      PathPart: '{contactId}'
+  InboundContactIdRecordingResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: InboundContactIdResource
+      PathPart: recording
+  InboundContactIdTranscriptResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ParentId:
+        Ref: InboundContactIdResource
+      PathPart: transcript
+  AuthRecordFailureMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: AuthRecordFailureResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthFailureReporterFn.Arn}/invocations
+  CyclesPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CycleApiFn.Arn}/invocations
+  CyclesGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CycleApiFn.Arn}/invocations
+  CyclesIdGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CycleApiFn.Arn}/invocations
+  CyclesIdStatusGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdStatusResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CycleApiFn.Arn}/invocations
+  CyclesIdResponsesGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResponsesResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResponseApiFn.Arn}/invocations
+  CyclesIdResponsesEmployeeIdGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResponsesEmployeeIdResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResponseApiFn.Arn}/invocations
+  CyclesIdRecordingsEmployeeIdSeqGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdRecordingsEmployeeIdSeqResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RecordingApiFn.Arn}/invocations
+  CyclesIdTranscriptsEmployeeIdSeqGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdTranscriptsEmployeeIdSeqResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RecordingApiFn.Arn}/invocations
+  EmployeesPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesIdGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesIdPutMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdResource
+      HttpMethod: PUT
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesIdDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdResource
+      HttpMethod: DELETE
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesImportPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesImportResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesIdAnonymizePostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdAnonymizeResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  EmployeesIdCognitoUserDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdCognitoUserResource
+      HttpMethod: DELETE
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmployeeApiFn.Arn}/invocations
+  KeywordDictionaryPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryResource
+      HttpMethod: POST
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations
+  KeywordDictionaryGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations
+  KeywordDictionaryVersionGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryVersionResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations
+  KeywordDictionaryCategoryKeywordPatchMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryCategoryKeywordResource
+      HttpMethod: PATCH
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations
+  KeywordDictionaryCategoryKeywordDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryCategoryKeywordResource
+      HttpMethod: DELETE
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations
+  InboundContactIdRecordingGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: InboundContactIdRecordingResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RecordingApiFn.Arn}/invocations
+  InboundContactIdTranscriptGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: InboundContactIdTranscriptResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId:
+        Ref: CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RecordingApiFn.Arn}/invocations
+  AuthFailureReporterApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: AuthFailureReporterFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  DictionaryApiApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: DictionaryApiFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  EmployeeApiApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: EmployeeApiFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  CycleApiApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: CycleApiFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  ResponseApiApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: ResponseApiFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  RecordingApiApiGwPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: RecordingApiFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*/*
+  AuthRecordFailureOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: AuthRecordFailureResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdStatusOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdStatusResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdResponsesOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResponsesResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdResponsesEmployeeIdOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdResponsesEmployeeIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdRecordingsEmployeeIdSeqOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdRecordingsEmployeeIdSeqResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  CyclesIdTranscriptsEmployeeIdSeqOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: CyclesIdTranscriptsEmployeeIdSeqResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  EmployeesOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  EmployeesIdOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  EmployeesIdAnonymizeOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdAnonymizeResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  EmployeesIdCognitoUserOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesIdCognitoUserResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  EmployeesImportOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: EmployeesImportResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  KeywordDictionaryOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  KeywordDictionaryVersionOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryVersionResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  KeywordDictionaryCategoryKeywordOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: KeywordDictionaryCategoryKeywordResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  InboundContactIdRecordingOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: InboundContactIdRecordingResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  InboundContactIdTranscriptOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResourceId:
+        Ref: InboundContactIdTranscriptResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+            method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+          ResponseTemplates:
+            application/json: ''
+      MethodResponses:
+      - StatusCode: 200
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Origin: true
+          method.response.header.Access-Control-Allow-Headers: true
+          method.response.header.Access-Control-Allow-Methods: true
+  ApiGatewayResponseUnauthorized:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResponseType: UNAUTHORIZED
+      StatusCode: '401'
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+  ApiGatewayResponseDefault4xx:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResponseType: DEFAULT_4XX
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+  ApiGatewayResponseDefault5xx:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      ResponseType: DEFAULT_5XX
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+    - AuthRecordFailureMethod
+    - CyclesPostMethod
+    - CyclesGetMethod
+    - CyclesIdGetMethod
+    - CyclesIdStatusGetMethod
+    - CyclesIdResponsesGetMethod
+    - CyclesIdResponsesEmployeeIdGetMethod
+    - CyclesIdRecordingsEmployeeIdSeqGetMethod
+    - CyclesIdTranscriptsEmployeeIdSeqGetMethod
+    - EmployeesPostMethod
+    - EmployeesGetMethod
+    - EmployeesIdGetMethod
+    - EmployeesIdPutMethod
+    - EmployeesIdDeleteMethod
+    - EmployeesIdAnonymizePostMethod
+    - EmployeesIdCognitoUserDeleteMethod
+    - EmployeesImportPostMethod
+    - KeywordDictionaryPostMethod
+    - KeywordDictionaryGetMethod
+    - KeywordDictionaryVersionGetMethod
+    - KeywordDictionaryCategoryKeywordPatchMethod
+    - KeywordDictionaryCategoryKeywordDeleteMethod
+    - InboundContactIdRecordingGetMethod
+    - InboundContactIdTranscriptGetMethod
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      Description: Phase 5.7 initial deployment (all Phase 3-5 methods)
+  ApiDeploymentV2Cors:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+    - AuthRecordFailureMethod
+    - CyclesPostMethod
+    - CyclesGetMethod
+    - CyclesIdGetMethod
+    - CyclesIdStatusGetMethod
+    - CyclesIdResponsesGetMethod
+    - CyclesIdResponsesEmployeeIdGetMethod
+    - CyclesIdRecordingsEmployeeIdSeqGetMethod
+    - CyclesIdTranscriptsEmployeeIdSeqGetMethod
+    - EmployeesPostMethod
+    - EmployeesGetMethod
+    - EmployeesIdGetMethod
+    - EmployeesIdPutMethod
+    - EmployeesIdDeleteMethod
+    - EmployeesIdAnonymizePostMethod
+    - EmployeesIdCognitoUserDeleteMethod
+    - EmployeesImportPostMethod
+    - KeywordDictionaryPostMethod
+    - KeywordDictionaryGetMethod
+    - KeywordDictionaryVersionGetMethod
+    - KeywordDictionaryCategoryKeywordPatchMethod
+    - KeywordDictionaryCategoryKeywordDeleteMethod
+    - InboundContactIdRecordingGetMethod
+    - InboundContactIdTranscriptGetMethod
+    - AuthRecordFailureOptionsMethod
+    - CyclesOptionsMethod
+    - CyclesIdOptionsMethod
+    - CyclesIdStatusOptionsMethod
+    - CyclesIdResponsesOptionsMethod
+    - CyclesIdResponsesEmployeeIdOptionsMethod
+    - CyclesIdRecordingsEmployeeIdSeqOptionsMethod
+    - CyclesIdTranscriptsEmployeeIdSeqOptionsMethod
+    - EmployeesOptionsMethod
+    - EmployeesIdOptionsMethod
+    - EmployeesIdAnonymizeOptionsMethod
+    - EmployeesIdCognitoUserOptionsMethod
+    - EmployeesImportOptionsMethod
+    - KeywordDictionaryOptionsMethod
+    - KeywordDictionaryVersionOptionsMethod
+    - KeywordDictionaryCategoryKeywordOptionsMethod
+    - InboundContactIdRecordingOptionsMethod
+    - InboundContactIdTranscriptOptionsMethod
+    - ApiGatewayResponseUnauthorized
+    - ApiGatewayResponseDefault4xx
+    - ApiGatewayResponseDefault5xx
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      Description: Phase 15.2a CORS hotfix deployment (24 base methods + 18 OPTIONS
+        + 3 GatewayResponse)
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    DependsOn:
+    - ApiGatewayAccount
+    Properties:
+      RestApiId:
+        Ref: RestApi
+      DeploymentId:
+        Ref: ApiDeploymentV2Cors
+      StageName:
+        Ref: EnvironmentName
+      Description:
+        Fn::Sub: Safety Confirmation API stage for environment ${EnvironmentName}
+      AccessLogSetting:
+        DestinationArn:
+          Fn::GetAtt:
+          - ApiGwAccessLogGroup
+          - Arn
+        Format: '{"requestId":"$context.requestId","sourceIp":"$context.identity.sourceIp","method":"$context.httpMethod","path":"$context.resourcePath","status":"$context.status","len":"$context.responseLength","latency":"$context.responseLatency"}'
+      MethodSettings:
+      - ResourcePath: /*
+        HttpMethod: '*'
+        LoggingLevel: INFO
+        DataTraceEnabled: false
+        MetricsEnabled: true
+        ThrottlingRateLimit:
+          Fn::FindInMap:
+          - EnvMap
+          - Ref: EnvironmentName
+          - ApiThrottleRate
+        ThrottlingBurstLimit:
+          Fn::FindInMap:
+          - EnvMap
+          - Ref: EnvironmentName
+          - ApiThrottleBurst
+  SpaOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name:
+          Fn::Sub: ${EnvironmentName}-safety-confirmation-spa-oac
+        Description:
+          Fn::Sub: OAC for SPA bucket (${EnvironmentName} environment, SigV4 to S3
+            origin)
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+  SpaDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment:
+          Fn::Sub: Safety Confirmation SPA distribution (${EnvironmentName})
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_200
+        Aliases:
+          Fn::If:
+          - HasCustomDomain
+          - - Ref: DomainName
+          - Ref: AWS::NoValue
+        Origins:
+        - Id: SpaS3Origin
+          DomainName:
+            Fn::GetAtt:
+            - SpaBucket
+            - RegionalDomainName
+          OriginAccessControlId:
+            Fn::GetAtt:
+            - SpaOac
+            - Id
+          S3OriginConfig:
+            OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: SpaS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+          - GET
+          - HEAD
+          CachedMethods:
+          - GET
+          - HEAD
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        CustomErrorResponses:
+        - ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+          ErrorCachingMinTTL: 0
+        - ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+          ErrorCachingMinTTL: 0
+        ViewerCertificate:
+          Fn::If:
+          - UseCustomCert
+          - AcmCertificateArn:
+              Ref: AcmCertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
+  SpaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: SpaBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowCloudFrontServicePrincipalRead
+          Effect: Allow
+          Principal:
+            Service: cloudfront.amazonaws.com
+          Action: s3:GetObject
+          Resource:
+            Fn::Sub: ${SpaBucket.Arn}/*
+          Condition:
+            StringEquals:
+              AWS:SourceArn:
+                Fn::Sub: arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${SpaDistribution}
+  SpaRecordSet:
+    Type: AWS::Route53::RecordSet
+    Condition: HasCustomDomainAndHostedZone
+    Properties:
+      HostedZoneId:
+        Ref: HostedZoneId
+      Name:
+        Ref: DomainName
+      Type: A
+      AliasTarget:
+        DNSName:
+          Fn::GetAtt:
+          - SpaDistribution
+          - DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+Outputs:
+  KmsCmkArn:
+    Description: ?????????? KMS CMK ? ARN??? Phase ? DynamoDB / S3 / Lambda ??
+    Value:
+      Fn::GetAtt:
+      - KmsCmk
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KmsCmkArn
+  KmsCmkAliasName:
+    Description: ?????????? KMS CMK ????????alias/ ?????????
+    Value:
+      Ref: KmsCmkAlias
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KmsCmkAliasName
+  LambdaBaseLogsManagedPolicyArn:
+    Description: ? Lambda ?? CloudWatch Logs ???? ManagedPolicy ? ARN??? Phase ????
+      Role ? ManagedPolicyArns ????
+    Value:
+      Ref: LambdaBaseLogsManagedPolicy
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-LambdaBaseLogsManagedPolicyArn
+  EmployeeTableName:
+    Description: D1 Employee_Master DynamoDB ??????Phase 5 / 6 / 9 ? Lambda ????
+    Value:
+      Ref: EmployeeTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-EmployeeTableName
+  EmployeeTableArn:
+    Description: D1 Employee_Master DynamoDB ???? ARN?Phase 5 / 6 / 9 ? Lambda IAM
+      Resource ??
+    Value:
+      Fn::GetAtt:
+      - EmployeeTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-EmployeeTableArn
+  CycleTableName:
+    Description: D2 Cycle DynamoDB ??????Phase 5 / 6 ? Lambda ????
+    Value:
+      Ref: CycleTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleTableName
+  CycleTableArn:
+    Description: D2 Cycle DynamoDB ???? ARN?Phase 5 / 6 ? Lambda IAM Resource ??
+    Value:
+      Fn::GetAtt:
+      - CycleTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleTableArn
+  ResponseTableName:
+    Description: D3 Response DynamoDB ??????Phase 5 / 6 / 8 ? Lambda ????
+    Value:
+      Ref: ResponseTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ResponseTableName
+  ResponseTableArn:
+    Description: D3 Response DynamoDB ???? ARN?Phase 5 / 6 / 8 ? Lambda IAM Resource
+      ??
+    Value:
+      Fn::GetAtt:
+      - ResponseTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ResponseTableArn
+  RecordingMetaTableName:
+    Description: D4 Recording_Metadata DynamoDB ??????Phase 6 / 9 ? Lambda ????
+    Value:
+      Ref: RecordingMetaTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingMetaTableName
+  RecordingMetaTableArn:
+    Description: D4 Recording_Metadata DynamoDB ???? ARN?Phase 6 / 9 ? Lambda IAM
+      Resource ??
+    Value:
+      Fn::GetAtt:
+      - RecordingMetaTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingMetaTableArn
+  TranscriptMetaTableName:
+    Description: D6 TranscriptMetadata DynamoDB ??????Phase 6 / 8 ? Lambda ????
+    Value:
+      Ref: TranscriptMetaTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-TranscriptMetaTableName
+  TranscriptMetaTableArn:
+    Description: D6 TranscriptMetadata DynamoDB ???? ARN?Phase 6 / 8 ? Lambda IAM
+      Resource ??
+    Value:
+      Fn::GetAtt:
+      - TranscriptMetaTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-TranscriptMetaTableArn
+  KeywordDictionaryTableName:
+    Description: D7 KeywordDictionary DynamoDB ??????Phase 4 / 8 ? Lambda ????
+    Value:
+      Ref: KeywordDictionaryTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KeywordDictionaryTableName
+  KeywordDictionaryTableArn:
+    Description: D7 KeywordDictionary DynamoDB ???? ARN?Phase 4 / 8 ? Lambda IAM Resource
+      ??
+    Value:
+      Fn::GetAtt:
+      - KeywordDictionaryTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KeywordDictionaryTableArn
+  KeywordDictionaryHistoryTableName:
+    Description: D7 ?? KeywordDictionaryHistory DynamoDB ??????Phase 4 / 8 ? Lambda
+      ????
+    Value:
+      Ref: KeywordDictionaryHistoryTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KeywordDictionaryHistoryTableName
+  KeywordDictionaryHistoryTableArn:
+    Description: D7 ?? KeywordDictionaryHistory DynamoDB ???? ARN?Phase 4 / 8 ? Lambda
+      IAM Resource ??
+    Value:
+      Fn::GetAtt:
+      - KeywordDictionaryHistoryTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KeywordDictionaryHistoryTableArn
+  InboundContactTableName:
+    Description: D8 Inbound_Contact DynamoDB ??????Phase 9 ? Lambda ????
+    Value:
+      Ref: InboundContactTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-InboundContactTableName
+  InboundContactTableArn:
+    Description: D8 Inbound_Contact DynamoDB ???? ARN?Phase 9 ? Lambda IAM Resource
+      ??
+    Value:
+      Fn::GetAtt:
+      - InboundContactTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-InboundContactTableArn
+  LockoutTableName:
+    Description: Lockout DynamoDB ??????Phase 3 ? AuthPreAuth / AuthPostAuth Lambda
+      ????
+    Value:
+      Ref: LockoutTable
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-LockoutTableName
+  LockoutTableArn:
+    Description: Lockout DynamoDB ???? ARN?Phase 3 ? AuthPreAuth / AuthPostAuth Lambda
+      IAM Resource ??
+    Value:
+      Fn::GetAtt:
+      - LockoutTable
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-LockoutTableArn
+  RecordingsBucketName:
+    Description: D5 Recordings S3 ??????Phase 6 / 7 / 9 ? Lambda ????
+    Value:
+      Ref: RecordingsBucket
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingsBucketName
+  RecordingsBucketArn:
+    Description: D5 Recordings S3 ???? ARN?Phase 6 / 7 / 9 ? Lambda IAM Resource ??
+    Value:
+      Fn::GetAtt:
+      - RecordingsBucket
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingsBucketArn
+  TranscriptsBucketName:
+    Description: D6 Transcripts S3 ??????Phase 6 / 8 ? Lambda ????
+    Value:
+      Ref: TranscriptsBucket
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-TranscriptsBucketName
+  TranscriptsBucketArn:
+    Description: D6 Transcripts S3 ???? ARN?Phase 6 / 8 ? Lambda IAM Resource ??
+    Value:
+      Fn::GetAtt:
+      - TranscriptsBucket
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-TranscriptsBucketArn
+  SpaBucketName:
+    Description: SPA ??? S3 ??????Phase 11 CloudFront OAC ????????
+    Value:
+      Ref: SpaBucket
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaBucketName
+  SpaBucketArn:
+    Description: SPA ??? S3 ???? ARN?Phase 11 CloudFront OAC ???? / BucketPolicy ??
+    Value:
+      Fn::GetAtt:
+      - SpaBucket
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaBucketArn
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID?Phase 5 API Gateway Authorizer / Phase 3.6 Trigger
+      ????????
+    Value:
+      Ref: CognitoUserPool
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CognitoUserPoolId
+  CognitoUserPoolArn:
+    Description: Cognito User Pool ARN?Phase 5 API Gateway Authorizer ? ProviderARNs
+      ??
+    Value:
+      Fn::GetAtt:
+      - CognitoUserPool
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CognitoUserPoolArn
+  CognitoUserPoolClientId:
+    Description: Cognito User Pool Client ID?SPA ??????????????????
+    Value:
+      Ref: CognitoUserPoolClient
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CognitoUserPoolClientId
+  AuthPreAuthFnArn:
+    Description: AuthPreAuthFn Lambda ARN?Phase 3.6 ? Cognito UserPool LambdaConfig.PreAuthentication
+      ????
+    Value:
+      Fn::GetAtt:
+      - AuthPreAuthFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-AuthPreAuthFnArn
+  SharedLayerVersionArn:
+    Description: SharedLayer ??? LayerVersion ARN??? Phase ?? Lambda ? Layers ????
+    Value:
+      Ref: SharedLayer
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SharedLayerVersionArn
+  AuthPostAuthFnArn:
+    Description: AuthPostAuthFn Lambda ARN?Phase 3.6 ? Cognito UserPool LambdaConfig.PostAuthentication
+      ????
+    Value:
+      Fn::GetAtt:
+      - AuthPostAuthFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-AuthPostAuthFnArn
+  AuthPreSignUpFnArn:
+    Description: AuthPreSignUpFn Lambda ARN?Cognito UserPool LambdaConfig.PreSignUp
+      ???????????
+    Value:
+      Fn::GetAtt:
+      - AuthPreSignUpFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-AuthPreSignUpFnArn
+  DictionaryApiFnArn:
+    Description: DictionaryApi Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????
+    Value:
+      Fn::GetAtt:
+      - DictionaryApiFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-DictionaryApiFnArn
+  RestApiId:
+    Description: API Gateway REST API ID?Phase 5.x ?? Method/Resource ????
+    Value:
+      Ref: RestApi
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RestApiId
+  RestApiRootResourceId:
+    Description: API Gateway REST API ???? Resource ID?Phase 5.x ?? Resource ? ParentId
+      ??????
+    Value:
+      Fn::GetAtt:
+      - RestApi
+      - RootResourceId
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RestApiRootResourceId
+  CognitoAuthorizerId:
+    Description: Cognito Authorizer ID?Phase 5.x ?? Method ? AuthorizerId ??????
+    Value:
+      Ref: CognitoAuthorizer
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CognitoAuthorizerId
+  ApiGwAccessLogGroupArn:
+    Description: API Gateway ??????? LogGroup ARN?Phase 5.6 Stage ? AccessLogSetting
+      ????
+    Value:
+      Fn::GetAtt:
+      - ApiGwAccessLogGroup
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ApiGwAccessLogGroupArn
+  EmployeeApiFnArn:
+    Description: EmployeeApi Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????
+    Value:
+      Fn::GetAtt:
+      - EmployeeApiFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-EmployeeApiFnArn
+  CycleApiFnArn:
+    Description: CycleApi Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????
+    Value:
+      Fn::GetAtt:
+      - CycleApiFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleApiFnArn
+  ResponseApiFnArn:
+    Description: ResponseApi Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????
+    Value:
+      Fn::GetAtt:
+      - ResponseApiFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ResponseApiFnArn
+  RecordingApiFnArn:
+    Description: RecordingApi Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????
+    Value:
+      Fn::GetAtt:
+      - RecordingApiFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingApiFnArn
+  AuthFailureReporterFnArn:
+    Description: AuthFailureReporter Lambda ARN?Phase 5.x ? API Gateway Method ? Integration
+      ??????Authorizer ???????? API?
+    Value:
+      Fn::GetAtt:
+      - AuthFailureReporterFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-AuthFailureReporterFnArn
+  LoadTargetsFnArn:
+    Description: LoadTargets Lambda ARN?Phase 6.8 ? Step Functions ??????????????
+    Value:
+      Fn::GetAtt:
+      - LoadTargetsFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-LoadTargetsFnArn
+  ConnectDispatcherFnArn:
+    Description: ConnectDispatcher Lambda ARN?Phase 6.8 ? Step Functions ??????? Map
+      ????????????
+    Value:
+      Fn::GetAtt:
+      - ConnectDispatcherFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ConnectDispatcherFnArn
+  CallEndHandlerFnArn:
+    Description: CallEndHandler Lambda ARN?Phase 7.1 ? Outbound Contact Flow ?? Lambda
+      Invoke ?????????
+    Value:
+      Fn::GetAtt:
+      - CallEndHandlerFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CallEndHandlerFnArn
+  TranscribeStarterFnArn:
+    Description: TranscribeStarter Lambda ARN?Phase 8.x ? KeywordMatcher ??? Transcript
+      ?????????????????
+    Value:
+      Fn::GetAtt:
+      - TranscribeStarterFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-TranscribeStarterFnArn
+  RetryEvaluatorFnArn:
+    Description: RetryEvaluator Lambda ARN?Phase 6.8 ? Step Functions ??????? EvaluateRetry
+      ?????????
+    Value:
+      Fn::GetAtt:
+      - RetryEvaluatorFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RetryEvaluatorFnArn
+  CycleFinalizerFnArn:
+    Description: CycleFinalizer Lambda ARN?Phase 6.8 SFN Finalize ???? ? Phase 6.8
+      StartTimers ????? EventBridge ??? 2 ? ? Target?Phase 12.4 OperatorTopic ????
+      SNS ?????????
+    Value:
+      Fn::GetAtt:
+      - CycleFinalizerFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleFinalizerFnArn
+  RecordingMetadataWriterFnArn:
+    Description: RecordingMetadataWriter Lambda ARN?Phase 6.4 TranscribeStarter ???
+      Recordings PutObject ??? 2 ???????????
+    Value:
+      Fn::GetAtt:
+      - RecordingMetadataWriterFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingMetadataWriterFnArn
+  RecordingMetadataWriterDLQArn:
+    Description: RecordingMetadataWriter DLQ ARN?Phase 12.5 ?????????? / ???????????
+    Value:
+      Fn::GetAtt:
+      - RecordingMetadataWriterDLQ
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingMetadataWriterDLQArn
+  RecordingMetadataWriterDLQUrl:
+    Description: RecordingMetadataWriter DLQ URL?CLI / SDK ??????? Peek / ?????????????????
+    Value:
+      Ref: RecordingMetadataWriterDLQ
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingMetadataWriterDLQUrl
+  CycleStateMachineArn:
+    Description: Cycle State Machine ARN?safety-confirmation-cycle-{env}?Wave 7 ???????
+    Value:
+      Ref: CycleStateMachine
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleStateMachineArn
+  CycleStateMachineName:
+    Description: Cycle State Machine ??????? ARN ???????????????
+    Value:
+      Fn::GetAtt:
+      - CycleStateMachine
+      - Name
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleStateMachineName
+  CycleStateMachineLogGroupName:
+    Description: Cycle State Machine ????? LogGroup ??CloudWatch Logs Insights ???????
+    Value:
+      Ref: CycleStateMachineLogGroup
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-CycleStateMachineLogGroupName
+  ApiBaseUrl:
+    Description: API Gateway invoke URL?SPA ????????`https://{RestApiId}.execute-api.{region}.amazonaws.com/{stage}`
+      ???
+    Value:
+      Fn::Sub: https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ApiBaseUrl
+  ApiStageName:
+    Description: API Gateway Stage ???? Phase ????
+    Value:
+      Ref: ApiStage
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ApiStageName
+  RecordingRelocatorFnArn:
+    Description: RecordingRelocator Lambda ARN?Phase 7.2?Connect-native key ? ???????
+      key ?? CopyObject + DeleteObject?
+    Value:
+      Fn::GetAtt:
+      - RecordingRelocatorFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-RecordingRelocatorFnArn
+  KeywordMatcherFnArn:
+    Description: KeywordMatcher Lambda ARN?Phase 8.1?Transcript ? Voice_Status ??
+      + Response / TranscriptMeta ???
+    Value:
+      Fn::GetAtt:
+      - KeywordMatcherFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-KeywordMatcherFnArn
+  InboundHandlerFnArn:
+    Description: InboundHandler Lambda ARN?Phase 9.1 inbound.json ? InvokeLambdaFunction
+      ????? ${InboundHandlerFnArn} ?????????????
+    Value:
+      Fn::GetAtt:
+      - InboundHandlerFn
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-InboundHandlerFnArn
+  ConnectRecordingsPrefixOut:
+    Description: Connect ???????? S3 prefix?Phase 7.2?InstanceStorageConfig.BucketPrefix
+      ? RecordingRelocator ?????????????
+    Value:
+      Ref: ConnectRecordingsPrefix
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ConnectRecordingsPrefix
+  SpaOacId:
+    Description: CloudFront Origin Access Control ID?SPA ???????Phase 11.2?
+    Value:
+      Ref: SpaOac
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaOacId
+  SpaDistributionId:
+    Description: CloudFront ??????????? ID?aws cloudfront create-invalidation ?????Phase
+      11.2?
+    Value:
+      Ref: SpaDistribution
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaDistributionId
+  SpaDistributionDomainName:
+    Description: CloudFront ??????????????????*.cloudfront.net?SPA ??????????Phase
+      11.2?
+    Value:
+      Fn::GetAtt:
+      - SpaDistribution
+      - DomainName
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaDistributionDomainName
+  SpaRecordSetName:
+    Condition: HasCustomDomainAndHostedZone
+    Description: Route 53 ALIAS RecordSet ?????????? + HostedZoneId ??????Phase 11.3?
+    Value:
+      Ref: SpaRecordSet
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SpaRecordSetName
+  OperatorTopicArn:
+    Description: SNS Topic ARN for operator notifications (Phase 12.4)
+    Value:
+      Ref: OperatorTopic
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-OperatorTopicArn
+  OperatorEmailSubscriptionArn:
+    Description: SNS Email Subscription ARN (PendingConfirmation until subscriber
+      clicks the AWS email link)
+    Value:
+      Ref: OperatorEmailSubscription
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-OperatorEmailSubscriptionArn
+  AuditReaderManagedPolicyArn:
+    Description: ??????? AuditLogGroup ???? ManagedPolicy ? ARN?CFn ?? IAM User /
+      Role / Group ????????Phase 15.15?
+    Value:
+      Ref: AuditReaderManagedPolicy
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-AuditReaderManagedPolicyArn
+

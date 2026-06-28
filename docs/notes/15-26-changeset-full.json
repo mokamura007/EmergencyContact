@@ -1,0 +1,219 @@
+{
+    "Changes": [
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "CognitoUserPoolClientTest",
+                "ResourceType": "AWS::Cognito::UserPoolClient",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "CycleFinalizerFn",
+                "PhysicalResourceId": "safety-confirmation-cycle-finalizer-dev",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Code",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "DirectModification"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "CycleStateMachineExecutionRole",
+                "PhysicalResourceId": "safety-confirmation-cycle-sfn-dev",
+                "ResourceType": "AWS::IAM::Role",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Policies",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "CycleFinalizerFn.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "CycleStateMachine",
+                "PhysicalResourceId": "arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev",
+                "ResourceType": "AWS::StepFunctions::StateMachine",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "RoleArn",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "CycleStateMachineExecutionRole.Arn"
+                    },
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "DefinitionSubstitutions",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "CycleFinalizerFn.Arn"
+                    }
+                ]
+            }
+        }
+    ],
+    "ChangeSetName": "awscli-cloudformation-package-deploy-1782582079",
+    "ChangeSetId": "arn:aws:cloudformation:ap-northeast-1:214046906694:changeSet/awscli-cloudformation-package-deploy-1782582079/ed5ff004-1343-4c71-b1c5-12682c2eb4b8",
+    "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+    "StackName": "safety-confirmation-dev",
+    "Description": "Created by AWS CLI at 2026-06-27T17:41:19.492646 UTC",
+    "Parameters": [
+        {
+            "ParameterKey": "ConnectOutboundPhoneNumber",
+            "ParameterValue": "+810000000000"
+        },
+        {
+            "ParameterKey": "DefaultRetryCount",
+            "ParameterValue": "3"
+        },
+        {
+            "ParameterKey": "RecordingsRetentionDays",
+            "ParameterValue": "90"
+        },
+        {
+            "ParameterKey": "OutboundContactFlowId",
+            "ParameterValue": "00000000-0000-0000-0000-000000000002"
+        },
+        {
+            "ParameterKey": "MaxConcurrentCalls",
+            "ParameterValue": "10"
+        },
+        {
+            "ParameterKey": "InboundGuidanceText",
+            "ParameterValue": "???????????????????????????????????????????????????????????????????????????????????????????"
+        },
+        {
+            "ParameterKey": "ConnectInstanceArn",
+            "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000"
+        },
+        {
+            "ParameterKey": "TranscriptsRetentionDays",
+            "ParameterValue": "90"
+        },
+        {
+            "ParameterKey": "OperatorEmail",
+            "ParameterValue": "placeholder@example.com"
+        },
+        {
+            "ParameterKey": "ConnectRecordingsPrefix",
+            "ParameterValue": "connect-raw/"
+        },
+        {
+            "ParameterKey": "ConnectInboundPhoneNumberArn",
+            "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000/phone-number/00000000-0000-0000-0000-000000000001"
+        },
+        {
+            "ParameterKey": "ManageConnectStorageConfig",
+            "ParameterValue": "false"
+        },
+        {
+            "ParameterKey": "ConnectInstanceId",
+            "ParameterValue": "00000000-0000-0000-0000-000000000000"
+        },
+        {
+            "ParameterKey": "LogRetentionDays",
+            "ParameterValue": "90"
+        },
+        {
+            "ParameterKey": "AcmCertificateArn",
+            "ParameterValue": ""
+        },
+        {
+            "ParameterKey": "EnvironmentName",
+            "ParameterValue": "dev"
+        },
+        {
+            "ParameterKey": "InboundReceptionWindowDays",
+            "ParameterValue": "30"
+        },
+        {
+            "ParameterKey": "DomainName",
+            "ParameterValue": ""
+        },
+        {
+            "ParameterKey": "HostedZoneId",
+            "ParameterValue": ""
+        },
+        {
+            "ParameterKey": "OutboundGuidanceText",
+            "ParameterValue": "???????????????????????????????????????????????????????????????????????????????????????????"
+        },
+        {
+            "ParameterKey": "InboundContactFlowId",
+            "ParameterValue": "00000000-0000-0000-0000-000000000003"
+        },
+        {
+            "ParameterKey": "DefaultRetryIntervalMinutes",
+            "ParameterValue": "5"
+        },
+        {
+            "ParameterKey": "TranscribeLanguageCode",
+            "ParameterValue": "ja-JP"
+        },
+        {
+            "ParameterKey": "EmployeeAnonymizeSalt",
+            "ParameterValue": "****"
+        },
+        {
+            "ParameterKey": "ConnectOutboundPhoneNumberArn",
+            "ParameterValue": "arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000/phone-number/00000000-0000-0000-0000-000000000000"
+        }
+    ],
+    "CreationTime": "2026-06-27T17:41:20.768000+00:00",
+    "ExecutionStatus": "AVAILABLE",
+    "Status": "CREATE_COMPLETE",
+    "StatusReason": null,
+    "NotificationARNs": [],
+    "RollbackConfiguration": {},
+    "Capabilities": [
+        "CAPABILITY_NAMED_IAM"
+    ],
+    "Tags": null,
+    "ParentChangeSetId": null,
+    "IncludeNestedStacks": false,
+    "RootChangeSetId": null,
+    "OnStackFailure": null
+}

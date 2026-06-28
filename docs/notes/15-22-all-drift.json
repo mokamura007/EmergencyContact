@@ -1,0 +1,1189 @@
+{
+    "StackResourceDrifts": [
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AdminGroup",
+            "PhysicalResourceId": "Administrator",
+            "ResourceType": "AWS::Cognito::UserPoolGroup",
+            "ExpectedProperties": "{\"GroupName\":\"Administrator\",\"UserPoolId\":\"ap-northeast-1_5uYfaQMLJ\",\"Description\":\"???????????????Requirement 1.9 ??? Employee ???????????\",\"Precedence\":1}",
+            "ActualProperties": "{\"GroupName\":\"Administrator\",\"Description\":\"???????????????Requirement 1.9 ??? Employee ???????????\",\"UserPoolId\":\"ap-northeast-1_5uYfaQMLJ\",\"Precedence\":1}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:36.303000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiDeployment",
+            "PhysicalResourceId": "285tof",
+            "ResourceType": "AWS::ApiGateway::Deployment",
+            "ExpectedProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Description\":\"Phase 5.7 initial deployment (all Phase 3-5 methods)\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Description\":\"Phase 5.7 initial deployment (all Phase 3-5 methods)\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:36.756000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiDeploymentV2Cors",
+            "PhysicalResourceId": "tgwqy2",
+            "ResourceType": "AWS::ApiGateway::Deployment",
+            "ExpectedProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Description\":\"Phase 15.2a CORS hotfix deployment (24 base methods + 18 OPTIONS + 3 GatewayResponse)\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Description\":\"Phase 15.2a CORS hotfix deployment (24 base methods + 18 OPTIONS + 3 GatewayResponse)\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:36.091000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiGatewayAccount",
+            "PhysicalResourceId": "safety-ApiGa-8h3Ua51STxGp",
+            "ResourceType": "AWS::ApiGateway::Account",
+            "ExpectedProperties": "{\"CloudWatchRoleArn\":\"arn:aws:iam::214046906694:role/safety-confirmation-apigw-logs-dev\"}",
+            "ActualProperties": "{\"CloudWatchRoleArn\":\"arn:aws:iam::214046906694:role/safety-confirmation-apigw-logs-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:36.454000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiGatewayLogsRole",
+            "PhysicalResourceId": "safety-confirmation-apigw-logs-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs\"],\"RoleName\":\"safety-confirmation-apigw-logs-dev\",\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs\"],\"RoleName\":\"safety-confirmation-apigw-logs-dev\",\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"apigateway.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:37.706000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiGwAccessLogGroup",
+            "PhysicalResourceId": "/aws/apigateway/safety-confirmation-dev/access",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/apigateway/safety-confirmation-dev/access\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/apigateway/safety-confirmation-dev/access\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:38.154000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiGwExecutionLogGroup",
+            "PhysicalResourceId": "/aws/apigateway/safety-confirmation-dev/execution",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/apigateway/safety-confirmation-dev/execution\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/apigateway/safety-confirmation-dev/execution\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:38.541000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ApiStage",
+            "PhysicalResourceId": "dev",
+            "ResourceType": "AWS::ApiGateway::Stage",
+            "ExpectedProperties": "{\"DeploymentId\":\"tgwqy2\",\"Description\":\"Safety Confirmation API stage for environment dev\",\"StageName\":\"dev\",\"RestApiId\":\"bev0uk24s0\",\"MethodSettings\":[{\"ResourcePath\":\"/*\",\"LoggingLevel\":\"INFO\",\"DataTraceEnabled\":false,\"ThrottlingBurstLimit\":100,\"MetricsEnabled\":true,\"HttpMethod\":\"*\",\"ThrottlingRateLimit\":50}],\"AccessLogSetting\":{\"Format\":\"{\\\"requestId\\\":\\\"$context.requestId\\\",\\\"sourceIp\\\":\\\"$context.identity.sourceIp\\\",\\\"method\\\":\\\"$context.httpMethod\\\",\\\"path\\\":\\\"$context.resourcePath\\\",\\\"status\\\":\\\"$context.status\\\",\\\"len\\\":\\\"$context.responseLength\\\",\\\"latency\\\":\\\"$context.responseLatency\\\"}\",\"DestinationArn\":\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/apigateway/safety-confirmation-dev/access:*\"}}",
+            "ActualProperties": "{\"DeploymentId\":\"tgwqy2\",\"Description\":\"Safety Confirmation API stage for environment dev\",\"StageName\":\"dev\",\"RestApiId\":\"bev0uk24s0\",\"MethodSettings\":[{\"DataTraceEnabled\":false,\"HttpMethod\":\"*\",\"LoggingLevel\":\"INFO\",\"MetricsEnabled\":true,\"ResourcePath\":\"/*\",\"ThrottlingBurstLimit\":100,\"ThrottlingRateLimit\":50.0}],\"AccessLogSetting\":{\"DestinationArn\":\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/apigateway/safety-confirmation-dev/access\",\"Format\":\"{\\\"requestId\\\":\\\"$context.requestId\\\",\\\"sourceIp\\\":\\\"$context.identity.sourceIp\\\",\\\"method\\\":\\\"$context.httpMethod\\\",\\\"path\\\":\\\"$context.resourcePath\\\",\\\"status\\\":\\\"$context.status\\\",\\\"len\\\":\\\"$context.responseLength\\\",\\\"latency\\\":\\\"$context.responseLatency\\\"}\"}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:38.189000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuditLogGroup",
+            "PhysicalResourceId": "/aws/safety-confirmation/audit-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/safety-confirmation/audit-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/safety-confirmation/audit-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:38.534000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuditLogWriteManagedPolicy",
+            "PhysicalResourceId": "arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write",
+            "ResourceType": "AWS::IAM::ManagedPolicy",
+            "ExpectedProperties": "{\"ManagedPolicyName\":\"dev-safety-confirmation-audit-log-write\",\"PolicyDocument\":\"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"logs:DescribeLogStreams\\\",\\\"logs:CreateLogStream\\\",\\\"logs:PutLogEvents\\\"],\\\"Resource\\\":\\\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/safety-confirmation/audit-dev:*\\\",\\\"Effect\\\":\\\"Allow\\\",\\\"Sid\\\":\\\"AllowAuditLogWrite\\\"}]}\",\"Description\":\"Phase 12.3: AuditLogGroup ???? (??: dev)?auth / dictionary / employee / cycle / inbound 6 Lambda ? Role ??????\"}",
+            "ActualProperties": "{\"ManagedPolicyName\":\"dev-safety-confirmation-audit-log-write\",\"PolicyDocument\":\"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"logs:DescribeLogStreams\\\",\\\"logs:CreateLogStream\\\",\\\"logs:PutLogEvents\\\"],\\\"Resource\\\":\\\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/safety-confirmation/audit-dev:*\\\",\\\"Effect\\\":\\\"Allow\\\",\\\"Sid\\\":\\\"AllowAuditLogWrite\\\"}]}\",\"Description\":\"Phase 12.3: AuditLogGroup ???? (??: dev)?auth / dictionary / employee / cycle / inbound 6 Lambda ? Role ??????\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:39.831000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuditReaderManagedPolicy",
+            "PhysicalResourceId": "arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-read",
+            "ResourceType": "AWS::IAM::ManagedPolicy",
+            "ExpectedProperties": "{\"ManagedPolicyName\":\"dev-safety-confirmation-audit-log-read\",\"PolicyDocument\":\"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"logs:GetLogEvents\\\",\\\"logs:FilterLogEvents\\\",\\\"logs:StartQuery\\\",\\\"logs:StopQuery\\\",\\\"logs:GetQueryResults\\\",\\\"logs:DescribeLogStreams\\\",\\\"logs:DescribeLogGroups\\\"],\\\"Resource\\\":\\\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/safety-confirmation/audit-dev:*\\\",\\\"Effect\\\":\\\"Allow\\\",\\\"Sid\\\":\\\"AllowAuditLogRead\\\"}]}\",\"Description\":\"Phase 15.15: AuditLogGroup ???? (??: dev)??????? IAM User / Role / Group ? AWS Console / CLI ????????? CloudWatch Logs Insights ????????\"}",
+            "ActualProperties": "{\"ManagedPolicyName\":\"dev-safety-confirmation-audit-log-read\",\"PolicyDocument\":\"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"logs:GetLogEvents\\\",\\\"logs:FilterLogEvents\\\",\\\"logs:StartQuery\\\",\\\"logs:StopQuery\\\",\\\"logs:GetQueryResults\\\",\\\"logs:DescribeLogStreams\\\",\\\"logs:DescribeLogGroups\\\"],\\\"Resource\\\":\\\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/safety-confirmation/audit-dev:*\\\",\\\"Effect\\\":\\\"Allow\\\",\\\"Sid\\\":\\\"AllowAuditLogRead\\\"}]}\",\"Description\":\"Phase 15.15: AuditLogGroup ???? (??: dev)??????? IAM User / Role / Group ? AWS Console / CLI ????????? CloudWatch Logs Insights ????????\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:41.044000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthFailureReporterApiGwPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-AuthFailureReporterApiGwPermission-Z7YufzfbZLCZ",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-auth-failure-reporter-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-auth-failure-reporter-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:38.965000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthFailureReporterExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-auth-failure-reporter-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\"],\"RoleName\":\"safety-confirmation-auth-failure-reporter-dev\",\"Policies\":[{\"PolicyName\":\"LockoutTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-failure-reporter-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"LockoutTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:40.169000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthFailureReporterFn",
+            "PhysicalResourceId": "safety-confirmation-auth-failure-reporter-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-failure-reporter-dev\",\"FunctionName\":\"safety-confirmation-auth-failure-reporter-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Public API for SPA-driven auth-failure recording (Requirement 1.6 - record side)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"LOCKOUT_WINDOW_SECONDS\":\"1800\"}},\"Code\":{},\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-failure-reporter-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-auth-failure-reporter-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Public API for SPA-driven auth-failure recording (Requirement 1.6 - record side)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"LOCKOUT_WINDOW_SECONDS\":\"1800\"}},\"Code\":{},\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:41.620000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthFailureReporterFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-auth-failure-reporter-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-failure-reporter-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-failure-reporter-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:41.953000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPostAuthFn",
+            "PhysicalResourceId": "safety-confirmation-auth-post-auth-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-post-auth-dev\",\"FunctionName\":\"safety-confirmation-auth-post-auth-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Cognito PostAuthentication Trigger ? clear lockout history and emit AUTH_SUCCESS audit log\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-post-auth-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-auth-post-auth-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Cognito PostAuthentication Trigger ? clear lockout history and emit AUTH_SUCCESS audit log\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:41.681000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPostAuthFnCognitoPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-AuthPostAuthFnCognitoPermission-rkcRRq55gNLA",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-auth-post-auth-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-auth-post-auth-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:42.008000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPostAuthFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-auth-post-auth-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\"],\"RoleName\":\"safety-confirmation-auth-post-auth-dev\",\"Policies\":[{\"PolicyName\":\"LockoutTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-post-auth-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"LockoutTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:43.172000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPostAuthFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-auth-post-auth-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-post-auth-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-post-auth-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:43.509000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreAuthFn",
+            "PhysicalResourceId": "safety-confirmation-auth-pre-auth-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-pre-auth-dev\",\"FunctionName\":\"safety-confirmation-auth-pre-auth-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Cognito PreAuthentication Trigger ? account lockout judgement (Requirement 1.6)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"LOCKOUT_THRESHOLD\":\"5\",\"LOCKOUT_WINDOW_SECONDS\":\"1800\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-pre-auth-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-auth-pre-auth-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Cognito PreAuthentication Trigger ? account lockout judgement (Requirement 1.6)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"LOCKOUT_TABLE_NAME\":\"Lockout-dev\",\"LOCKOUT_THRESHOLD\":\"5\",\"LOCKOUT_WINDOW_SECONDS\":\"1800\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:42.589000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreAuthFnCognitoPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-AuthPreAuthFnCognitoPermission-vY9xeQC6G704",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-auth-pre-auth-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-auth-pre-auth-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:42.915000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreAuthFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-auth-pre-auth-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-pre-auth-dev\",\"Policies\":[{\"PolicyName\":\"LockoutTableRead\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:GetItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}},{\"PolicyName\":\"CmkDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"kms:Decrypt\",\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-pre-auth-dev\",\"Policies\":[{\"PolicyName\":\"CmkDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"kms:Decrypt\",\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"LockoutTableRead\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:GetItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Lockout-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:44.738000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreAuthFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-auth-pre-auth-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-pre-auth-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-pre-auth-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:45.087000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreSignUpFn",
+            "PhysicalResourceId": "safety-confirmation-auth-pre-signup-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-pre-signup-dev\",\"FunctionName\":\"safety-confirmation-auth-pre-signup-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Cognito PreSignUp Trigger ? admin-only sign-up gate (Requirement 1.9)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Code\":{},\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-auth-pre-signup-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-auth-pre-signup-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Cognito PreSignUp Trigger ? admin-only sign-up gate (Requirement 1.9)\",\"Timeout\":5,\"Handler\":\"handler.lambda_handler\",\"Code\":{},\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:44.101000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreSignUpFnCognitoPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-AuthPreSignUpFnCognitoPermission-uM4iAwoRx1EE",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-auth-pre-signup-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-auth-pre-signup-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\",\"Principal\":\"cognito-idp.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:44.449000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreSignUpFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-auth-pre-signup-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-pre-signup-dev\",\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-auth-pre-signup-dev\",\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:46.004000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthPreSignUpFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-auth-pre-signup-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-pre-signup-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-auth-pre-signup-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:46.348000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthRecordFailureMethod",
+            "PhysicalResourceId": "bev0uk24s0|vxze7j|POST",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-auth-failure-reporter-dev/invocations\"},\"AuthorizationType\":\"NONE\",\"ResourceId\":\"vxze7j\",\"HttpMethod\":\"POST\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-auth-failure-reporter-dev/invocations\"},\"AuthorizationType\":\"NONE\",\"ResourceId\":\"vxze7j\",\"HttpMethod\":\"POST\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:45.521000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthRecordFailureOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|vxze7j|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"vxze7j\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"vxze7j\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:45.906000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthRecordFailureResource",
+            "PhysicalResourceId": "vxze7j",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"woebiz\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"record-failure\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"woebiz\",\"PathPart\":\"record-failure\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:46.848000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "AuthResource",
+            "PhysicalResourceId": "woebiz",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"k4s7miqaub\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"auth\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"k4s7miqaub\",\"PathPart\":\"auth\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:47.254000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CallEndHandlerFn",
+            "PhysicalResourceId": "safety-confirmation-call-end-handler-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-call-end-handler-dev\",\"FunctionName\":\"safety-confirmation-call-end-handler-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Finalise one Connect outbound call (Requirements 5.4, 5.5)\",\"Timeout\":10,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-call-end-handler-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-call-end-handler-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Finalise one Connect outbound call (Requirements 5.4, 5.5)\",\"Timeout\":10,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:46.965000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CallEndHandlerFnConnectPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-CallEndHandlerFnConnectPermission-pSXvq5NydQdS",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-call-end-handler-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000\",\"Principal\":\"connect.amazonaws.com\",\"SourceAccount\":\"214046906694\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-call-end-handler-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000\",\"Principal\":\"connect.amazonaws.com\",\"SourceAccount\":\"214046906694\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:47.241000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CallEndHandlerFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-call-end-handler-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-call-end-handler-dev\",\"Policies\":[{\"PolicyName\":\"ResponseTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"SfnSendTaskOutcome\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"states:SendTaskSuccess\",\"states:SendTaskFailure\"],\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-call-end-handler-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"ResponseTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"SfnSendTaskOutcome\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"states:SendTaskSuccess\",\"states:SendTaskFailure\"],\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:48.702000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CallEndHandlerFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-call-end-handler-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-call-end-handler-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-call-end-handler-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:49.094000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CognitoAuthorizer",
+            "PhysicalResourceId": "qlfcu5",
+            "ResourceType": "AWS::ApiGateway::Authorizer",
+            "ExpectedProperties": "{\"ProviderARNs\":[\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\"],\"RestApiId\":\"bev0uk24s0\",\"IdentitySource\":\"method.request.header.Authorization\",\"Type\":\"COGNITO_USER_POOLS\",\"Name\":\"CognitoUserPoolAuthorizer-dev\"}",
+            "ActualProperties": "{\"ProviderARNs\":[\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\"],\"RestApiId\":\"bev0uk24s0\",\"IdentitySource\":\"method.request.header.Authorization\",\"Type\":\"COGNITO_USER_POOLS\",\"Name\":\"CognitoUserPoolAuthorizer-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:47.690000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CognitoUserPoolClient",
+            "PhysicalResourceId": "7h8mt6jrieu5grm9s8uqdn94en",
+            "ResourceType": "AWS::Cognito::UserPoolClient",
+            "ExpectedProperties": "{\"GenerateSecret\":false,\"ClientName\":\"safety-confirmation-spa-dev\",\"UserPoolId\":\"ap-northeast-1_5uYfaQMLJ\",\"IdTokenValidity\":1,\"ExplicitAuthFlows\":[\"ALLOW_USER_SRP_AUTH\",\"ALLOW_REFRESH_TOKEN_AUTH\"],\"AccessTokenValidity\":1,\"TokenValidityUnits\":{\"IdToken\":\"hours\",\"RefreshToken\":\"days\",\"AccessToken\":\"hours\"},\"RefreshTokenValidity\":30,\"PreventUserExistenceErrors\":\"ENABLED\",\"SupportedIdentityProviders\":[\"COGNITO\"],\"EnableTokenRevocation\":true}",
+            "ActualProperties": "{\"GenerateSecret\":false,\"ClientName\":\"safety-confirmation-spa-dev\",\"UserPoolId\":\"ap-northeast-1_5uYfaQMLJ\",\"IdTokenValidity\":1,\"ExplicitAuthFlows\":[\"ALLOW_REFRESH_TOKEN_AUTH\",\"ALLOW_USER_SRP_AUTH\"],\"TokenValidityUnits\":{\"AccessToken\":\"hours\",\"IdToken\":\"hours\",\"RefreshToken\":\"days\"},\"AccessTokenValidity\":1,\"RefreshTokenValidity\":30,\"PreventUserExistenceErrors\":\"ENABLED\",\"SupportedIdentityProviders\":[\"COGNITO\"],\"EnableTokenRevocation\":true}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:49.622000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ConnectDispatcherFn",
+            "PhysicalResourceId": "safety-confirmation-connect-dispatcher-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-connect-dispatcher-dev\",\"FunctionName\":\"safety-confirmation-connect-dispatcher-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Initiate one Connect outbound call (Requirements 5.1, 5.2, 9.6)\",\"Timeout\":60,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"OUTBOUND_PHONE_NUMBER\":\"+810000000000\",\"CONNECT_INSTANCE_ID\":\"00000000-0000-0000-0000-000000000000\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\",\"OUTBOUND_CONTACT_FLOW_ID\":\"00000000-0000-0000-0000-000000000002\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-connect-dispatcher-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-connect-dispatcher-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Initiate one Connect outbound call (Requirements 5.1, 5.2, 9.6)\",\"Timeout\":60,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"OUTBOUND_PHONE_NUMBER\":\"+810000000000\",\"CONNECT_INSTANCE_ID\":\"00000000-0000-0000-0000-000000000000\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\",\"OUTBOUND_CONTACT_FLOW_ID\":\"00000000-0000-0000-0000-000000000002\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:50.318000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ConnectDispatcherFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-connect-dispatcher-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-connect-dispatcher-dev\",\"Policies\":[{\"PolicyName\":\"ConnectStartOutboundVoiceContact\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"connect:StartOutboundVoiceContact\",\"Resource\":\"arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000/phone-number/00000000-0000-0000-0000-000000000000\"}]}},{\"PolicyName\":\"ResponseTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"SfnSendTaskOutcome\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"states:SendTaskSuccess\",\"states:SendTaskFailure\"],\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-connect-dispatcher-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"ConnectStartOutboundVoiceContact\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"connect:StartOutboundVoiceContact\",\"Resource\":\"arn:aws:connect:ap-northeast-1:214046906694:instance/00000000-0000-0000-0000-000000000000/phone-number/00000000-0000-0000-0000-000000000000\"}]}},{\"PolicyName\":\"ResponseTableUpdate\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:UpdateItem\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"SfnSendTaskOutcome\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"states:SendTaskSuccess\",\"states:SendTaskFailure\"],\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:50.820000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "ConnectDispatcherFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-connect-dispatcher-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-connect-dispatcher-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-connect-dispatcher-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:51.181000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleApiApiGwPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-CycleApiApiGwPermission-1gOoax1V4p0V",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-cycle-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-cycle-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:50.656000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleApiExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-cycle-api-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\"],\"RoleName\":\"safety-confirmation-cycle-api-dev\",\"Policies\":[{\"PolicyName\":\"CycleTableCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:Query\",\"dynamodb:Scan\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev/index/*\"]}]}},{\"PolicyName\":\"KeywordDictionaryRead\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:Query\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionary-dev\"}]}},{\"PolicyName\":\"SfnStartExecution\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"states:StartExecution\",\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-cycle-api-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"CycleTableCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:Query\",\"dynamodb:Scan\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev/index/*\"]}]}},{\"PolicyName\":\"KeywordDictionaryRead\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:Query\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionary-dev\"}]}},{\"PolicyName\":\"SfnStartExecution\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"states:StartExecution\",\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:52.189000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleApiFn",
+            "PhysicalResourceId": "safety-confirmation-cycle-api-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-api-dev\",\"FunctionName\":\"safety-confirmation-cycle-api-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"Cycle creation + status retrieval (Requirements 4.1-4.11)\",\"Timeout\":15,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\",\"KEYWORD_DICT_TABLE_NAME\":\"KeywordDictionary-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-api-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-cycle-api-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Cycle creation + status retrieval (Requirements 4.1-4.11)\",\"Timeout\":15,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\",\"KEYWORD_DICT_TABLE_NAME\":\"KeywordDictionary-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:51.791000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleApiFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-cycle-api-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-cycle-api-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-cycle-api-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:52.125000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleFinalizerFn",
+            "PhysicalResourceId": "safety-confirmation-cycle-finalizer-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-finalizer-dev\",\"FunctionName\":\"safety-confirmation-cycle-finalizer-dev\",\"MemorySize\":1024,\"Runtime\":\"python3.12\",\"Description\":\"Finalize a cycle on Map completion or 30/60-minute timer (Requirements 11.4, 14.4-14.6)\",\"Timeout\":30,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"CLOUDWATCH_NAMESPACE\":\"SafetyConfirmation\",\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"OPERATOR_TOPIC_ARN\":\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-finalizer-dev\",\"MemorySize\":1024,\"FunctionName\":\"safety-confirmation-cycle-finalizer-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Finalize a cycle on Map completion or 30/60-minute timer (Requirements 11.4, 14.4-14.6)\",\"Timeout\":30,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"CLOUDWATCH_NAMESPACE\":\"SafetyConfirmation\",\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"OPERATOR_TOPIC_ARN\":\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"SFN_STATE_MACHINE_ARN\":\"arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:52.819000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleFinalizerFnExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-cycle-finalizer-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-cycle-finalizer-dev\",\"Policies\":[{\"PolicyName\":\"CycleAndResponseTableAccess\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:UpdateItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\"},{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:Query\",\"dynamodb:UpdateItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"SfnStopExecution\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"states:StopExecution\",\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:execution:safety-confirmation-cycle-dev:*\"}]}},{\"PolicyName\":\"OperatorTopicPublish\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sns:Publish\",\"Resource\":\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\"}]}},{\"PolicyName\":\"CloudWatchPutMetric\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"cloudwatch:PutMetricData\",\"Resource\":\"*\"}]}},{\"PolicyName\":\"EventRuleDelete\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"events:DeleteRule\",\"events:RemoveTargets\"],\"Resource\":\"arn:aws:events:ap-northeast-1:214046906694:rule/cycle-*\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-cycle-finalizer-dev\",\"Policies\":[{\"PolicyName\":\"CloudWatchPutMetric\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"cloudwatch:PutMetricData\",\"Resource\":\"*\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"CycleAndResponseTableAccess\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:UpdateItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\"},{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:Query\",\"dynamodb:UpdateItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"EventRuleDelete\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"events:DeleteRule\",\"events:RemoveTargets\"],\"Resource\":\"arn:aws:events:ap-northeast-1:214046906694:rule/cycle-*\"}]}},{\"PolicyName\":\"OperatorTopicPublish\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sns:Publish\",\"Resource\":\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\"}]}},{\"PolicyName\":\"SfnStopExecution\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"states:StopExecution\",\"Resource\":\"arn:aws:states:ap-northeast-1:214046906694:execution:safety-confirmation-cycle-dev:*\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:54.738000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleFinalizerFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-cycle-finalizer-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-cycle-finalizer-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-cycle-finalizer-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:52.585000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleStateMachine",
+            "PhysicalResourceId": "arn:aws:states:ap-northeast-1:214046906694:stateMachine:safety-confirmation-cycle-dev",
+            "ResourceType": "AWS::StepFunctions::StateMachine",
+            "ExpectedProperties": "{\"StateMachineName\":\"safety-confirmation-cycle-dev\",\"RoleArn\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-sfn-dev\",\"LoggingConfiguration\":{\"IncludeExecutionData\":true,\"Destinations\":[{\"CloudWatchLogsLogGroup\":{\"LogGroupArn\":\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/states/safety-confirmation-cycle-dev:*\"}}],\"Level\":\"ALL\"},\"StateMachineType\":\"STANDARD\"}",
+            "ActualProperties": "{\"StateMachineName\":\"safety-confirmation-cycle-dev\",\"RoleArn\":\"arn:aws:iam::214046906694:role/safety-confirmation-cycle-sfn-dev\",\"LoggingConfiguration\":{\"Level\":\"ALL\",\"IncludeExecutionData\":true,\"Destinations\":[{\"CloudWatchLogsLogGroup\":{\"LogGroupArn\":\"arn:aws:logs:ap-northeast-1:214046906694:log-group:/aws/states/safety-confirmation-cycle-dev:*\"}}]},\"StateMachineType\":\"STANDARD\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:52.970000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleStateMachineExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-cycle-sfn-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"RoleName\":\"safety-confirmation-cycle-sfn-dev\",\"Policies\":[{\"PolicyName\":\"InvokeCycleLambdas\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"lambda:InvokeFunction\",\"Resource\":[\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-load-targets-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-connect-dispatcher-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-retry-evaluator-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-finalizer-dev\"]}]}},{\"PolicyName\":\"ResponseTableReadWrite\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:GetItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}},{\"PolicyName\":\"CloudWatchLogsForSfn\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogDelivery\",\"logs:GetLogDelivery\",\"logs:UpdateLogDelivery\",\"logs:DeleteLogDelivery\",\"logs:ListLogDeliveries\",\"logs:PutResourcePolicy\",\"logs:DescribeResourcePolicies\",\"logs:DescribeLogGroups\"],\"Resource\":\"*\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"states.ap-northeast-1.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"RoleName\":\"safety-confirmation-cycle-sfn-dev\",\"Policies\":[{\"PolicyName\":\"CloudWatchLogsForSfn\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"logs:CreateLogDelivery\",\"logs:GetLogDelivery\",\"logs:UpdateLogDelivery\",\"logs:DeleteLogDelivery\",\"logs:ListLogDeliveries\",\"logs:PutResourcePolicy\",\"logs:DescribeResourcePolicies\",\"logs:DescribeLogGroups\"],\"Resource\":\"*\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"InvokeCycleLambdas\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"lambda:InvokeFunction\",\"Resource\":[\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-load-targets-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-connect-dispatcher-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-retry-evaluator-dev\",\"arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-finalizer-dev\"]}]}},{\"PolicyName\":\"ResponseTableReadWrite\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:GetItem\"],\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\"}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"states.ap-northeast-1.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:56.335000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleStateMachineLogGroup",
+            "PhysicalResourceId": "/aws/states/safety-confirmation-cycle-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/states/safety-confirmation-cycle-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/states/safety-confirmation-cycle-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:56.721000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleTable",
+            "PhysicalResourceId": "Cycle-dev",
+            "ResourceType": "AWS::DynamoDB::Table",
+            "ExpectedProperties": "{\"TableName\":\"Cycle-dev\",\"SSESpecification\":{\"SSEEnabled\":true,\"SSEType\":\"KMS\",\"KMSMasterKeyId\":\"5ac89beb-86ef-4ed0-b311-bef554612f9f\"},\"AttributeDefinitions\":[{\"AttributeType\":\"S\",\"AttributeName\":\"cycleId\"},{\"AttributeType\":\"S\",\"AttributeName\":\"status\"},{\"AttributeType\":\"S\",\"AttributeName\":\"startedAt\"}],\"BillingMode\":\"PAY_PER_REQUEST\",\"GlobalSecondaryIndexes\":[{\"IndexName\":\"StatusStartedAtIndex\",\"Projection\":{\"ProjectionType\":\"ALL\"},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"status\"},{\"KeyType\":\"RANGE\",\"AttributeName\":\"startedAt\"}]}],\"PointInTimeRecoverySpecification\":{\"PointInTimeRecoveryEnabled\":true},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"cycleId\"}]}",
+            "ActualProperties": "{\"SSESpecification\":{\"KMSMasterKeyId\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"SSEEnabled\":true,\"SSEType\":\"KMS\"},\"TableName\":\"Cycle-dev\",\"AttributeDefinitions\":[{\"AttributeName\":\"cycleId\",\"AttributeType\":\"S\"},{\"AttributeName\":\"startedAt\",\"AttributeType\":\"S\"},{\"AttributeName\":\"status\",\"AttributeType\":\"S\"}],\"BillingMode\":\"PAY_PER_REQUEST\",\"GlobalSecondaryIndexes\":[{\"IndexName\":\"StatusStartedAtIndex\",\"KeySchema\":[{\"AttributeName\":\"status\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"startedAt\",\"KeyType\":\"RANGE\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}],\"PointInTimeRecoverySpecification\":{\"PointInTimeRecoveryEnabled\":true},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"cycleId\"}]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:55.425000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CycleTimeoutAlarm",
+            "PhysicalResourceId": "safety-confirmation-cycle-timeout-dev",
+            "ResourceType": "AWS::CloudWatch::Alarm",
+            "ExpectedProperties": "{\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\"],\"MetricName\":\"CycleTimeout\",\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"AlarmName\":\"safety-confirmation-cycle-timeout-dev\",\"AlarmDescription\":\"Cycle ? 60 ???????????????? (Requirements 14.4 / 14.6)\",\"Statistic\":\"Sum\",\"Period\":300,\"EvaluationPeriods\":1,\"Namespace\":\"SafetyConfirmation\",\"Threshold\":1}",
+            "ActualProperties": "{\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:214046906694:safety-confirmation-operator-dev\"],\"MetricName\":\"CycleTimeout\",\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"AlarmDescription\":\"Cycle ? 60 ???????????????? (Requirements 14.4 / 14.6)\",\"AlarmName\":\"safety-confirmation-cycle-timeout-dev\",\"Statistic\":\"Sum\",\"Period\":300,\"EvaluationPeriods\":1,\"Namespace\":\"SafetyConfirmation\",\"Threshold\":1.0}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:55.841000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ukj91|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"ResourceId\":\"7ukj91\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:57.169000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ojzv3|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"ResourceId\":\"7ojzv3\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:57.548000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ojzv3|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:57.189000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsEmployeeIdResource",
+            "PhysicalResourceId": "aqlgic",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"3yo465\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{employeeId}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"3yo465\",\"PathPart\":\"{employeeId}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:57.511000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsEmployeeIdSeqGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|j2a3au|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-recording-api-dev/invocations\"},\"ResourceId\":\"j2a3au\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-recording-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"j2a3au\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:57.953000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsEmployeeIdSeqOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|j2a3au|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"j2a3au\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"j2a3au\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:58.331000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsEmployeeIdSeqResource",
+            "PhysicalResourceId": "j2a3au",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"aqlgic\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{seq}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"aqlgic\",\"PathPart\":\"{seq}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:57.978000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdRecordingsResource",
+            "PhysicalResourceId": "3yo465",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"recordings\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"7ojzv3\",\"PathPart\":\"recordings\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:58.366000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResource",
+            "PhysicalResourceId": "7ojzv3",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{id}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"7ukj91\",\"PathPart\":\"{id}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:58.742000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesEmployeeIdGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|lt1mu4|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-response-api-dev/invocations\"},\"ResourceId\":\"lt1mu4\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-response-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"lt1mu4\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:59.098000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesEmployeeIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|lt1mu4|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"lt1mu4\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"lt1mu4\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:58.824000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesEmployeeIdResource",
+            "PhysicalResourceId": "lt1mu4",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{employeeId}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"bvrv2f\",\"PathPart\":\"{employeeId}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:59.210000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|bvrv2f|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-response-api-dev/invocations\"},\"ResourceId\":\"bvrv2f\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-response-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:59.491000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|bvrv2f|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"bvrv2f\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:53:59.842000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdResponsesResource",
+            "PhysicalResourceId": "bvrv2f",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"responses\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"7ojzv3\",\"PathPart\":\"responses\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:59.588000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdStatusGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|s2av9s|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"ResourceId\":\"s2av9s\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"s2av9s\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:53:59.960000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdStatusOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|s2av9s|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"s2av9s\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"s2av9s\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:00.244000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdStatusResource",
+            "PhysicalResourceId": "s2av9s",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"status\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"7ojzv3\",\"PathPart\":\"status\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:00.589000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsEmployeeIdResource",
+            "PhysicalResourceId": "5hr9xe",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"93tleh\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{employeeId}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"93tleh\",\"PathPart\":\"{employeeId}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:00.345000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsEmployeeIdSeqGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|w5nqu8|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-recording-api-dev/invocations\"},\"ResourceId\":\"w5nqu8\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-recording-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"w5nqu8\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:00.721000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsEmployeeIdSeqOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|w5nqu8|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"w5nqu8\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"w5nqu8\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:01.016000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsEmployeeIdSeqResource",
+            "PhysicalResourceId": "w5nqu8",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"5hr9xe\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{seq}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"5hr9xe\",\"PathPart\":\"{seq}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:01.378000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesIdTranscriptsResource",
+            "PhysicalResourceId": "93tleh",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"7ojzv3\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"transcripts\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"7ojzv3\",\"PathPart\":\"transcripts\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:01.143000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ukj91|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:01.538000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesPostMethod",
+            "PhysicalResourceId": "bev0uk24s0|7ukj91|POST",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"ResourceId\":\"7ukj91\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"POST\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-cycle-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"7ukj91\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"POST\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:01.839000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "CyclesResource",
+            "PhysicalResourceId": "7ukj91",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"k4s7miqaub\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"cycles\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"k4s7miqaub\",\"PathPart\":\"cycles\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:02.195000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "DictionaryApiApiGwPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-DictionaryApiApiGwPermission-vVHkt2zQ6XCj",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-dictionary-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-dictionary-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:01.930000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "DictionaryApiExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-dictionary-api-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\"],\"RoleName\":\"safety-confirmation-dictionary-api-dev\",\"Policies\":[{\"PolicyName\":\"KeywordDictionaryCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:DeleteItem\",\"dynamodb:Scan\",\"dynamodb:Query\",\"dynamodb:BatchWriteItem\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionary-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionaryHistory-dev\"]}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-dictionary-api-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"KeywordDictionaryCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:DeleteItem\",\"dynamodb:Scan\",\"dynamodb:Query\",\"dynamodb:BatchWriteItem\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionary-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/KeywordDictionaryHistory-dev\"]}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:03.477000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "DictionaryApiFn",
+            "PhysicalResourceId": "safety-confirmation-dictionary-api-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-dictionary-api-dev\",\"FunctionName\":\"safety-confirmation-dictionary-api-dev\",\"MemorySize\":512,\"Runtime\":\"python3.12\",\"Description\":\"KeywordDictionary CRUD with optimistic-lock versioning (Requirements 8.1-8.7)\",\"Timeout\":30,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"KEYWORD_DICT_HISTORY_TABLE_NAME\":\"KeywordDictionaryHistory-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"KEYWORD_DICT_TABLE_NAME\":\"KeywordDictionary-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-dictionary-api-dev\",\"MemorySize\":512,\"FunctionName\":\"safety-confirmation-dictionary-api-dev\",\"Runtime\":\"python3.12\",\"Description\":\"KeywordDictionary CRUD with optimistic-lock versioning (Requirements 8.1-8.7)\",\"Timeout\":30,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"KEYWORD_DICT_HISTORY_TABLE_NAME\":\"KeywordDictionaryHistory-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"KEYWORD_DICT_TABLE_NAME\":\"KeywordDictionary-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:02.796000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "DictionaryApiFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-dictionary-api-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-dictionary-api-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-dictionary-api-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:03.145000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeeApiApiGwPermission",
+            "PhysicalResourceId": "safety-confirmation-dev-EmployeeApiApiGwPermission-wlThsxGYElSl",
+            "ResourceType": "AWS::Lambda::Permission",
+            "ExpectedProperties": "{\"FunctionName\":\"safety-confirmation-employee-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "ActualProperties": "{\"FunctionName\":\"safety-confirmation-employee-api-dev\",\"Action\":\"lambda:InvokeFunction\",\"SourceArn\":\"arn:aws:execute-api:ap-northeast-1:214046906694:bev0uk24s0/*/*\",\"Principal\":\"apigateway.amazonaws.com\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:03.832000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeeApiExecutionRole",
+            "PhysicalResourceId": "safety-confirmation-employee-api-dev",
+            "ResourceType": "AWS::IAM::Role",
+            "ExpectedProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\"],\"RoleName\":\"safety-confirmation-employee-api-dev\",\"Policies\":[{\"PolicyName\":\"EmployeeTableCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:DeleteItem\",\"dynamodb:Query\",\"dynamodb:Scan\",\"dynamodb:TransactWriteItems\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Employee-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Employee-dev/index/*\"]}]}},{\"PolicyName\":\"CycleResponseAnonymizeAccess\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:Scan\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\"},{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:Query\",\"dynamodb:PutItem\",\"dynamodb:DeleteItem\",\"dynamodb:TransactWriteItems\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev/index/*\"]}]}},{\"PolicyName\":\"CognitoAdminUserManagement\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"cognito-idp:AdminCreateUser\",\"cognito-idp:AdminAddUserToGroup\",\"cognito-idp:AdminGetUser\",\"cognito-idp:AdminDeleteUser\"],\"Resource\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\"}]}},{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "ActualProperties": "{\"ManagedPolicyArns\":[\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-audit-log-write\",\"arn:aws:iam::214046906694:policy/dev-safety-confirmation-lambda-base-logs\"],\"RoleName\":\"safety-confirmation-employee-api-dev\",\"Policies\":[{\"PolicyName\":\"CmkEncryptDecryptViaDynamoDB\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"dynamodb.ap-northeast-1.amazonaws.com\"}}}]}},{\"PolicyName\":\"CognitoAdminUserManagement\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"cognito-idp:AdminCreateUser\",\"cognito-idp:AdminAddUserToGroup\",\"cognito-idp:AdminGetUser\",\"cognito-idp:AdminDeleteUser\"],\"Resource\":\"arn:aws:cognito-idp:ap-northeast-1:214046906694:userpool/ap-northeast-1_5uYfaQMLJ\"}]}},{\"PolicyName\":\"CycleResponseAnonymizeAccess\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"dynamodb:Scan\",\"Resource\":\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Cycle-dev\"},{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:Query\",\"dynamodb:PutItem\",\"dynamodb:DeleteItem\",\"dynamodb:TransactWriteItems\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Response-dev/index/*\"]}]}},{\"PolicyName\":\"EmployeeTableCrud\",\"PolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\",\"dynamodb:UpdateItem\",\"dynamodb:DeleteItem\",\"dynamodb:Query\",\"dynamodb:Scan\",\"dynamodb:TransactWriteItems\"],\"Resource\":[\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Employee-dev\",\"arn:aws:dynamodb:ap-northeast-1:214046906694:table/Employee-dev/index/*\"]}]}}],\"AssumeRolePolicyDocument\":{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:05.329000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeeApiFn",
+            "PhysicalResourceId": "safety-confirmation-employee-api-dev",
+            "ResourceType": "AWS::Lambda::Function",
+            "ExpectedProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-employee-api-dev\",\"FunctionName\":\"safety-confirmation-employee-api-dev\",\"MemorySize\":1024,\"Runtime\":\"python3.12\",\"Description\":\"Employee master CRUD + CSV import (Requirements 2, 3)\",\"Timeout\":60,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"EMPLOYEE_ANONYMIZE_SALT\":\"****\",\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"ADMIN_GROUP_NAME\":\"Administrator\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"EMPLOYEE_TABLE_NAME\":\"Employee-dev\",\"COGNITO_USER_POOL_ID\":\"ap-northeast-1_5uYfaQMLJ\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "ActualProperties": "{\"Role\":\"arn:aws:iam::214046906694:role/safety-confirmation-employee-api-dev\",\"MemorySize\":1024,\"FunctionName\":\"safety-confirmation-employee-api-dev\",\"Runtime\":\"python3.12\",\"Description\":\"Employee master CRUD + CSV import (Requirements 2, 3)\",\"Timeout\":60,\"Handler\":\"handler.lambda_handler\",\"Environment\":{\"Variables\":{\"EMPLOYEE_ANONYMIZE_SALT\":\"****\",\"CYCLE_TABLE_NAME\":\"Cycle-dev\",\"AUDIT_LOG_GROUP_NAME\":\"/aws/safety-confirmation/audit-dev\",\"ADMIN_GROUP_NAME\":\"Administrator\",\"RESPONSE_TABLE_NAME\":\"Response-dev\",\"COGNITO_USER_POOL_ID\":\"ap-northeast-1_5uYfaQMLJ\",\"EMPLOYEE_TABLE_NAME\":\"Employee-dev\"}},\"Code\":{},\"Layers\":[\"arn:aws:lambda:ap-northeast-1:214046906694:layer:safety-confirmation-shared-dev:9\"],\"Architectures\":[\"arm64\"]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:04.079000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeeApiFnLogGroup",
+            "PhysicalResourceId": "/aws/lambda/safety-confirmation-employee-api-dev",
+            "ResourceType": "AWS::Logs::LogGroup",
+            "ExpectedProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-employee-api-dev\"}",
+            "ActualProperties": "{\"RetentionInDays\":90,\"LogGroupName\":\"/aws/lambda/safety-confirmation-employee-api-dev\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:04.428000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeeTable",
+            "PhysicalResourceId": "Employee-dev",
+            "ResourceType": "AWS::DynamoDB::Table",
+            "ExpectedProperties": "{\"TableName\":\"Employee-dev\",\"SSESpecification\":{\"SSEEnabled\":true,\"SSEType\":\"KMS\",\"KMSMasterKeyId\":\"5ac89beb-86ef-4ed0-b311-bef554612f9f\"},\"AttributeDefinitions\":[{\"AttributeType\":\"S\",\"AttributeName\":\"employeeId\"},{\"AttributeType\":\"S\",\"AttributeName\":\"phoneNumber\"}],\"BillingMode\":\"PAY_PER_REQUEST\",\"GlobalSecondaryIndexes\":[{\"IndexName\":\"PhoneNumberIndex\",\"Projection\":{\"ProjectionType\":\"ALL\"},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"phoneNumber\"}]}],\"PointInTimeRecoverySpecification\":{\"PointInTimeRecoveryEnabled\":true},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"employeeId\"}]}",
+            "ActualProperties": "{\"SSESpecification\":{\"KMSMasterKeyId\":\"arn:aws:kms:ap-northeast-1:214046906694:key/5ac89beb-86ef-4ed0-b311-bef554612f9f\",\"SSEEnabled\":true,\"SSEType\":\"KMS\"},\"TableName\":\"Employee-dev\",\"AttributeDefinitions\":[{\"AttributeName\":\"employeeId\",\"AttributeType\":\"S\"},{\"AttributeName\":\"phoneNumber\",\"AttributeType\":\"S\"}],\"BillingMode\":\"PAY_PER_REQUEST\",\"GlobalSecondaryIndexes\":[{\"IndexName\":\"PhoneNumberIndex\",\"KeySchema\":[{\"AttributeName\":\"phoneNumber\",\"KeyType\":\"HASH\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}],\"PointInTimeRecoverySpecification\":{\"PointInTimeRecoveryEnabled\":true},\"KeySchema\":[{\"KeyType\":\"HASH\",\"AttributeName\":\"employeeId\"}]}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:06.031000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|55ddeo|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"55ddeo\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"55ddeo\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:06.402000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdAnonymizeOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|glz99e|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"glz99e\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"glz99e\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:05.798000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdAnonymizePostMethod",
+            "PhysicalResourceId": "bev0uk24s0|glz99e|POST",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"glz99e\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"POST\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"glz99e\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"POST\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:06.157000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdAnonymizeResource",
+            "PhysicalResourceId": "glz99e",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"anonymize\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"c7vwml\",\"PathPart\":\"anonymize\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:06.801000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdCognitoUserDeleteMethod",
+            "PhysicalResourceId": "bev0uk24s0|6xzloc|DELETE",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"6xzloc\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"DELETE\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"6xzloc\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"DELETE\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:07.173000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdCognitoUserOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|6xzloc|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"6xzloc\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"6xzloc\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:06.816000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdCognitoUserResource",
+            "PhysicalResourceId": "6xzloc",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"cognito-user\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"c7vwml\",\"PathPart\":\"cognito-user\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:07.185000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdDeleteMethod",
+            "PhysicalResourceId": "bev0uk24s0|c7vwml|DELETE",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"c7vwml\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"DELETE\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"DELETE\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:07.595000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdGetMethod",
+            "PhysicalResourceId": "bev0uk24s0|c7vwml|GET",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"c7vwml\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"GET\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:07.945000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|c7vwml|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:07.604000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdPutMethod",
+            "PhysicalResourceId": "bev0uk24s0|c7vwml|PUT",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"Integration\":{\"Type\":\"AWS_PROXY\",\"IntegrationHttpMethod\":\"POST\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"ResourceId\":\"c7vwml\",\"AuthorizerId\":\"qlfcu5\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"PUT\"}",
+            "ActualProperties": "{\"Integration\":{\"IntegrationHttpMethod\":\"POST\",\"Type\":\"AWS_PROXY\",\"Uri\":\"arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:214046906694:function:safety-confirmation-employee-api-dev/invocations\"},\"AuthorizerId\":\"qlfcu5\",\"ResourceId\":\"c7vwml\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"COGNITO_USER_POOLS\",\"HttpMethod\":\"PUT\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:07.993000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesIdResource",
+            "PhysicalResourceId": "c7vwml",
+            "ResourceType": "AWS::ApiGateway::Resource",
+            "ExpectedProperties": "{\"ParentId\":\"55ddeo\",\"RestApiId\":\"bev0uk24s0\",\"PathPart\":\"{id}\"}",
+            "ActualProperties": "{\"RestApiId\":\"bev0uk24s0\",\"ParentId\":\"55ddeo\",\"PathPart\":\"{id}\"}",
+            "PropertyDifferences": [],
+            "StackResourceDriftStatus": "IN_SYNC",
+            "Timestamp": "2026-06-27T16:54:08.314000+00:00"
+        },
+        {
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:214046906694:stack/safety-confirmation-dev/53176280-701d-11f1-896e-0605d9c92b29",
+            "LogicalResourceId": "EmployeesImportOptionsMethod",
+            "PhysicalResourceId": "bev0uk24s0|r5mzfq|OPTIONS",
+            "ResourceType": "AWS::ApiGateway::Method",
+            "ExpectedProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"Type\":\"MOCK\",\"IntegrationResponses\":[{\"ResponseTemplates\":{\"application/json\":\"\"},\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"}},\"ResourceId\":\"r5mzfq\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "ActualProperties": "{\"MethodResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":true,\"method.response.header.Access-Control-Allow-Headers\":true,\"method.response.header.Access-Control-Allow-Origin\":true},\"StatusCode\":\"200\"}],\"Integration\":{\"IntegrationResponses\":[{\"ResponseParameters\":{\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,PATCH,OPTIONS'\",\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Idempotency-Key'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"},\"StatusCode\":\"200\"}],\"RequestTemplates\":{\"application/json\":\"{\\\"statusCode\\\": 200}\"},\"Type\":\"MOCK\"},\"ResourceId\":\"r5mzfq\",\"RestApiId\":\"bev0uk24s0\",\"AuthorizationType\":\"NONE\",\"HttpMethod\":\"OPTIONS\"}",
+            "PropertyDifferences": [
+                {
+                    "PropertyPath": "/Integration/IntegrationResponses/0/ResponseTemplates",
+                    "ExpectedValue": "{\"application/json\":\"\"}",
+                    "ActualValue": "null",
+                    "DifferenceType": "REMOVE"
+                }
+            ],
+            "StackResourceDriftStatus": "MODIFIED",
+            "Timestamp": "2026-06-27T16:54:08.671000+00:00"
+        }
+    ],
+    "NextToken": "wtBmm8OdLWkrgUueGIPmrr/4+jEJtVinQUvLcbiVxb6+IFzmunmsdaTzBR1e31zX+lV7LrTrPHcGZ/Ak/BAGLBbg1RNdj6UR7oxOzlw3ObdNRqQEJ0y/s4G1OWbHYp4gI9IavI7SShxgU6q8AZvDz7qvWv0EAhYMiGl1eu6Ij4kGS/pw6zMdHTE35mLQor8kHAwkjmJCFpMCGjhnSpDtmBjB6bQMHtiuiB0Mbnm9hsAriP7odYv5tHmhuJPLLDhUUmu/yxSarO8H1Wi0V4dmrhSFPpJQEVceVfSjIumHVUq7c9SLSdipWjg8VPCg6Y1Y/K3xTPgAME4ynJDZbyjfm3cyzZO0UUP588Xdyu8CI9TklvizXFEiFQd24Lt4tKowmXrsTAfBnNQDObqSCGlyRcUQL6hULGWWY8rRGkdDVe29P8500QXp7lfSe5Jwi5+LLn/qUBWM+tr6HqrbvoydllMyZnppPJrp4y4XzIF8xjtmizePdSKsIc9f2rqhs1IPYSXh54jDIJPpMAQvQfP4oV5ZKAaagBqz7pyzydxb4WfgqsW8AoqpGCU/3ozIPI5Bqre/4owOWGDjnn7Q5nUO+/t3rKVX3q/hKGhijHk3zo2DJYhvzB+hwbVtsQB96RadWgkzAyxSksAzr+1PUgejfyFCLIyJ+SQ/8oA+oMxE6u8=|wOB5SSYQPpkdZphO4ahDbA==|1|2f6af37c1767af235463731590075ef0e24ace83ebc9f61eb11e1d764a39613a"
+}
