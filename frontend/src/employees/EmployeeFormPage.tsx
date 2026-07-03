@@ -22,7 +22,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { EmployeeApiError, EmployeeClient } from '../api/employeeClient';
 
-import { MAX_NAME_LENGTH, isValidE164, isValidName } from './validation';
+import { MAX_NAME_LENGTH, isValidDomesticPhone, domesticToE164, e164ToDomestic, isValidName } from './validation';
 
 export interface EmployeeFormPageProps {
   /** テスト DI：未指定なら `new EmployeeClient()`。 */
@@ -57,7 +57,7 @@ export function EmployeeFormPage({ client }: EmployeeFormPageProps = {}): JSX.El
       try {
         const detail = await employeeClient.get(editTarget);
         setName(detail.name);
-        setPhoneNumber(detail.phoneNumber);
+        setPhoneNumber(e164ToDomestic(detail.phoneNumber));
       } catch (err) {
         if (err instanceof EmployeeApiError) {
           setServerError(`取得失敗（HTTP ${err.status.toString()}）: ${err.serverMessage}`);
@@ -77,9 +77,9 @@ export function EmployeeFormPage({ client }: EmployeeFormPageProps = {}): JSX.El
     if (!isValidName(name)) {
       errs.name = `氏名は 1〜${MAX_NAME_LENGTH.toString()} 文字で入力してください。`;
     }
-    if (!isValidE164(phoneNumber)) {
+    if (!isValidDomesticPhone(phoneNumber)) {
       errs.phoneNumber =
-        '電話番号は E.164 形式（先頭 + に続けて 1〜15 桁の数字）で入力してください。';
+        '電話番号は国内形式（例：09012345678 または 0312345678）で入力してください。';
     }
     return errs;
   }, [name, phoneNumber]);
@@ -95,10 +95,11 @@ export function EmployeeFormPage({ client }: EmployeeFormPageProps = {}): JSX.El
       setSubmitting(true);
       void (async () => {
         try {
+          const e164Phone = domesticToE164(phoneNumber);
           if (editTarget !== null) {
-            await employeeClient.update(editTarget, { name, phoneNumber });
+            await employeeClient.update(editTarget, { name, phoneNumber: e164Phone });
           } else {
-            await employeeClient.create({ name, phoneNumber });
+            await employeeClient.create({ name, phoneNumber: e164Phone });
           }
           navigate('/employees', { replace: true });
         } catch (err) {
@@ -165,7 +166,7 @@ export function EmployeeFormPage({ client }: EmployeeFormPageProps = {}): JSX.El
 
         <div style={{ marginBottom: '1rem' }}>
           <label htmlFor="employee-phone" style={{ display: 'block', marginBottom: '0.25rem' }}>
-            電話番号（E.164 形式、例：+819012345678）
+            電話番号（例：09012345678）
           </label>
           <input
             id="employee-phone"
@@ -176,7 +177,7 @@ export function EmployeeFormPage({ client }: EmployeeFormPageProps = {}): JSX.El
             onChange={(e) => {
               setPhoneNumber(e.target.value);
             }}
-            placeholder="+819012345678"
+            placeholder="09012345678"
             style={{ width: '100%', padding: '0.5rem' }}
           />
           {fieldErrors.phoneNumber !== undefined && (

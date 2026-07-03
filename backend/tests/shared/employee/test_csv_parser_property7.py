@@ -62,7 +62,7 @@ from shared.employee.csv_parser import (
     CsvParseResult,
     parse_employee_csv,
 )
-from tests.strategies import e164_phone
+from tests.strategies import domestic_jp_phone
 
 # Hypothesis settings: at least 100 runs per property (task requirement).
 PBT_SETTINGS = settings(
@@ -108,7 +108,7 @@ def valid_csv_rows(
     # Use `unique_by` to guarantee phone uniqueness across the generated list.
     pairs = draw(
         st.lists(
-            st.tuples(valid_name, e164_phone),
+            st.tuples(valid_name, domestic_jp_phone),
             min_size=n,
             max_size=n,
             unique_by=lambda pair: pair[1],
@@ -158,10 +158,10 @@ def csv_with_at_least_one_invalid(draw: st.DrawFn) -> bytes:
     # Inject at least one invalid row.  Choose the failure mode randomly.
     failure_mode = draw(st.sampled_from(["empty_name", "bad_phone", "wrong_columns"]))
     if failure_mode == "empty_name":
-        invalid_pair = ("   ", draw(e164_phone))  # whitespace-only → strip empty
+        invalid_pair = ("   ", draw(domestic_jp_phone))  # whitespace-only → strip empty
     elif failure_mode == "bad_phone":
         invalid_pair = (draw(valid_name), draw(st.text(min_size=1, max_size=20).filter(
-            lambda s: not (s.startswith("+") and s[1:].isdigit() and 1 <= len(s[1:]) <= 15)
+            lambda s: not (s.startswith("0") and s[1:].isdigit() and 9 <= len(s[1:]) <= 10)
         )))
     else:
         # wrong_columns: emit a one-column row.
@@ -337,8 +337,8 @@ def test_property7_non_utf8_rejected(raw: bytes) -> None:
 
 @st.composite
 def csv_with_duplicate_phone(draw: st.DrawFn) -> bytes:
-    """Generate a CSV with the same E.164 phone appearing on >= 2 data rows."""
-    dup_phone = draw(e164_phone)
+    """Generate a CSV with the same domestic JP phone appearing on >= 2 data rows."""
+    dup_phone = draw(domestic_jp_phone)
     name_a = draw(valid_name)
     name_b = draw(valid_name)
     # Optionally add unrelated valid rows before / after.
@@ -376,7 +376,7 @@ def test_property7_row_count_cap_rejected() -> None:
     Note: We use a fixed deterministic generator rather than Hypothesis here
     to keep run time bounded (301 rows × 200 examples would be wasteful).
     """
-    rows = [(f"name{i:04d}", f"+8190{i:09d}") for i in range(MAX_DATA_ROWS + 1)]
+    rows = [(f"name{i:04d}", f"090{i:08d}") for i in range(MAX_DATA_ROWS + 1)]
     raw = _encode_csv(rows)
     result = parse_employee_csv(raw)
     assert result.rows == []
@@ -418,7 +418,7 @@ def test_property7_header_only_rejected() -> None:
 
 def test_unit_one_valid_row_succeeds() -> None:
     """Single valid row → rows == [the row], errors == []."""
-    raw = b"name,phoneNumber\nAlice,+819012345678\n"
+    raw = b"name,phoneNumber\nAlice,09012345678\n"
     result = parse_employee_csv(raw)
     assert result.errors == []
     assert len(result.rows) == 1
@@ -430,8 +430,8 @@ def test_unit_one_valid_plus_one_invalid_returns_zero_rows() -> None:
     """One valid + one invalid → rows == [] (transactionality)."""
     raw = (
         b"name,phoneNumber\n"
-        b"Alice,+819012345678\n"
-        b"Bob,not-an-e164\n"
+        b"Alice,09012345678\n"
+        b"Bob,not-a-phone\n"
     )
     result = parse_employee_csv(raw)
     assert result.rows == []
@@ -443,9 +443,9 @@ def test_unit_same_phone_three_times_yields_two_duplicate_errors() -> None:
     """Same phone on lines 2/3/4 → two duplicate errors (for lines 3 and 4)."""
     raw = (
         b"name,phoneNumber\n"
-        b"Alice,+819012345678\n"
-        b"Bob,+819012345678\n"
-        b"Charlie,+819012345678\n"
+        b"Alice,09012345678\n"
+        b"Bob,09012345678\n"
+        b"Charlie,09012345678\n"
     )
     result = parse_employee_csv(raw)
     assert result.rows == []
@@ -461,7 +461,7 @@ def test_unit_same_phone_three_times_yields_two_duplicate_errors() -> None:
 def test_unit_name_exactly_100_chars_is_valid() -> None:
     """100-char name → valid (inclusive upper bound)."""
     name = "a" * 100
-    raw = f"name,phoneNumber\n{name},+819012345678\n".encode("utf-8")
+    raw = f"name,phoneNumber\n{name},09012345678\n".encode("utf-8")
     result = parse_employee_csv(raw)
     assert result.errors == []
     assert len(result.rows) == 1
@@ -471,7 +471,7 @@ def test_unit_name_exactly_100_chars_is_valid() -> None:
 def test_unit_name_101_chars_is_invalid() -> None:
     """101-char name → invalid (strict upper bound)."""
     name = "a" * 101
-    raw = f"name,phoneNumber\n{name},+819012345678\n".encode("utf-8")
+    raw = f"name,phoneNumber\n{name},09012345678\n".encode("utf-8")
     result = parse_employee_csv(raw)
     assert result.rows == []
     assert len(result.errors) == 1
@@ -482,10 +482,10 @@ def test_unit_blank_lines_between_valid_rows_are_skipped() -> None:
     """Blank lines between valid rows are skipped, not counted as data rows."""
     raw = (
         b"name,phoneNumber\n"
-        b"Alice,+819012345678\n"
+        b"Alice,09012345678\n"
         b"\n"
         b"\n"
-        b"Bob,+819012345679\n"
+        b"Bob,09012345679\n"
         b"\n"
     )
     result = parse_employee_csv(raw)
@@ -497,7 +497,7 @@ def test_unit_blank_lines_between_valid_rows_are_skipped() -> None:
 
 def test_unit_max_data_rows_boundary_exactly_300_succeeds() -> None:
     """Exactly MAX_DATA_ROWS (300) valid rows → all 300 accepted."""
-    rows = [(f"name{i:04d}", f"+8190{i:09d}") for i in range(MAX_DATA_ROWS)]
+    rows = [(f"name{i:04d}", f"090{i:08d}") for i in range(MAX_DATA_ROWS)]
     raw = _encode_csv(rows)
     result = parse_employee_csv(raw)
     assert result.errors == []
@@ -514,7 +514,7 @@ def test_unit_max_bytes_boundary_at_limit_accepts_decoding() -> None:
     # We avoid one huge field (Python csv enforces a 131_072-byte field cap
     # by default) by repeating a short two-column data row.
     header = b"name,phoneNumber\n"
-    row = b"a,+819012345678\n"  # 16 bytes
+    row = b"a,09012345678\n"  # 14 bytes
     body_target = MAX_BYTES - len(header)
     # Repeat the short row to fill exactly body_target bytes.  body_target
     # is divisible by len(row) only by coincidence; pad the tail with `a`s
@@ -526,7 +526,7 @@ def test_unit_max_bytes_boundary_at_limit_accepts_decoding() -> None:
         # Drop one full row, replace with a row whose name is padded so the
         # whole replacement row's length is len(row) + tail.
         full_rows -= 1
-        pad_row = b"a" + b"a" * tail + b",+819012345678\n"
+        pad_row = b"a" + b"a" * tail + b",09012345678\n"
         body = row * full_rows + pad_row
     else:
         body = row * full_rows
@@ -551,8 +551,8 @@ def test_unit_max_bytes_boundary_at_limit_accepts_decoding() -> None:
 @PBT_SETTINGS
 @example(raw=b"")
 @example(raw=b"name,phoneNumber\n")
-@example(raw=b"name,phoneNumber\nAlice,+819012345678\n")
-@example(raw=b"name,phoneNumber\nAlice,not-e164\n")
+@example(raw=b"name,phoneNumber\nAlice,09012345678\n")
+@example(raw=b"name,phoneNumber\nAlice,not-a-phone\n")
 @given(raw=st.binary(min_size=0, max_size=512))
 def test_property7_transactionality_examples_anchored(raw: bytes) -> None:
     """Same invariant as (c) but with explicit anchors for the regression suite."""
