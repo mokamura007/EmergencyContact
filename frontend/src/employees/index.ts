@@ -10,6 +10,9 @@ export { EmployeeFormPage, type EmployeeFormPageProps } from './EmployeeFormPage
 export { EmployeeCsvImportPage, type EmployeeCsvImportPageProps } from './EmployeeCsvImportPage';
 export {
   isValidE164,
+  isValidDomesticPhone,
+  domesticToE164,
+  e164ToDomestic,
   isValidName,
   validateCsvFile,
   encodeBase64,

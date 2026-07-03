@@ -3,6 +3,11 @@
 E.164 spec (Requirement 2.7):
     A leading "+" immediately followed by 1 to 15 decimal digits.
     No country-code semantics; pure syntactic check.
+
+Domestic JP format:
+    A leading "0" immediately followed by 9 to 10 decimal digits
+    (total 10-11 digits). Covers mobile (090/080/070 = 11 digits)
+    and landline (03/06 etc. = 10 digits).
 """
 
 from __future__ import annotations
@@ -10,6 +15,7 @@ from __future__ import annotations
 import re
 
 _E164_RE = re.compile(r"^\+\d{1,15}$")
+_DOMESTIC_JP_RE = re.compile(r"^0\d{9,10}$")
 
 MAX_NAME_LENGTH = 100
 
@@ -19,6 +25,27 @@ def is_valid_e164(phone: object) -> bool:
     if not isinstance(phone, str):
         return False
     return bool(_E164_RE.match(phone))
+
+
+def is_valid_domestic_jp(phone: object) -> bool:
+    """Return True iff `phone` is a valid Japanese domestic phone number.
+
+    Accepts: leading '0' followed by 9-10 digits (total 10-11 digits).
+    """
+    if not isinstance(phone, str):
+        return False
+    return bool(_DOMESTIC_JP_RE.match(phone))
+
+
+def domestic_to_e164(phone: str) -> str:
+    """Convert a Japanese domestic phone number to E.164 format.
+
+    Replaces leading '0' with '+81'.
+    If the input is not in domestic format, returns unchanged.
+    """
+    if _DOMESTIC_JP_RE.match(phone):
+        return "+81" + phone[1:]
+    return phone
 
 
 def is_valid_name(name: object) -> bool:

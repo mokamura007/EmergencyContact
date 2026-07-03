@@ -22,6 +22,8 @@ import { Link } from 'react-router-dom';
 
 import { EmployeeApiError, EmployeeClient, type EmployeeSummary } from '../api/employeeClient';
 
+import { e164ToDomestic } from './validation';
+
 export interface EmployeeListPageProps {
   /** テスト DI：未指定なら `new EmployeeClient()`。 */
   readonly client?: EmployeeClient;
@@ -189,7 +191,7 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
               return (
                 <tr key={emp.employeeId}>
                   <td style={cellStyle}>{emp.name}</td>
-                  <td style={cellStyle}>{emp.phoneNumber}</td>
+                  <td style={cellStyle}>{e164ToDomestic(emp.phoneNumber)}</td>
                   <td style={cellStyle}>{emp.isAdmin ? '○' : ''}</td>
                   <td style={cellStyle}>{isDeleted ? '削除済' : 'アクティブ'}</td>
                   <td style={cellStyle}>
