@@ -201,15 +201,16 @@ describe('CognitoAuthProvider.signIn', () => {
     expect(tokens.idToken).toBe('after-change-id');
     expect(tokens.expiresAtEpochSeconds).toBe(1_900_000_000);
 
-    // SDK 慣例：email_verified はサーバー側計算のため除去して渡す。name は残す。
+    // issue #3 6 巡目：`completeNewPasswordChallenge` の第 2 引数は空 `{}` を渡す。
+    // `userAttributes` を渡すと `sub` 等 immutable 属性を含み Cognito が
+    // `NotAuthorizedException` を返す（実機検証済み）。
     expect(completeNewPasswordChallenge).toHaveBeenCalledOnce();
     const firstCall = completeNewPasswordChallenge.mock.calls[0];
     if (firstCall === undefined) {
       throw new Error('completeNewPasswordChallenge should have been called');
     }
     const passedAttrs = firstCall[1] as Record<string, string>;
-    expect(passedAttrs.email_verified).toBeUndefined();
-    expect(passedAttrs.name).toBe('A');
+    expect(passedAttrs).toEqual({});
   });
 
   it('rejects complete() with AuthenticationFailedError on InvalidPasswordException', async () => {

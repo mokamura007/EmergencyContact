@@ -27,8 +27,11 @@ import { useCallback, useState, type FormEvent, type JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { getAuthProvider } from '../auth';
+import { setPendingChallenge } from '../auth/authChallengeStore';
 import { AuthenticationFailedError } from '../auth/errors';
 import type { AuthSessionProvider } from '../auth/types';
+
+import { translateLoginError } from './loginErrors';
 
 export interface LoginPageProps {
   /** テスト用 DI。本番では `getAuthProvider()` のシングルトンを使う。 */
@@ -70,29 +73,32 @@ export function LoginPage({ authProvider }: LoginPageProps = {}): JSX.Element {
           const result = await provider.signIn(email, password);
           if (result.kind === 'NEW_PASSWORD_REQUIRED') {
             // FORCE_CHANGE_PASSWORD ユーザー：新パスワード設定画面へ遷移。
-            // challenge オブジェクトは history.state に保持し、新ページが
-            // `complete(newPassword)` を呼んで認証を続行する。
-            navigate('/new-password', { state: { challenge: result } });
+            // issue #3 再々修正：history.state に challenge を渡すと
+            // `structuredClone` が `complete` 関数を clone できず
+            // `DataCloneError` を投げるため、モジュールスコープの一時ストア
+            // 経由で受け渡す。NewPasswordPage 側で `consumePendingChallenge`
+            // で取り出す。
+            setPendingChallenge(result);
+            navigate('/new-password');
             return;
           }
           const target = extractFromPath(location.state);
           navigate(target, { replace: true });
         } catch (err) {
-          if (err instanceof AuthenticationFailedError) {
-            // Cognito の代表的なエラーコードのみメッセージを分岐する。
-            // それ以外は汎用メッセージで安全側に倒す（攻撃者に過度の情報を与えない）。
-            if (err.code === 'NotAuthorizedException' || err.code === 'UserNotFoundException') {
-              setErrorMessage('メールアドレスまたはパスワードが正しくありません。');
-            } else if (err.code === 'PasswordResetRequiredException') {
-              setErrorMessage(
-                'パスワードのリセットが必要です。システム管理者にお問い合わせください。',
-              );
-            } else {
-              setErrorMessage('ログインに失敗しました。時間をおいて再度お試しください。');
-            }
-          } else {
-            setErrorMessage('ログインに失敗しました。時間をおいて再度お試しください。');
-          }
+          // 診断容易化（Requirement 2.1、issue #3 再修正）：Cognito から返された
+          // code を console に出す。入力値（email / password）は含めない。
+          // 生 err オブジェクトを別引数で追加し、DevTools でオブジェクト展開して
+          // SDK 内部の `__type` / `statusCode` / `retryable` 等を目視確認可能にする。
+          console.error(
+            'Login failed:',
+            {
+              errorName: err instanceof Error ? err.name : 'unknown',
+              code: err instanceof AuthenticationFailedError ? err.code : undefined,
+              message: err instanceof Error ? err.message : String(err),
+            },
+            err,
+          );
+          setErrorMessage(translateLoginError(err));
         } finally {
           setSubmitting(false);
         }
