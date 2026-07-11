@@ -1,30 +1,29 @@
 /**
- * NewPasswordPage の単体テスト（ε-2、15.2a 実機検証）。
+ * NewPasswordPage の単体テスト（ε-2 + issue #3 再々修正）。
  *
  * 観点：
- *   - location.state.challenge が無い場合は /login へ replace 遷移する。
- *   - 新パスワードと確認パスワードを入力 → 一致 → complete() 呼び出し →
- *     成功 → / へ遷移する。
- *   - 確認パスワード不一致でエラー表示、complete() は呼ばれない。
- *   - InvalidPasswordException ではポリシー説明メッセージを表示する。
- *   - 送信中はボタンが disabled。
+ *   - authChallengeStore に challenge が無い場合は /login へ replace 遷移する。
+ *   - authChallengeStore に challenge がある場合はフォーム描画 → complete() を呼び /
+ *     成功時 / へ遷移。
+ *   - 各種入力バリデーション / エラー表示。
  *
- * Validates: ε-2 NEW_PASSWORD_REQUIRED チャレンジ UI 対応
+ * Validates: ε-2 NEW_PASSWORD_REQUIRED チャレンジ UI 対応 + issue #3 DataCloneError 回避
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { clearPendingChallenge, setPendingChallenge } from '../auth/authChallengeStore';
 import { AuthenticationFailedError } from '../auth/errors';
 import type { NewPasswordRequiredChallenge, TokenSet } from '../auth/types';
 
 import { NewPasswordPage } from './NewPasswordPage';
 
-function renderWithState(state: unknown): void {
+function renderPage(): void {
   render(
-    <MemoryRouter initialEntries={[{ pathname: '/new-password', state }]}>
+    <MemoryRouter initialEntries={['/new-password']}>
       <Routes>
         <Route path="/new-password" element={<NewPasswordPage />} />
         <Route path="/login" element={<div data-testid="login-page">login</div>} />
@@ -40,18 +39,28 @@ const successTokens: TokenSet = {
   expiresAtEpochSeconds: 9_999_999_999,
 };
 
+function makeChallenge(
+  complete: NewPasswordRequiredChallenge['complete'],
+): NewPasswordRequiredChallenge {
+  return { kind: 'NEW_PASSWORD_REQUIRED', complete };
+}
+
 describe('NewPasswordPage', () => {
-  it('challenge state が無いと /login へリダイレクトする', () => {
-    renderWithState(undefined);
+  beforeEach(() => {
+    clearPendingChallenge();
+  });
+  afterEach(() => {
+    clearPendingChallenge();
+  });
+
+  it('authChallengeStore に challenge が無いと /login へリダイレクトする', () => {
+    renderPage();
     expect(screen.getByTestId('login-page')).toBeInTheDocument();
   });
 
-  it('challenge state があるとフォームが描画される', () => {
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete: vi.fn(),
-    };
-    renderWithState({ challenge });
+  it('authChallengeStore に challenge があるとフォームが描画される', () => {
+    setPendingChallenge(makeChallenge(vi.fn()));
+    renderPage();
     expect(screen.getByText('初回パスワード変更')).toBeInTheDocument();
     expect(screen.getByTestId('new-password-input')).toBeInTheDocument();
     expect(screen.getByTestId('confirm-password-input')).toBeInTheDocument();
@@ -60,11 +69,8 @@ describe('NewPasswordPage', () => {
 
   it('新パスワード一致 + complete() 成功で / へ遷移する', async () => {
     const complete = vi.fn().mockResolvedValue(successTokens);
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.type(screen.getByTestId('new-password-input'), 'NewStrongP@ss1');
@@ -77,11 +83,8 @@ describe('NewPasswordPage', () => {
 
   it('確認パスワード不一致ではエラーを表示し complete() を呼ばない', async () => {
     const complete = vi.fn().mockResolvedValue(successTokens);
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.type(screen.getByTestId('new-password-input'), 'NewStrongP@ss1');
@@ -99,11 +102,8 @@ describe('NewPasswordPage', () => {
       .mockRejectedValue(
         new AuthenticationFailedError('Password does not meet policy.', 'InvalidPasswordException'),
       );
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.type(screen.getByTestId('new-password-input'), 'weak');
@@ -116,6 +116,80 @@ describe('NewPasswordPage', () => {
     expect(screen.queryByTestId('admin-home')).not.toBeInTheDocument();
   });
 
+  it('NotAuthorizedException では SRP セッション消費のメッセージ + 再ログイン動線を表示する（issue #3 4 巡目）', async () => {
+    const complete = vi
+      .fn()
+      .mockRejectedValue(
+        new AuthenticationFailedError('Incorrect username or password.', 'NotAuthorizedException'),
+      );
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.type(screen.getByTestId('new-password-input'), 'NewPass2026!');
+    await user.type(screen.getByTestId('confirm-password-input'), 'NewPass2026!');
+    await user.click(screen.getByTestId('new-password-submit'));
+
+    const errorEl = await screen.findByTestId('new-password-error');
+    expect(errorEl).toHaveTextContent('認証セッションが無効化されました');
+    expect(errorEl).toHaveTextContent('同じセッションでは再試行できない');
+    expect(errorEl).toHaveTextContent('再度ログインしてください');
+
+    // 送信ボタンは消え、再ログインボタンが出現する。
+    expect(screen.queryByTestId('new-password-submit')).not.toBeInTheDocument();
+    expect(screen.getByTestId('new-password-relogin')).toBeInTheDocument();
+
+    // 入力欄も無効化されている（再試行できないことを視覚的にも保証）。
+    expect(screen.getByTestId('new-password-input')).toBeDisabled();
+    expect(screen.getByTestId('confirm-password-input')).toBeDisabled();
+  });
+
+  it('セッション無効化後の再ログインボタンで /login に遷移する', async () => {
+    const complete = vi
+      .fn()
+      .mockRejectedValue(
+        new AuthenticationFailedError('Incorrect username or password.', 'NotAuthorizedException'),
+      );
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.type(screen.getByTestId('new-password-input'), 'NewPass2026!');
+    await user.type(screen.getByTestId('confirm-password-input'), 'NewPass2026!');
+    await user.click(screen.getByTestId('new-password-submit'));
+
+    await screen.findByTestId('new-password-relogin');
+    await user.click(screen.getByTestId('new-password-relogin'));
+
+    expect(await screen.findByTestId('login-page')).toBeInTheDocument();
+  });
+
+  it('未知コードでは汎用文言 + コード併記で表示する', async () => {
+    const complete = vi
+      .fn()
+      .mockRejectedValue(new AuthenticationFailedError('boom', 'UnknownInternalError'));
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
+
+    const user = userEvent.setup();
+    await user.type(screen.getByTestId('new-password-input'), 'NewStrongP@ss1');
+    await user.type(screen.getByTestId('confirm-password-input'), 'NewStrongP@ss1');
+    await user.click(screen.getByTestId('new-password-submit'));
+
+    expect(await screen.findByTestId('new-password-error')).toHaveTextContent(
+      'パスワード変更に失敗しました。時間をおいて再度お試しください。（コード: UnknownInternalError）',
+    );
+  });
+
+  it('UI に「一時パスワードとは異なる値を設定してください」の注意書きが表示される', () => {
+    setPendingChallenge(makeChallenge(vi.fn()));
+    renderPage();
+    // 「一時パスワードとは異なる」は複数要素にまたがる（<strong> で切れる）ため getAllByText を利用。
+    expect(screen.getAllByText(/一時パスワードとは/)[0]).toBeInTheDocument();
+    expect(screen.getByText(/8 文字以上/)).toBeInTheDocument();
+    expect(screen.getByText(/1 回のみ有効/)).toBeInTheDocument();
+  });
+
   it('RequiredAttributesUnsupported では管理者問合せメッセージを表示する', async () => {
     const complete = vi
       .fn()
@@ -125,11 +199,8 @@ describe('NewPasswordPage', () => {
           'RequiredAttributesUnsupported',
         ),
       );
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.type(screen.getByTestId('new-password-input'), 'NewStrongP@ss1');
@@ -150,11 +221,8 @@ describe('NewPasswordPage', () => {
           deferred.resolve = resolve;
         }),
     );
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.type(screen.getByTestId('new-password-input'), 'NewStrongP@ss1');
@@ -172,11 +240,8 @@ describe('NewPasswordPage', () => {
 
   it('空入力ではエラーを表示し complete() を呼ばない', async () => {
     const complete = vi.fn().mockResolvedValue(successTokens);
-    const challenge: NewPasswordRequiredChallenge = {
-      kind: 'NEW_PASSWORD_REQUIRED',
-      complete,
-    };
-    renderWithState({ challenge });
+    setPendingChallenge(makeChallenge(complete));
+    renderPage();
 
     const user = userEvent.setup();
     await user.click(screen.getByTestId('new-password-submit'));
