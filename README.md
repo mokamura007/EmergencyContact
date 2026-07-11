@@ -4,7 +4,7 @@
 
 ## ステータス
 
-実装フェーズ進行中。Phase 0.1 / 0.2 / 1.1 / 1.2 / 1.3 / 1.4 完了。Phase 0.3（Connect mock）は課金合意保留中。次は Phase 1.5（KMS CMK）。
+実装フェーズ進行中。Phase 1（IaC）〜 Phase 13（PBT 実装）まで完了。Phase 0.3（Connect mock 実機検証）は課金合意（ADR-0005 / ADR-0009 §3）保留中で findings 整備で代行済。残作業は Phase 14（統合 / スモーク / 性能テスト、実 Connect 通話を伴う）と Phase 15（デプロイ運用、ADR-0009 §3 連動タスク群）。SPA は共有 dev 環境（`safety-confirmation-spa-dev-*` S3 + CloudFront）に配信稼働中。詳細は `.kiro/specs/safety-confirmation-system/tasks.md`。
 
 ## ディレクトリ構成
 
@@ -46,6 +46,44 @@ uv sync
 uv run python --version    # Python 3.12.x
 uv run ruff --version      # ruff 0.6.x 以上
 ```
+
+## 開発フロー
+
+dev 環境は**単一スタック共有**。共有 dev を汚す前にローカルで最大限確認する運用。
+
+### 1. ローカル確認
+
+| 変更対象         | コマンド                                                                     |
+| ---------------- | ---------------------------------------------------------------------------- |
+| backend Lambda   | `cd backend; uv run pytest` (handler 直接呼出 + boto3 stubber + Hypothesis)  |
+| frontend SPA     | `cd frontend; npm run dev` (http://localhost:5173、dev API を叩く)           |
+| CFn テンプレート | `.\.venv\Scripts\cfn-lint.exe ..\infrastructure\template.yaml` (課題 2 参照) |
+
+SAM local / LocalStack 等の統合ローカル起動口は**意図的に未整備**。統合検証は下記の dev デプロイで実施する。
+
+### 2. git push
+
+品質チェック（後述）通過後、`git push origin develop`。
+
+### 3. dev 環境への反映（変更内容に応じて選択）
+
+- **backend / CFn 変更**: `pwsh -File scripts/deploy_dev.ps1`（Lambda Layer build + CFn package + deploy）
+- **frontend 変更**: 以下 3 コマンドを順に実行
+
+  ```powershell
+  cd frontend
+  npm run build
+  aws s3 sync .\dist\ s3://safety-confirmation-spa-dev-214046906694-ap-northeast-1/ --delete --profile AWS-security-check --region ap-northeast-1
+  aws cloudfront create-invalidation --distribution-id EAXOBS3AIJQHH --paths "/*" --profile AWS-security-check
+  ```
+
+- **両方の変更**: 上記を両方実行
+
+### 共有 dev 運用の注意
+
+- 複数人が同時にデプロイすると後勝ちでコード上書き / DynamoDB 状態干渉が起きる。事前調整を推奨
+- CloudFront invalidation を忘れると古いバンドルが配信され続ける。`create-invalidation` の Status が `Completed` になるまで数分待つ
+- backend の pytest は「共有 dev を汚す前の防波堤」として機能する設計。push 前に必ず通す
 
 ## 品質チェック(手動コマンド)
 
