@@ -66,6 +66,11 @@ aws sts get-caller-identity --profile AWS-security-check
 
 ## 2. 管理者ユーザー登録（新規メールアドレス）
 
+> **本章は初回ブートストラップ限定の手順です。** 管理者 1 名以上が既にログイン
+> できる日常運用状態では、SPA「新規社員追加」画面から「管理者権限を付与する」
+> チェックで登録する方が高速です。日常運用の詳細は
+> [`admin-user-management.md`](./admin-user-management.md) §2 を参照してください。
+>
 > 既存ユーザー `tomita@g-wise.co.jp`（Administrator group, CONFIRMED）でログインできる場合は本章を **スキップして §3 へ** 進んで構いません。
 
 ### 2.1 メールアドレスの決定

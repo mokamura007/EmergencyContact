@@ -48,6 +48,19 @@ export interface EmployeeDetail extends EmployeeSummary {
 export interface CreateEmployeePayload {
   readonly name: string;
   readonly phoneNumber: string;
+  /**
+   * 管理者権限を付与するかどうか（Requirement 2.1 改訂）。
+   * 未指定は false 相当（バックエンド側で `bool(body.get("isAdmin", False))`）。
+   * true の場合は `adminEmail` が必須で、バックエンドは
+   * `admin_create_user` を先に呼んで Cognito 管理者ユーザーを作成する。
+   */
+  readonly isAdmin?: boolean;
+  /**
+   * 管理者権限付与時（`isAdmin=true`）の Cognito ログイン用 email。
+   * `isAdmin=false` の場合は送信しなくてよい。
+   * 形式検証は `isValidEmail`（`validation.ts`）で事前に行う。
+   */
+  readonly adminEmail?: string;
 }
 
 /** PUT /employees/{id} のリクエストボディ（部分更新ではなく全項目送信）。 */

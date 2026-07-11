@@ -23,6 +23,15 @@
 const E164_REGEX = /^\+\d{1,15}$/;
 
 /**
+ * RFC 5322 simplified email pattern.
+ *
+ * バックエンド `shared/employee/validate.py._EMAIL_RE` と同一（変更時は
+ * 両側同時更新）。Cognito の email-as-username 機能が upstream で同様の
+ * shape を強制するため、この事前検査は API 呼出前の front-line filter。
+ */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
  * 日本国内形式：先頭 `0` + 9〜10 桁の数字（合計 10〜11 桁）。
  * 携帯（090/080/070 → 11桁）、固定電話（03/06 等 → 10桁）両方をカバー。
  */
@@ -88,6 +97,18 @@ export function isValidName(name: unknown): name is string {
   if (typeof name !== 'string') return false;
   const trimmed = name.trim();
   return trimmed.length > 0 && trimmed.length <= MAX_NAME_LENGTH;
+}
+
+/**
+ * 管理者作成時の email として妥当か判定する純粋関数（Requirement 2.1 改訂）。
+ *
+ * 判定パターン：RFC 5322 simplified（`^[^\s@]+@[^\s@]+\.[^\s@]+$`）。
+ * 空白 / 複数 `@` / ドットなし / 空 local / 空 domain / 空 TLD を拒否する。
+ * バックエンド `shared/employee/validate.py.is_valid_email` と等価であり、
+ * 数値・regex パターンが乖離するとサーバー側 400 でユーザー体験崩れになる。
+ */
+export function isValidEmail(email: unknown): email is string {
+  return typeof email === 'string' && EMAIL_REGEX.test(email);
 }
 
 /**

@@ -152,7 +152,8 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     expect(screen.queryByTestId('admin-email-input')).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/氏名/), '一般');
-    await user.type(screen.getByLabelText(/電話番号/), '+819011112222');
+    // 入力欄は国内形式（domestic-phone-format PR より）。送信時に E.164 へ変換される。
+    await user.type(screen.getByLabelText(/電話番号/), '09011112222');
     await user.click(screen.getByRole('button', { name: '追加する' }));
 
     await waitFor(() => {
@@ -163,6 +164,7 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     // `unknown[][]` を経由してキャストする（issue #3 対応の副次修正、
     // .kiro/specs/fix-initial-login-flow/tasks.md Task 6 前提）。
     const payload = (createMock.mock.calls as unknown[][])[0]?.[0] as Record<string, unknown>;
+    // domesticToE164 で 09011112222 → +819011112222 に変換されて送信される。
     expect(payload).toEqual({ name: '一般', phoneNumber: '+819011112222' });
     expect('isAdmin' in payload).toBe(false);
     expect('adminEmail' in payload).toBe(false);
@@ -185,7 +187,8 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     renderNewMode(client);
 
     await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
-    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    // 入力欄は国内形式（domestic-phone-format PR より）。送信時に E.164 へ変換される。
+    await user.type(screen.getByLabelText(/電話番号/), '09033334444');
     await user.click(screen.getByTestId('admin-checkbox'));
     // adminEmail は入力せずに送信。
     await user.click(screen.getByRole('button', { name: '追加する' }));
@@ -202,7 +205,8 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     renderNewMode(client);
 
     await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
-    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    // 入力欄は国内形式（domestic-phone-format PR より）。送信時に E.164 へ変換される。
+    await user.type(screen.getByLabelText(/電話番号/), '09033334444');
     await user.click(screen.getByTestId('admin-checkbox'));
     await user.type(screen.getByTestId('admin-email-input'), 'not-an-email');
     await user.click(screen.getByRole('button', { name: '追加する' }));
@@ -227,7 +231,8 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     renderNewMode(client);
 
     await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
-    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    // 入力欄は国内形式（domestic-phone-format PR より）。送信時に E.164 へ変換される。
+    await user.type(screen.getByLabelText(/電話番号/), '09033334444');
     await user.click(screen.getByTestId('admin-checkbox'));
     await user.type(screen.getByTestId('admin-email-input'), 'admin.taro@example.com');
     await user.click(screen.getByRole('button', { name: '追加する' }));
@@ -235,6 +240,7 @@ describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 
     await waitFor(() => {
       expect(createMock).toHaveBeenCalledWith({
         name: '管理者太郎',
+        // domesticToE164 で 09033334444 → +819033334444 に変換されて送信される。
         phoneNumber: '+819033334444',
         isAdmin: true,
         adminEmail: 'admin.taro@example.com',
