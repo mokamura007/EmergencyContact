@@ -132,6 +132,143 @@ describe('EmployeeFormPage (新規追加)', () => {
   });
 });
 
+describe('EmployeeFormPage (新規追加 / 管理者権限セクション、Req 2.1 改訂)', () => {
+  it('管理者チェック未 ON なら isAdmin / adminEmail を送信しない（既存挙動維持）', async () => {
+    const user = userEvent.setup();
+    const createMock = vi.fn(
+      (): Promise<EmployeeSummary> =>
+        Promise.resolve({
+          employeeId: 'e1',
+          name: '一般',
+          phoneNumber: '+819011112222',
+          isAdmin: false,
+        }),
+    );
+    const client = makeClient({ create: createMock });
+    renderNewMode(client);
+
+    // 管理者セクションは存在するが、チェック OFF の初期状態。
+    expect(screen.getByTestId('admin-section')).toBeInTheDocument();
+    expect(screen.queryByTestId('admin-email-input')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/氏名/), '一般');
+    await user.type(screen.getByLabelText(/電話番号/), '+819011112222');
+    await user.click(screen.getByRole('button', { name: '追加する' }));
+
+    await waitFor(() => {
+      expect(createMock).toHaveBeenCalledTimes(1);
+    });
+    // isAdmin / adminEmail は payload に含まれない（未指定）。
+    // `mock.calls` の tuple 推論が空タプルになる vitest 型付けを回避するため
+    // `unknown[][]` を経由してキャストする（issue #3 対応の副次修正、
+    // .kiro/specs/fix-initial-login-flow/tasks.md Task 6 前提）。
+    const payload = (createMock.mock.calls as unknown[][])[0]?.[0] as Record<string, unknown>;
+    expect(payload).toEqual({ name: '一般', phoneNumber: '+819011112222' });
+    expect('isAdmin' in payload).toBe(false);
+    expect('adminEmail' in payload).toBe(false);
+  });
+
+  it('管理者チェック ON にすると email 欄が表示される', async () => {
+    const user = userEvent.setup();
+    const client = makeClient({});
+    renderNewMode(client);
+
+    expect(screen.queryByTestId('admin-email-input')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('admin-checkbox'));
+    expect(screen.getByTestId('admin-email-input')).toBeInTheDocument();
+  });
+
+  it('管理者チェック ON + email 空 → create を呼ばずフィールドエラー', async () => {
+    const user = userEvent.setup();
+    const createMock = vi.fn();
+    const client = makeClient({ create: createMock });
+    renderNewMode(client);
+
+    await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
+    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    await user.click(screen.getByTestId('admin-checkbox'));
+    // adminEmail は入力せずに送信。
+    await user.click(screen.getByRole('button', { name: '追加する' }));
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.some((el) => el.textContent?.includes('管理者 email') ?? false)).toBe(true);
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it('管理者チェック ON + email 不正形式 → create を呼ばずフィールドエラー', async () => {
+    const user = userEvent.setup();
+    const createMock = vi.fn();
+    const client = makeClient({ create: createMock });
+    renderNewMode(client);
+
+    await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
+    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    await user.click(screen.getByTestId('admin-checkbox'));
+    await user.type(screen.getByTestId('admin-email-input'), 'not-an-email');
+    await user.click(screen.getByRole('button', { name: '追加する' }));
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.some((el) => el.textContent?.includes('管理者 email') ?? false)).toBe(true);
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it('管理者チェック ON + valid email → isAdmin=true + adminEmail 付きで送信', async () => {
+    const user = userEvent.setup();
+    const createMock = vi.fn(
+      (): Promise<EmployeeSummary> =>
+        Promise.resolve({
+          employeeId: 'a1',
+          name: '管理者太郎',
+          phoneNumber: '+819033334444',
+          isAdmin: true,
+        }),
+    );
+    const client = makeClient({ create: createMock });
+    renderNewMode(client);
+
+    await user.type(screen.getByLabelText(/氏名/), '管理者太郎');
+    await user.type(screen.getByLabelText(/電話番号/), '+819033334444');
+    await user.click(screen.getByTestId('admin-checkbox'));
+    await user.type(screen.getByTestId('admin-email-input'), 'admin.taro@example.com');
+    await user.click(screen.getByRole('button', { name: '追加する' }));
+
+    await waitFor(() => {
+      expect(createMock).toHaveBeenCalledWith({
+        name: '管理者太郎',
+        phoneNumber: '+819033334444',
+        isAdmin: true,
+        adminEmail: 'admin.taro@example.com',
+      });
+    });
+    expect(await screen.findByTestId('list')).toBeInTheDocument();
+  });
+});
+
+describe('EmployeeFormPage (編集モード：管理者権限欄は非表示、Req 2.1 改訂スコープ外)', () => {
+  it('編集モードでは管理者セクションが描画されない', async () => {
+    const getMock = vi.fn(
+      (): Promise<EmployeeDetail> =>
+        Promise.resolve({
+          employeeId: 'u1',
+          name: '既存太郎',
+          phoneNumber: '+8190',
+          isAdmin: true,
+          createdAt: '2026-06-25T00:00:00Z',
+        }),
+    );
+    const client = makeClient({ get: getMock });
+    renderEditMode(client);
+
+    // 読み込み完了を待つ。
+    expect(await screen.findByDisplayValue('既存太郎')).toBeInTheDocument();
+
+    // 管理者セクションは描画されない。
+    expect(screen.queryByTestId('admin-section')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('admin-email-input')).not.toBeInTheDocument();
+  });
+});
+
 describe('EmployeeFormPage (編集モード)', () => {
   it('マウント時に get を呼び、初期値を国内形式で埋めたうえで update する', async () => {
     const user = userEvent.setup();

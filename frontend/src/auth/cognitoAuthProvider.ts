@@ -127,12 +127,29 @@ export class CognitoAuthProvider implements AuthSessionProvider {
           // `completeNewPasswordChallenge` を行う。
           //
           // 注意：amazon-cognito-identity-js の API は
-          // userAttributes に必ず `email_verified` 等のサーバー側計算属性が
-          // 入って返ってくるが、これらはユーザー入力不要のため
-          // `delete` で除去してから completeNewPasswordChallenge に渡す
-          // のが SDK 慣例（未除去だと InvalidParameterException）。
-          // 残った requiredAttributes が非空の場合は本 SPA では未対応
-          // のため、`complete` 呼出時に AuthenticationFailedError を投げる。
+          // issue #3 6 巡目訂正：`newPasswordRequired` コールバックが返す
+          // `userAttributes` を `completeNewPasswordChallenge` に渡すのは
+          // Amplify の "SDK 慣例" として広く紹介されているが、実機 dev 環境
+          // で試したところ、Cognito から `NotAuthorizedException` が返って
+          // ユーザーは `FORCE_CHANGE_PASSWORD` のまま更新されなかった。
+          //
+          // 原因仮説：`userAttributes` には `sub` などの immutable な
+          // サーバー生成属性が含まれる場合があり、これを含む更新試行を
+          // Cognito が拒否している可能性が高い（`email_verified` /
+          // `phone_number_verified` を delete するだけでは不十分）。
+          //
+          // SPA は初回パスワード変更時に追加属性の入力を要求しない仕様
+          // （`requiredAttributes` が非空の場合はエラーで即拒否）なので、
+          // 更新すべき属性は無い。よって `{}` を渡す。
+          //
+          // 参照：`docs/notes/fix-initial-login-flow-verification.md` §14.5,
+          // Issue #3 コメント履歴（6 巡目）。
+          //
+          // なお、`userAttributes` / `requiredAttributes` は将来「追加属性
+          // 入力 UI」が必要になった際に再利用可能なため、コールバック引数
+          // としては受け取り続ける（引数名先頭に `_` を付けて未使用を明示）。
+          const _userAttributes = userAttributes;
+          void _userAttributes;
           const challenge: NewPasswordRequiredChallenge = {
             kind: 'NEW_PASSWORD_REQUIRED',
             complete: (newPassword: string): Promise<TokenSet> => {
@@ -147,22 +164,21 @@ export class CognitoAuthProvider implements AuthSessionProvider {
                   );
                   return;
                 }
-                // userAttributes からサーバー側計算属性を除去
-                // （SDK のドキュメントに従う）。
-                const attrs: Record<string, string> = { ...userAttributes };
-                delete attrs.email_verified;
-                delete attrs.phone_number_verified;
-                cognitoUser.completeNewPasswordChallenge(newPassword, attrs, {
-                  onSuccess: (session) => {
-                    resolveComplete(toTokenSet(session));
+                cognitoUser.completeNewPasswordChallenge(
+                  newPassword,
+                  {},
+                  {
+                    onSuccess: (session) => {
+                      resolveComplete(toTokenSet(session));
+                    },
+                    onFailure: (err: unknown) => {
+                      const code = extractCognitoErrorCode(err);
+                      const message =
+                        err instanceof Error ? err.message : 'New password challenge failed';
+                      rejectComplete(new AuthenticationFailedError(message, code, err));
+                    },
                   },
-                  onFailure: (err: unknown) => {
-                    const code = extractCognitoErrorCode(err);
-                    const message =
-                      err instanceof Error ? err.message : 'New password challenge failed';
-                    rejectComplete(new AuthenticationFailedError(message, code, err));
-                  },
-                });
+                );
               });
             },
           };
