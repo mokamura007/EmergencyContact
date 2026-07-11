@@ -54,7 +54,7 @@
 
 #### Acceptance Criteria
 
-1. WHEN 管理者が新規社員追加画面を開く, THE Admin_Console SHALL 入力項目として「氏名（1〜128 文字、必須）」および「電話番号（E.164 形式、最大 16 文字、必須）」のみを表示し、各項目に対する形式・必須バリデーションを実施する。
+1. WHEN 管理者が新規社員追加画面を開く, THE Admin_Console SHALL 入力項目として「氏名（1〜128 文字、必須）」「電話番号（E.164 形式、最大 16 文字、必須）」および「管理者権限フラグ（任意、既定 false）」を表示し、管理者権限フラグが true の場合は追加で「管理者 email（RFC 5322 simplified 形式、必須、Cognito ログイン用）」を表示し、各項目に対する形式・必須バリデーションを実施する。
 2. WHEN 管理者が社員追加を確定し、全入力項目のバリデーションが成功する, THE System SHALL Employee_Master に当該レコードを書き込み、社員 ID（UUID）を新規採番し、CloudWatch Logs に追加操作の監査ログ（実行管理者識別子・対象社員 ID・操作種別・タイムスタンプを含む）を記録する。
 3. IF 入力された電話番号が Employee_Master に既に登録されている（論理削除済みレコードを含む）, THEN THE System SHALL 重複を示すバリデーションエラーを返却し、Employee_Master に対する変更を行わない。
 4. WHEN 管理者が既存社員の更新を確定し、全入力項目のバリデーションが成功する, THE System SHALL Employee_Master の対象レコードを更新し、CloudWatch Logs に更新操作の監査ログ（実行管理者識別子・対象社員 ID・更新前後の値・タイムスタンプを含む）を記録する。

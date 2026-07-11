@@ -49,7 +49,7 @@ from shared.api.cors import with_cors_headers
 from shared.audit.logger import write_audit_log
 from shared.auth.authorization import ADMINISTRATOR_GROUP, is_authorized
 from shared.employee.csv_parser import parse_employee_csv
-from shared.employee.validate import is_valid_e164, is_valid_name
+from shared.employee.validate import is_valid_e164, is_valid_email, is_valid_name
 from shared.privacy import ANONYMIZED_ID_PREFIX, anonymize_employee_id
 
 if TYPE_CHECKING:
@@ -200,8 +200,11 @@ def _create_employee(body: dict[str, Any], principal: str) -> dict[str, Any]:
         raise ValueError("name is required: non-empty string up to 100 chars")
     if not is_valid_e164(phone):
         raise ValueError("phoneNumber must be E.164 (+ followed by 1-15 digits)")
-    if is_admin and (not isinstance(admin_email, str) or not admin_email):
-        raise ValueError("adminEmail is required when isAdmin=true")
+    if is_admin and not is_valid_email(admin_email):
+        raise ValueError(
+            "adminEmail is required and must be a valid email address "
+            "(RFC 5322 simplified) when isAdmin=true"
+        )
 
     # mypy: validators above guarantee these are str
     assert isinstance(name, str)
@@ -239,6 +242,20 @@ def _create_employee(body: dict[str, Any], principal: str) -> dict[str, Any]:
         item["cognitoSub"] = cognito_sub
     _TABLE.put_item(Item=item)
     _audit("EMPLOYEE_ADD", principal, employee_id, phone)
+    # Admin-registration side effect: emit an independent audit event
+    # symmetric with ``COGNITO_USER_DELETE`` (Task 15.16), so the
+    # Cognito user lifecycle can be queried per event in AuditLogGroup.
+    # ``target`` is the plain employee_id (same convention as
+    # ``COGNITO_USER_DELETE``); ``cognitoSub`` is captured in ``extra``
+    # for traceability without leaking the raw email into audit records.
+    if is_admin and cognito_sub:
+        write_audit_log(
+            event_type="COGNITO_USER_CREATE",
+            principal=principal,
+            target=employee_id,
+            outcome="SUCCESS",
+            extra={"cognitoSub": cognito_sub},
+        )
     return _response(
         201,
         {
