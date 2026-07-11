@@ -62,7 +62,7 @@ describe('EmployeeCsvImportPage', () => {
 
     const file = makeCsvFile(
       'ok.csv',
-      'name,phoneNumber\n山田太郎,+819012345678\n田中花子,+819011112222\n',
+      'name,phoneNumber\n山田太郎,09012345678\n田中花子,09011112222\n',
     );
     await user.upload(screen.getByLabelText('CSV ファイル'), file);
     await user.click(screen.getByRole('button', { name: 'インポート実行' }));
@@ -95,18 +95,18 @@ describe('EmployeeCsvImportPage', () => {
       (): Promise<ImportCsvResult> =>
         Promise.reject(
           new EmployeeApiError(400, 'Validation failed', [
-            { line: 2, reason: 'phoneNumber must be E.164' },
+            { line: 2, reason: 'Phone not in domestic JP format (0 + 9-10 digits): not-domestic' },
           ]),
         ),
     );
     const client = makeClient({ importCsv: importMock });
     renderPage(client);
 
-    const file = makeCsvFile('partial.csv', 'name,phoneNumber\n山田,not-e164\n');
+    const file = makeCsvFile('partial.csv', 'name,phoneNumber\n山田,not-domestic\n');
     await user.upload(screen.getByLabelText('CSV ファイル'), file);
     await user.click(screen.getByRole('button', { name: 'インポート実行' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('HTTP 400');
-    expect(screen.getByText('行 2: phoneNumber must be E.164')).toBeInTheDocument();
+    expect(screen.getByText('行 2: Phone not in domestic JP format (0 + 9-10 digits): not-domestic')).toBeInTheDocument();
   });
 });

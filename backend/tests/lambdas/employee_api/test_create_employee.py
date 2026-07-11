@@ -302,9 +302,12 @@ def test_create_admin_cognito_other_client_error_raises(
             id="empty-name",
         ),
         pytest.param(
-            {"name": "山田", "phoneNumber": "0812345678"},  # missing "+"
+            # 電話番号は E.164 or Domestic JP のどちらでもない場合に 400。
+            # "12345" は 5 桁で Domestic JP (10-11 桁) にも E.164 (+ 必須)
+            # にも該当しない。
+            {"name": "山田", "phoneNumber": "12345"},
             "phoneNumber",
-            id="phone-not-e164",
+            id="phone-not-e164-and-not-domestic",
         ),
         pytest.param(
             {

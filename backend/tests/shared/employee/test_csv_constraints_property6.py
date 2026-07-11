@@ -69,14 +69,12 @@ valid_name = st.text(alphabet=_NAME_ALPHABET, min_size=1, max_size=100).filter(
     lambda s: 0 < len(s.strip()) <= 100
 )
 
-# Phone-shaped strings (E.164-syntactically-valid).  We do not need full
-# E.164 validation here — accept_csv_file is file-level only and does not
-# inspect phone formats.  But we use plausible values so that the (j)
-# consistency check against parse_employee_csv has a chance to succeed for
-# strictly-positive cases.
-e164_like = st.integers(min_value=1, max_value=15).flatmap(
+# Phone-shaped strings (domestic JP format).  We use plausible domestic JP
+# values so that the (j) consistency check against parse_employee_csv has
+# a chance to succeed for strictly-positive cases.
+domestic_jp_like = st.integers(min_value=9, max_value=10).flatmap(
     lambda n: st.text(alphabet="0123456789", min_size=n, max_size=n).map(
-        lambda body: "+" + body
+        lambda body: "0" + body
     )
 )
 
@@ -97,7 +95,7 @@ def valid_csv_payload(draw: st.DrawFn, max_rows: int = 50) -> bytes:
     n = draw(st.integers(min_value=1, max_value=max_rows))
     rows = draw(
         st.lists(
-            st.tuples(valid_name, e164_like),
+            st.tuples(valid_name, domestic_jp_like),
             min_size=n,
             max_size=n,
             unique_by=lambda pair: pair[1],

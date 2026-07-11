@@ -20,7 +20,7 @@ import csv
 import io
 from dataclasses import dataclass
 
-from shared.employee.validate import is_valid_e164, is_valid_name
+from shared.employee.validate import is_valid_e164, is_valid_domestic_jp, is_valid_name, domestic_to_e164
 
 MAX_DATA_ROWS = 300
 MAX_BYTES = 1 * 1024 * 1024  # 1 MiB
@@ -132,21 +132,23 @@ def parse_employee_csv(raw_bytes: bytes) -> CsvParseResult:
                     CsvParseError(line=line_no, reason="Name is empty or exceeds 100 chars")
                 )
                 continue
-            if not is_valid_e164(phone_raw):
+            if not is_valid_domestic_jp(phone_raw):
                 errors.append(
-                    CsvParseError(line=line_no, reason=f"Phone not in E.164 format: {phone_raw}")
+                    CsvParseError(line=line_no, reason=f"Phone not in domestic JP format (0 + 9-10 digits): {phone_raw}")
                 )
                 continue
-            if phone_raw in seen_phones:
+            # Convert domestic format to E.164 for storage
+            phone_e164 = domestic_to_e164(phone_raw)
+            if phone_e164 in seen_phones:
                 errors.append(
                     CsvParseError(
                         line=line_no,
-                        reason=f"Phone duplicates line {seen_phones[phone_raw]}: {phone_raw}",
+                        reason=f"Phone duplicates line {seen_phones[phone_e164]}: {phone_raw}",
                     )
                 )
                 continue
-            seen_phones[phone_raw] = line_no
-            parsed.append(EmployeeRow(name=name_raw, phone_number=phone_raw))
+            seen_phones[phone_e164] = line_no
+            parsed.append(EmployeeRow(name=name_raw, phone_number=phone_e164))
     except csv.Error as exc:
         # Malformed CSV (stray CR / NUL / unterminated quotes / etc.) — keep
         # Property 7 transactionality intact by recording a file-level error

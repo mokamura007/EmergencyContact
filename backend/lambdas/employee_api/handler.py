@@ -49,7 +49,13 @@ from shared.api.cors import with_cors_headers
 from shared.audit.logger import write_audit_log
 from shared.auth.authorization import ADMINISTRATOR_GROUP, is_authorized
 from shared.employee.csv_parser import parse_employee_csv
-from shared.employee.validate import is_valid_e164, is_valid_email, is_valid_name
+from shared.employee.validate import (
+    domestic_to_e164,
+    is_valid_domestic_jp,
+    is_valid_e164,
+    is_valid_email,
+    is_valid_name,
+)
 from shared.privacy import ANONYMIZED_ID_PREFIX, anonymize_employee_id
 
 if TYPE_CHECKING:
@@ -198,8 +204,8 @@ def _create_employee(body: dict[str, Any], principal: str) -> dict[str, Any]:
 
     if not is_valid_name(name):
         raise ValueError("name is required: non-empty string up to 100 chars")
-    if not is_valid_e164(phone):
-        raise ValueError("phoneNumber must be E.164 (+ followed by 1-15 digits)")
+    if not isinstance(phone, str) or (not is_valid_e164(phone) and not is_valid_domestic_jp(phone)):
+        raise ValueError("phoneNumber must be domestic JP format (0 + 9-10 digits) or E.164")
     if is_admin and not is_valid_email(admin_email):
         raise ValueError(
             "adminEmail is required and must be a valid email address "
@@ -209,6 +215,9 @@ def _create_employee(body: dict[str, Any], principal: str) -> dict[str, Any]:
     # mypy: validators above guarantee these are str
     assert isinstance(name, str)
     assert isinstance(phone, str)
+
+    # Normalize to E.164 for storage
+    phone = domestic_to_e164(phone)
 
     if _phone_already_registered(phone):
         return _response(409, {"error": "Phone number already registered"})
@@ -340,10 +349,13 @@ def _update_employee(
     new_phone = body.get("phoneNumber", existing.get("phoneNumber"))
     if not is_valid_name(new_name):
         raise ValueError("name is invalid")
-    if not is_valid_e164(new_phone):
+    if not isinstance(new_phone, str) or (not is_valid_e164(new_phone) and not is_valid_domestic_jp(new_phone)):
         raise ValueError("phoneNumber is invalid")
     assert isinstance(new_name, str)
     assert isinstance(new_phone, str)
+
+    # Normalize to E.164 for storage
+    new_phone = domestic_to_e164(new_phone)
 
     if new_phone != existing.get("phoneNumber") and _phone_already_registered(new_phone):
         return _response(409, {"error": "Phone number already registered"})

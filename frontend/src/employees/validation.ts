@@ -31,6 +31,12 @@ const E164_REGEX = /^\+\d{1,15}$/;
  */
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * 日本国内形式：先頭 `0` + 9〜10 桁の数字（合計 10〜11 桁）。
+ * 携帯（090/080/070 → 11桁）、固定電話（03/06 等 → 10桁）両方をカバー。
+ */
+const DOMESTIC_JP_REGEX = /^0\d{9,10}$/;
+
 /** 氏名の長さ上限（バックエンド `validate.py` MAX_NAME_LENGTH と一致）。 */
 export const MAX_NAME_LENGTH = 100;
 
@@ -49,6 +55,38 @@ export const CSV_REQUIRED_HEADER = 'name,phoneNumber';
  */
 export function isValidE164(phone: unknown): phone is string {
   return typeof phone === 'string' && E164_REGEX.test(phone);
+}
+
+/**
+ * 日本国内形式の電話番号か判定する純粋関数。
+ * 先頭 `0` + 9〜10 桁（合計 10〜11 桁）。
+ * 携帯（090/080/070）及び固定電話（03/06 等）を受け付ける。
+ */
+export function isValidDomesticPhone(phone: unknown): phone is string {
+  return typeof phone === 'string' && DOMESTIC_JP_REGEX.test(phone);
+}
+
+/**
+ * 日本国内形式 → E.164 変換。先頭の `0` を `+81` に置換する。
+ * 入力が国内形式でない場合はそのまま返す。
+ */
+export function domesticToE164(phone: string): string {
+  if (DOMESTIC_JP_REGEX.test(phone)) {
+    return '+81' + phone.slice(1);
+  }
+  return phone;
+}
+
+/**
+ * E.164（日本 `+81` プレフィックス）→ 国内形式変換。
+ * `+81` を除去して先頭に `0` を付与する。
+ * 日本の国番号でない場合はそのまま返す。
+ */
+export function e164ToDomestic(phone: string): string {
+  if (phone.startsWith('+81') && phone.length >= 12 && phone.length <= 13) {
+    return '0' + phone.slice(3);
+  }
+  return phone;
 }
 
 /**

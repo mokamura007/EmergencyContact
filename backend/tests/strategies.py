@@ -21,6 +21,16 @@ e164_phone = st.integers(
     )
 )
 
+#: Strategy generating valid Japanese domestic phone numbers: "0" + 9..10 digits.
+#: Covers mobile (090/080/070 = 11 digits total) and landline (03/06 etc = 10 digits total).
+domestic_jp_phone = st.integers(
+    min_value=9, max_value=10
+).flatmap(
+    lambda n: st.text(alphabet="0123456789", min_size=n, max_size=n).map(
+        lambda body: "0" + body
+    )
+)
+
 #: Strategy generating valid E.164 strings whose body is long enough (>=5)
 #: that mask_phone actually masks (n>=5 means body has >=5 digits, but the
 #: contract masks when len(body) > 4, i.e. body length 5..15).

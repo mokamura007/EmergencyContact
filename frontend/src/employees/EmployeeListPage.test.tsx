@@ -59,7 +59,7 @@ describe('EmployeeListPage', () => {
     renderPage(client);
     expect(await screen.findByText('山田太郎')).toBeInTheDocument();
     expect(screen.getByText('田中花子')).toBeInTheDocument();
-    expect(screen.getByText('+819011112222')).toBeInTheDocument();
+    expect(screen.getByText('09011112222')).toBeInTheDocument();
     expect(listMock).toHaveBeenCalledTimes(1);
   });
 
