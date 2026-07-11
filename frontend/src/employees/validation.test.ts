@@ -18,6 +18,7 @@ import {
   MAX_NAME_LENGTH,
   encodeBase64,
   isValidE164,
+  isValidEmail,
   isValidName,
   validateCsvFile,
 } from './validation';
@@ -67,6 +68,41 @@ describe('isValidName', () => {
 
   it.each([null, undefined, 42, {}, [], true])('文字列以外は拒否: %s', (value) => {
     expect(isValidName(value)).toBe(false);
+  });
+});
+
+describe('isValidEmail', () => {
+  it.each([
+    'a@b.c',
+    'admin@example.com',
+    'user.name@example.co.jp',
+    'a+b@example.com',
+    'a_b@example.com',
+    '1234567890@example.com',
+    'integration-test-admin@example.com',
+  ])('受理: %s', (value) => {
+    expect(isValidEmail(value)).toBe(true);
+  });
+
+  it.each([
+    '', // 空文字
+    'abc', // @ なし
+    'abc@def', // ドメイン内ドットなし
+    '@example.com', // local 空
+    'abc@.com', // domain 空
+    'abc@def.', // TLD 空
+    ' abc@example.com', // 先頭空白
+    'abc@example.com ', // 末尾空白
+    'ab c@example.com', // local 内空白
+    'abc@ex ample.com', // domain 内空白
+    'a@b@example.com', // 複数 @
+    '@', // @ のみ
+  ])('拒否: %s', (value) => {
+    expect(isValidEmail(value)).toBe(false);
+  });
+
+  it.each([null, undefined, 42, {}, [], true])('文字列以外は拒否: %s', (value) => {
+    expect(isValidEmail(value)).toBe(false);
   });
 });
 

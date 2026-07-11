@@ -630,7 +630,12 @@ CFn は SPA バケット（`SpaBucket`）と CloudFront ディストリビュー
 
 > stg / prod も dev と同様、CFn は Cognito ユーザーや辞書初期データを作成しない。**手動投入が必須**。
 
-1. **管理者ユーザー作成**（Cognito）
+1. **管理者ユーザー作成**（Cognito、**初回ブートストラップ限定**）
+
+> **日常運用（管理者 1 名以上が既にログイン可能な状態）は SPA から実施する。**
+> 詳細手順は [`admin-user-management.md`](./admin-user-management.md) §2 を参照。
+> 以下の CLI 手順は、管理者ゼロ状態から 1 人目を作成する初回ブートストラップ
+> 用途に限定される。
 
 ```powershell
 $env:PYTHONUTF8 = "1"

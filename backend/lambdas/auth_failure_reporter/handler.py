@@ -25,7 +25,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import re
 import time
 from typing import Any
 
@@ -34,16 +33,13 @@ from botocore.exceptions import ClientError
 
 from shared.api.cors import with_cors_headers
 from shared.audit.logger import write_audit_log
+from shared.employee.validate import is_valid_email
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 LOCKOUT_TABLE_NAME = os.environ["LOCKOUT_TABLE_NAME"]
 LOCKOUT_WINDOW_SECONDS = int(os.environ.get("LOCKOUT_WINDOW_SECONDS", "1800"))
-
-# RFC 5322 simplified email pattern. Cognito's email-as-username feature
-# enforces a similar shape upstream.
-_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 _DDB = boto3.resource("dynamodb")
 _TABLE = _DDB.Table(LOCKOUT_TABLE_NAME)
@@ -92,7 +88,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
         return _response(400, {"error": str(exc)})
 
     user_identifier = body.get("userIdentifier")
-    if not isinstance(user_identifier, str) or not _EMAIL_RE.match(user_identifier):
+    if not is_valid_email(user_identifier):
         # Intentionally bland message — do not signal "user not found" vs
         # "format invalid" to a public endpoint.
         return _response(202, {"recorded": False})

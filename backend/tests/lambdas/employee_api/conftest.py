@@ -31,6 +31,9 @@ os.environ.setdefault("CYCLE_TABLE_NAME", "Cycle-test")
 os.environ.setdefault(
     "INBOUND_CONTACT_TABLE_NAME", "InboundContact-test"
 )
+# Required by inbound_handler when Property 20 tests import it to
+# exercise the phone-lookup round trip (test_delete_employee_property20).
+os.environ.setdefault("INBOUND_RECEPTION_WINDOW_DAYS", "90")
 # Phase 12.3: write_audit_log reads AUDIT_LOG_GROUP_NAME at call time.
 os.environ.setdefault(
     "AUDIT_LOG_GROUP_NAME", "/aws/safety-confirmation/audit-test"

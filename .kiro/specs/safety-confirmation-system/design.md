@@ -623,18 +623,20 @@ POST `/keyword-dictionary` 主要フィールド：
 
 属性：
 
-| 属性             | 型   | 説明                                                                             |
-| ---------------- | ---- | -------------------------------------------------------------------------------- |
-| `employeeId`     | S    | UUID v4                                                                          |
-| `name`           | S    | 氏名 1〜128 文字（UI 入力対象）                                                  |
-| `phoneNumber`    | S    | E.164 形式（UI 入力対象、暗号化対象、論理削除時は NULL 化）                      |
-| `employeeNumber` | S    | 任意、内部運用                                                                   |
-| `department`     | S    | 任意、内部運用                                                                   |
-| `cognitoSub`     | S    | 管理者ロール時のみ                                                               |
-| `role`           | S    | `Administrator` / `Employee`（社員側はログイン不要だがレコード上のロール表示用） |
-| `deleted`        | BOOL | 論理削除フラグ                                                                   |
-| `createdAt`      | S    | ISO 8601                                                                         |
-| `updatedAt`      | S    | ISO 8601                                                                         |
+| 属性             | 型   | 説明                                                                                                                                   |
+| ---------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `employeeId`     | S    | UUID v4                                                                                                                                |
+| `name`           | S    | 氏名 1〜128 文字（UI 入力対象）                                                                                                        |
+| `phoneNumber`    | S    | E.164 形式（UI 入力対象、暗号化対象、論理削除時は NULL 化）                                                                            |
+| `employeeNumber` | S    | 任意、内部運用                                                                                                                         |
+| `department`     | S    | 任意、内部運用                                                                                                                         |
+| `cognitoSub`     | S    | 管理者ロール時のみ、Cognito `admin_create_user` 成功時に採番される Cognito `sub` の値を格納（UI 入力ではなくバックエンド側で自動採番） |
+| `role`           | S    | `admin` / `employee`（新規追加時の UI「管理者権限フラグ」から導出。社員側はログイン不要だがレコード上のロール表示用）                  |
+| `deleted`        | BOOL | 論理削除フラグ                                                                                                                         |
+| `createdAt`      | S    | ISO 8601                                                                                                                               |
+| `updatedAt`      | S    | ISO 8601                                                                                                                               |
+
+新規追加時 UI 入力（Requirement 2.1 改訂）は「管理者権限フラグ（任意、既定 false）」と、フラグが true の場合の「管理者 email（Cognito ログイン ID、DynamoDB には保存せず Cognito 側の `email` 属性としてのみ保存）」を含む。管理者 email は Employee_Master の属性としては保存されず、Cognito 側でのみ保持する（Cognito sub との紐付けは `cognitoSub` 属性経由）。
 
 ### D2: Cycle（安否確認サイクル）
 

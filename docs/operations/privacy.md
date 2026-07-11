@@ -147,6 +147,13 @@ Cognito User Pool 内部のユーザー属性および認証情報は AWS マネ
 
 ### 6.1 退職者の通常削除フロー
 
+> 対称的な **新規管理者登録** の日常運用手順は
+> [`admin-user-management.md`](./admin-user-management.md) §2 を参照。
+> 退職時 Cognito 削除（本節 step 6）と、新規登録時 Cognito 作成（
+> [`admin-user-management.md`](./admin-user-management.md) §2.2）は、
+> それぞれ独立した監査イベント `COGNITO_USER_DELETE` / `COGNITO_USER_CREATE`
+> を AuditLogGroup に出力する（対称）。
+
 1. 管理者が SPA「社員管理」画面で対象社員を選択し「削除」を押下
 2. SPA は `DELETE /employees/{id}` を呼出
 3. EmployeeApi Lambda が以下を実行：
@@ -255,13 +262,13 @@ Cognito User Pool 内部のユーザー属性および認証情報は AWS マネ
 
 JSON 1 行 = 1 イベントで以下の必須 5 フィールドを保持：
 
-| フィールド  | 内容                                                                                                                                                                                                  |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `event`     | イベント種別（例：`EMPLOYEE_ADD` / `EMPLOYEE_DELETE` / `EMPLOYEE_ANONYMIZE` / `COGNITO_USER_DELETE` / `DICTIONARY_UPDATE` / `AUTH_SUCCESS` / `AUTH_FAILURE` / `CYCLE_START` / `INBOUND_RECEIVED` 等） |
-| `timestamp` | UTC ISO 8601 形式（末尾 `Z`、ミリ秒精度）                                                                                                                                                             |
-| `principal` | 実行者（Cognito sub。未認証は `<anonymous>`、Amazon Connect Contact Flow 呼出は `<connect-service>`）                                                                                                 |
-| `target`    | 対象識別子（社員 ID / `category#keyword` / Cycle ID / Contact ID 等）                                                                                                                                 |
-| `outcome`   | 結果（`SUCCESS` / `REJECTED` / `RECORDED` / `FAILED` 等の短い識別子）                                                                                                                                 |
+| フィールド  | 内容                                                                                                                                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `event`     | イベント種別（例：`EMPLOYEE_ADD` / `EMPLOYEE_DELETE` / `EMPLOYEE_ANONYMIZE` / `COGNITO_USER_CREATE` / `COGNITO_USER_DELETE` / `DICTIONARY_UPDATE` / `AUTH_SUCCESS` / `AUTH_FAILURE` / `CYCLE_START` / `INBOUND_RECEIVED` 等） |
+| `timestamp` | UTC ISO 8601 形式（末尾 `Z`、ミリ秒精度）                                                                                                                                                                                     |
+| `principal` | 実行者（Cognito sub。未認証は `<anonymous>`、Amazon Connect Contact Flow 呼出は `<connect-service>`）                                                                                                                         |
+| `target`    | 対象識別子（社員 ID / `category#keyword` / Cycle ID / Contact ID 等）                                                                                                                                                         |
+| `outcome`   | 結果（`SUCCESS` / `REJECTED` / `RECORDED` / `FAILED` 等の短い識別子）                                                                                                                                                         |
 
 条件付きフィールド：
 

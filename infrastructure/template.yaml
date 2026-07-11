@@ -1033,8 +1033,42 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub "safety-confirmation-${EnvironmentName}"
+      # InviteMessageTemplate: Japanese admin invitation mail body.
+      # Consumed by ``cognito-idp.admin_create_user`` when the SPA
+      # registers a new admin via POST /employees (Req 2.1 revised).
+      # ``{####}`` (mandatory) is replaced by Cognito with the
+      # temporary password; ``{username}`` is replaced with the
+      # Cognito username (= email). The login URL is injected per
+      # environment: custom domain when HasCustomDomain, otherwise
+      # the CloudFront distribution domain (*.cloudfront.net).
+      # NOTE (Phase 15.22): CFn drift detection does NOT compare
+      # AdminCreateUserConfig fields. Post-deploy verification is
+      # via ``infrastructure/scripts/verify-cognito.ps1``.
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailSubject: "【安否確認システム】管理者アカウントを発行しました"
+          EmailMessage: !Sub
+            - |-
+              このメールは安否確認システムの管理者アカウント発行のお知らせです。<br>
+              <br>
+              下記の情報でシステムにログインしてください。<br>
+              <br>
+              ログイン URL: ${LoginUrl}<br>
+              ユーザー名: {username}<br>
+              一時パスワード: {####}<br>
+              <br>
+              初回ログイン時にパスワード変更を求められます。<br>
+              新しいパスワードは 12 文字以上、大文字・小文字・数字・記号を全て含む必要があります。<br>
+              <br>
+              心当たりがない場合は、このメールを破棄してください。<br>
+              <br>
+              ------<br>
+              本メールは自動送信です。返信されても対応できません。
+            - LoginUrl: !If
+                - HasCustomDomain
+                - !Sub "https://${DomainName}/"
+                - !Sub "https://${SpaDistribution.DomainName}/"
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
