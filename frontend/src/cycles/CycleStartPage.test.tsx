@@ -63,7 +63,7 @@ describe('CycleStartPage', () => {
         <CycleStartPage client={client} idempotencyKeyFactory={idempotencyKeyFactory} />
       </MemoryRouter>,
     );
-    await user.click(screen.getByRole('button', { name: 'サイクルを起動する' }));
+    await user.click(screen.getByRole('button', { name: '安否確認を起動する' }));
 
     await waitFor(() => {
       expect(createMock).toHaveBeenCalledWith(
@@ -75,7 +75,7 @@ describe('CycleStartPage', () => {
     // 結果表示。
     expect(await screen.findByTestId('cycle-result-cycle-id')).toHaveTextContent('cyc-success');
     expect(screen.getByTestId('cycle-result-dictionary-version')).toHaveTextContent('12');
-    expect(screen.getByTestId('cycle-result-status')).toHaveTextContent('RUNNING');
+    expect(screen.getByTestId('cycle-result-status')).toHaveTextContent('実行中');
   });
 
   it('チェック OFF で起動すると mode=UNREACHABLE_ONLY で create が呼ばれる', async () => {
@@ -98,7 +98,7 @@ describe('CycleStartPage', () => {
       </MemoryRouter>,
     );
     await user.click(screen.getByRole('checkbox', { name: '全員' })); // ON → OFF
-    await user.click(screen.getByRole('button', { name: 'サイクルを起動する' }));
+    await user.click(screen.getByRole('button', { name: '安否確認を起動する' }));
 
     await waitFor(() => {
       expect(createMock).toHaveBeenCalledWith(
@@ -143,11 +143,11 @@ describe('CycleStartPage', () => {
         <CycleStartPage client={client} idempotencyKeyFactory={() => 'idem-replay'} />
       </MemoryRouter>,
     );
-    await user.click(screen.getByRole('button', { name: 'サイクルを起動する' }));
+    await user.click(screen.getByRole('button', { name: '安否確認を起動する' }));
 
     expect(
       await screen.findByRole('heading', {
-        name: '同じ Idempotency-Key で既存サイクルが返されました',
+        name: '同じ Idempotency-Key で既存の安否確認が返されました',
       }),
     ).toBeInTheDocument();
     expect(screen.getByTestId('cycle-result-cycle-id')).toHaveTextContent('cyc-replay');
@@ -166,7 +166,7 @@ describe('CycleStartPage', () => {
         <CycleStartPage client={client} idempotencyKeyFactory={() => 'idem-dup'} />
       </MemoryRouter>,
     );
-    await user.click(screen.getByRole('button', { name: 'サイクルを起動する' }));
+    await user.click(screen.getByRole('button', { name: '安否確認を起動する' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Another cycle is already RUNNING');
     expect(screen.queryByTestId('cycle-result-cycle-id')).toBeNull();
@@ -190,7 +190,7 @@ describe('CycleStartPage', () => {
         <CycleStartPage client={client} idempotencyKeyFactory={() => 'idem-empty'} />
       </MemoryRouter>,
     );
-    await user.click(screen.getByRole('button', { name: 'サイクルを起動する' }));
+    await user.click(screen.getByRole('button', { name: '安否確認を起動する' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Active dictionary is empty');
   });

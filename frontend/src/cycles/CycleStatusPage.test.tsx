@@ -221,7 +221,7 @@ describe('CycleStatusPage', () => {
 
     // 何もしなくても警告は同期的に出る。
     expect(getStatus).not.toHaveBeenCalled();
-    expect(screen.getByRole('alert')).toHaveTextContent('Cycle ID が指定されていません');
+    expect(screen.getByRole('alert')).toHaveTextContent('確認IDが指定されていません');
 
     // 念のため少し待っても呼ばれない。
     await sleep(SHORT_INTERVAL_MS + 20);

@@ -43,6 +43,7 @@ import {
 } from '../api/inboundClient';
 import { RecordingApiError, RecordingClient, type PresignedArtifact } from '../api/recordingClient';
 import { isRetentionExpired } from '../cycles/cycleExpiry';
+import { formatVoiceStatus } from '../cycles/labels';
 
 export interface InboundListPageProps {
   /** テスト DI：未指定なら `new InboundClient()`。 */
@@ -173,7 +174,7 @@ export function InboundListPage(props: InboundListPageProps = {}): JSX.Element {
           marginBottom: '1rem',
         }}
       >
-        <h1>インバウンド着信履歴</h1>
+        <h1>着信履歴</h1>
       </header>
 
       {errorMessage !== null && (
@@ -190,17 +191,18 @@ export function InboundListPage(props: InboundListPageProps = {}): JSX.Element {
         <p data-testid="inbound-empty">着信履歴はまだありません。</p>
       ) : (
         <>
-          <table style={tableStyle} data-testid="inbound-table">
+          <figure>
+          <table data-testid="inbound-table">
             <thead>
               <tr>
-                <th style={cellStyle}>受信時刻</th>
-                <th style={cellStyle}>発信者番号</th>
-                <th style={cellStyle}>Cycle ID</th>
-                <th style={cellStyle}>社員名</th>
-                <th style={cellStyle}>Flow</th>
-                <th style={cellStyle}>Voice_Status</th>
-                <th style={cellStyle}>Transcript 抜粋</th>
-                <th style={cellStyle}>操作</th>
+                <th>受信時刻</th>
+                <th>発信者番号</th>
+                <th>確認ID</th>
+                <th>社員名</th>
+                <th>Flow</th>
+                <th>状況</th>
+                <th>通話内容 抜粋</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -217,10 +219,8 @@ export function InboundListPage(props: InboundListPageProps = {}): JSX.Element {
               ))}
             </tbody>
           </table>
-          <nav
-            aria-label="ページ送り"
-            style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}
-          >
+          </figure>
+          <nav aria-label="ページ送り" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
             <button
               type="button"
               onClick={goPrevPage}
@@ -266,27 +266,27 @@ function InboundRow({
 
   return (
     <tr data-testid={`inbound-row-${row.contactId}`}>
-      <td style={cellStyle}>{row.receivedAt}</td>
-      <td style={cellStyle} data-testid={`inbound-caller-${row.contactId}`}>
+      <td>{row.receivedAt}</td>
+      <td data-testid={`inbound-caller-${row.contactId}`}>
         {row.callerNumberMasked}
       </td>
-      <td style={cellStyle}>{row.cycleId ?? '-'}</td>
-      <td style={cellStyle}>{row.employeeName ?? '-'}</td>
-      <td style={cellStyle} data-testid={`inbound-flow-${row.contactId}`}>
+      <td>{row.cycleId ?? '-'}</td>
+      <td>{row.employeeName ?? '-'}</td>
+      <td data-testid={`inbound-flow-${row.contactId}`}>
         {flowLabel(row.flow)}
       </td>
-      <td style={cellStyle}>{row.voiceStatus ?? '-'}</td>
-      <td style={cellStyle} data-testid={`inbound-excerpt-${row.contactId}`}>
+      <td>{formatVoiceStatus(row.voiceStatus)}</td>
+      <td data-testid={`inbound-excerpt-${row.contactId}`}>
         {row.transcriptExcerpt ?? '-'}
       </td>
-      <td style={cellStyle}>
+      <td>
         {disabled ? (
           <div data-testid={`inbound-disabled-${row.contactId}`}>
             <button type="button" disabled data-testid={`inbound-play-button-${row.contactId}`}>
               録音再生
             </button>{' '}
             <span aria-disabled="true" data-testid={`inbound-transcript-disabled-${row.contactId}`}>
-              Transcript 全文
+              通話内容 全文
             </span>
             {disabledReason !== null && (
               <div data-testid={`inbound-disabled-reason-${row.contactId}`}>{disabledReason}</div>
@@ -306,7 +306,7 @@ function InboundRow({
               to={`/inbound/${encodeURIComponent(row.contactId)}/transcript`}
               data-testid={`inbound-transcript-link-${row.contactId}`}
             >
-              Transcript 全文
+              通話内容 全文
             </Link>
           </div>
         ) : (
@@ -323,7 +323,7 @@ function InboundRow({
               to={`/inbound/${encodeURIComponent(row.contactId)}/transcript`}
               data-testid={`inbound-transcript-link-${row.contactId}`}
             >
-              Transcript 全文
+              通話内容 全文
             </Link>
             {state?.recordingError !== undefined && (
               <p
@@ -357,15 +357,3 @@ function flowLabel(flow: InboundFlow): string {
       return '直近サイクル終端（CYCLE_TERMINATED）';
   }
 }
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-};
-
-const cellStyle: React.CSSProperties = {
-  border: '1px solid #d1d5db',
-  padding: '0.5rem',
-  textAlign: 'left',
-  verticalAlign: 'top',
-};

@@ -92,8 +92,8 @@ export function CycleStatusPage(props: CycleStatusPageProps = {}): JSX.Element {
   if (cycleId === '') {
     return (
       <section>
-        <h1>サイクルステータス</h1>
-        <p role="alert">Cycle ID が指定されていません。</p>
+        <h1>安否確認 ステータス</h1>
+        <p role="alert">確認IDが指定されていません。</p>
       </section>
     );
   }
@@ -103,9 +103,9 @@ export function CycleStatusPage(props: CycleStatusPageProps = {}): JSX.Element {
 
   return (
     <section>
-      <h1>サイクルステータス</h1>
+      <h1>安否確認 ステータス</h1>
       <p>
-        Cycle ID: <span data-testid="cycle-status-id">{cycleId}</span>
+        確認ID: <span data-testid="cycle-status-id">{cycleId}</span>
       </p>
 
       {state.errorFlag && (

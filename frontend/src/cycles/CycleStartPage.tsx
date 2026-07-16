@@ -26,6 +26,8 @@ import { Link } from 'react-router-dom';
 
 import { CycleApiError, CycleClient, type CreateCycleResult } from '../api/cycleClient';
 
+import { formatCycleStatus } from './labels';
+
 /** バックエンド `cycle_api/handler.py` の既定値と一致させる。 */
 export const DEFAULT_RETRY_COUNT = 3;
 export const DEFAULT_RETRY_INTERVAL_MINUTES = 5;
@@ -91,7 +93,7 @@ export function CycleStartPage({
 
   return (
     <section>
-      <h1>サイクル起動</h1>
+      <h1>安否確認 起動</h1>
 
       <form onSubmit={onSubmit} noValidate style={{ maxWidth: '560px' }}>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
@@ -112,9 +114,9 @@ export function CycleStartPage({
               <span>全員</span>
             </label>
             <p style={{ margin: '0.5rem 0 0', color: '#374151', fontSize: '0.85em' }}>
-              ON：全社員に発信（mode=ALL）
+              ON：全社員に発信
               <br />
-              OFF：直近サイクルの未到達者のみに発信（mode=UNREACHABLE_ONLY）
+              OFF：直近の未到達者のみに発信
             </p>
           </div>
 
@@ -123,13 +125,13 @@ export function CycleStartPage({
             <h2 style={{ fontSize: '1rem', margin: '0 0 0.5rem' }}>リトライ設定（表示のみ）</h2>
             <dl style={{ margin: 0 }}>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <dt style={{ minWidth: '12rem' }}>Retry_Count</dt>
+                <dt style={{ minWidth: '12rem' }}>リトライ回数</dt>
                 <dd data-testid="cycle-retry-count" style={{ margin: 0, fontFamily: 'monospace' }}>
                   {DEFAULT_RETRY_COUNT.toString()}
                 </dd>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                <dt style={{ minWidth: '12rem' }}>Retry_Interval（分）</dt>
+                <dt style={{ minWidth: '12rem' }}>リトライ間隔（分）</dt>
                 <dd
                   data-testid="cycle-retry-interval"
                   style={{ margin: 0, fontFamily: 'monospace' }}
@@ -143,7 +145,7 @@ export function CycleStartPage({
 
         <div style={{ marginTop: '1.5rem' }}>
           <button type="submit" disabled={submitting} style={{ padding: '0.5rem 1rem' }}>
-            {submitting ? '起動中…' : 'サイクルを起動する'}
+            {submitting ? '起動中…' : '安否確認を起動する'}
           </button>
         </div>
       </form>
@@ -167,8 +169,8 @@ export function CycleStartPage({
         >
           <h2 id="cycle-start-result-title" style={{ marginTop: 0 }}>
             {result.idempotentReplay === true
-              ? '同じ Idempotency-Key で既存サイクルが返されました'
-              : 'サイクルを起動しました'}
+              ? '同じ Idempotency-Key で既存の安否確認が返されました'
+              : '安否確認を起動しました'}
           </h2>
           <dl style={{ margin: 0 }}>
             <div style={resultRow}>
@@ -186,7 +188,7 @@ export function CycleStartPage({
             <div style={resultRow}>
               <dt style={resultLabel}>Status</dt>
               <dd data-testid="cycle-result-status" style={resultValue}>
-                {result.status}
+                {formatCycleStatus(result.status)}
               </dd>
             </div>
             <div style={resultRow}>
@@ -198,7 +200,7 @@ export function CycleStartPage({
           </dl>
           <p style={{ marginTop: '1rem' }}>
             <Link to={`/cycles/${result.cycleId}/status`} data-testid="cycle-result-status-link">
-              サイクルのステータスを見る
+              安否確認のステータスを見る
             </Link>
           </p>
         </section>

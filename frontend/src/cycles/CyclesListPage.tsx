@@ -17,6 +17,8 @@ import { Link } from 'react-router-dom';
 
 import { CycleApiError, CycleClient, type CycleSummary } from '../api/cycleClient';
 
+import { formatCycleMode, formatCycleStatus } from './labels';
+
 /** 1 ページあたりの表示件数（Requirement 12.1）。 */
 export const CYCLES_PAGE_SIZE = 50;
 
@@ -80,9 +82,9 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
           marginBottom: '1rem',
         }}
       >
-        <h1>サイクル履歴</h1>
+        <h1>安否確認 履歴</h1>
         <Link to="/cycles/new">
-          <button type="button">新規サイクル起動</button>
+          <button type="button">新規安否確認 起動</button>
         </Link>
       </header>
 
@@ -97,50 +99,49 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
           読み込み中…
         </p>
       ) : cycles.length === 0 ? (
-        <p data-testid="cycles-empty">過去のサイクルはまだありません。</p>
+        <p data-testid="cycles-empty">過去の安否確認はまだありません。</p>
       ) : (
         <>
           <p data-testid="cycles-pagination-summary">
             全 {cycles.length} 件中 {start + 1} - {Math.min(end, cycles.length)} 件を表示 （ページ{' '}
             {currentPage + 1} / {totalPages}）
           </p>
-          <table style={tableStyle} data-testid="cycles-table">
+          <figure>
+          <table data-testid="cycles-table">
             <thead>
               <tr>
-                <th style={cellStyle}>Cycle ID</th>
-                <th style={cellStyle}>起動時刻</th>
-                <th style={cellStyle}>ステータス</th>
-                <th style={cellStyle}>Mode</th>
-                <th style={cellStyle}>Dict Version</th>
-                <th style={cellStyle}>完了時刻</th>
-                <th style={cellStyle}>操作</th>
+                <th>確認ID</th>
+                <th>起動時刻</th>
+                <th>ステータス</th>
+                <th>Mode</th>
+                <th>Dict Version</th>
+                <th>完了時刻</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
               {pageCycles.map((c) => (
                 <tr key={c.cycleId} data-testid={`cycle-row-${c.cycleId}`}>
-                  <td style={cellStyle}>{c.cycleId}</td>
-                  <td style={cellStyle}>{c.startedAt}</td>
-                  <td style={cellStyle}>{c.status}</td>
-                  <td style={cellStyle}>{c.mode ?? '-'}</td>
-                  <td style={cellStyle}>{c.dictionaryVersion}</td>
-                  <td style={cellStyle}>{c.completedAt ?? '-'}</td>
-                  <td style={cellStyle}>
+                  <td>{c.cycleId}</td>
+                  <td>{c.startedAt}</td>
+                  <td>{formatCycleStatus(c.status)}</td>
+                  <td>{formatCycleMode(c.mode)}</td>
+                  <td>{c.dictionaryVersion}</td>
+                  <td>{c.completedAt ?? '-'}</td>
+                  <td>
                     <Link
                       to={`/cycles/${encodeURIComponent(c.cycleId)}`}
                       data-testid={`cycle-detail-link-${c.cycleId}`}
                     >
-                      <button type="button">詳細</button>
+                      <button type="button" className="btn-icon" aria-label="詳細">🔍</button>
                     </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <nav
-            aria-label="ページ送り"
-            style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}
-          >
+          </figure>
+          <nav aria-label="ページ送り" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
             <button
               type="button"
               onClick={() => {
@@ -167,14 +168,3 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
     </section>
   );
 }
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-};
-
-const cellStyle: React.CSSProperties = {
-  border: '1px solid #d1d5db',
-  padding: '0.5rem',
-  textAlign: 'left',
-};

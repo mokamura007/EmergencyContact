@@ -125,7 +125,7 @@ describe('CycleDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('detail-cycle-id')).toHaveTextContent('cyc-1');
     });
-    expect(screen.getByTestId('detail-status')).toHaveTextContent('COMPLETED');
+    expect(screen.getByTestId('detail-status')).toHaveTextContent('完了');
     expect(screen.getByTestId('detail-dictionary-version')).toHaveTextContent('7');
     expect(screen.getByTestId('response-row-emp-A')).toBeInTheDocument();
     expect(screen.getByTestId('response-row-emp-B')).toBeInTheDocument();
@@ -311,7 +311,7 @@ describe('CycleDetailPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Cycle ID が指定されていません');
+    expect(screen.getByRole('alert')).toHaveTextContent('確認IDが指定されていません');
     expect(getDetail).not.toHaveBeenCalled();
     expect(listResponses).not.toHaveBeenCalled();
   });

@@ -86,7 +86,7 @@ describe('EmployeeListPage', () => {
     const client = makeClient({ list: listMock, remove: removeMock });
     renderPage(client);
 
-    await user.click(await screen.findByRole('button', { name: '削除' }));
+    await user.click(await screen.findByRole('button', { name: /を削除/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('削除の確認')).toBeInTheDocument();
 
@@ -116,7 +116,7 @@ describe('EmployeeListPage', () => {
     });
     renderPage(client);
 
-    await user.click(await screen.findByRole('button', { name: '削除' }));
+    await user.click(await screen.findByRole('button', { name: /を削除/ }));
     await user.click(screen.getByRole('button', { name: 'キャンセル' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -203,13 +203,13 @@ describe('EmployeeListPage — 論理削除済表示と Cognito 削除（Task 15
 
     // 退職一郎（admin かつ deleted）→ Cognito 削除ボタンあり
     expect(await screen.findByText('退職一郎')).toBeInTheDocument();
-    const cognitoButtons = screen.getAllByRole('button', { name: 'Cognito 削除' });
+    const cognitoButtons = screen.getAllByRole('button', { name: /Cognitoアカウントを削除/ });
     expect(cognitoButtons).toHaveLength(1);
 
     // 退職二郎（non-admin かつ deleted）→ Cognito 削除ボタンなし、編集 / 削除も無し
     // → 「削除済」状態カラムは表示されているが、操作カラムは空
     // 現役太郎（admin かつ active）→ Cognito 削除ボタンなし
-    const activeEditButton = screen.getByRole('button', { name: '編集' });
+    const activeEditButton = screen.getByRole('button', { name: /編集/ });
     expect(activeEditButton).toBeInTheDocument();
   });
 
@@ -235,7 +235,7 @@ describe('EmployeeListPage — 論理削除済表示と Cognito 削除（Task 15
     const client = makeClient({ list: listMock, removeCognitoUser: removeCognitoMock });
     renderPage(client);
 
-    await user.click(await screen.findByRole('button', { name: 'Cognito 削除' }));
+    await user.click(await screen.findByRole('button', { name: /Cognitoアカウントを削除/ }));
 
     // 確認ダイアログが表示される
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -273,7 +273,7 @@ describe('EmployeeListPage — 論理削除済表示と Cognito 削除（Task 15
     });
     renderPage(client);
 
-    await user.click(await screen.findByRole('button', { name: 'Cognito 削除' }));
+    await user.click(await screen.findByRole('button', { name: /Cognitoアカウントを削除/ }));
     await user.click(screen.getByRole('button', { name: 'キャンセル' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -308,7 +308,7 @@ describe('EmployeeListPage — 論理削除済表示と Cognito 削除（Task 15
     });
     renderPage(client);
 
-    await user.click(await screen.findByRole('button', { name: 'Cognito 削除' }));
+    await user.click(await screen.findByRole('button', { name: /Cognitoアカウントを削除/ }));
     await user.click(screen.getByRole('button', { name: 'Cognito 削除する' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(

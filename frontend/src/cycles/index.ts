@@ -32,6 +32,12 @@ export { parseTranscript, type ParsedTranscript } from './transcriptParser';
 export { isWithinRetentionWindow, isRetentionExpired, RETENTION_WINDOW_MS } from './cycleExpiry';
 
 export {
+  formatCycleMode,
+  formatCycleStatus,
+  formatVoiceStatus,
+} from './labels';
+
+export {
   statusViewerReducer,
   initialStatusViewerState,
   isTerminalStatus,
