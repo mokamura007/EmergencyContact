@@ -56,7 +56,7 @@
   - _Design: デプロイ手順_
   - _Done When: CloudFront 経由でアクセスしたときに新バンドル（Task 3 の `console.error` が出る版）が配信される。ブラウザ DevTools の Network で `main.[hash].js` が変更されたことを確認_
 
-- [~] 7. `FORCE_CHANGE_PASSWORD` 状態のテストユーザー作成 + 手順書 4.2 実機再現（CLI 側完了、ブラウザ検証は残作業）
+- [ ] 7. `FORCE_CHANGE_PASSWORD` 状態のテストユーザー作成 + 手順書 4.2 実機再現（CLI 側完了、ブラウザ検証は残作業）
   - 新規テストユーザーを作成（既存 tomita は `--permanent` 済みのため使用不可）：
     ```
     aws cognito-idp admin-create-user `
@@ -85,14 +85,14 @@
   - _Requirements: 2.1, 2.4_
   - _Done When: `CONFIRMED` フローが不変、`NotAuthorizedException` メッセージと console 出力が確認できる_
 
-- [~] 9. 実機検証エビデンスを `docs/notes/fix-initial-login-flow-verification.md` に記録（テンプレ + CLI 部完了、実機記入枠はユーザー実施）
+- [ ] 9. 実機検証エビデンスを `docs/notes/fix-initial-login-flow-verification.md` に記録（テンプレ + CLI 部完了、実機記入枠はユーザー実施）
   - Task 7, 8 のスクリーンショットへの相対リンク or 貼付
   - 実行日時、環境、ユーザー、確認事項、Cognito コンソール側スクリーンショット（`UserStatus` 表示）
   - 再発時の切り分けフロー（PostAuth Trigger 状態確認 → `console.error` の code 確認 → Cognito ユーザーステータス確認）
   - _Requirements: 3.1, 3.2, 3.3_
   - _Done When: `docs/notes/fix-initial-login-flow-verification.md` が Markdown diagnostics 0 issues で作成され、本 tasks.md および `.kiro/specs/safety-confirmation-system/tasks.md` 15.6 系タスクから参照可能_
 
-- [~] 10. GitHub Issue #3 のクローズ（進捗コメント投稿済み `#issuecomment-4933459002`、Close はユーザー実機検証後）
+- [ ] 10. GitHub Issue #3 のクローズ（進捗コメント投稿済み `#issuecomment-4933459002`、Close はユーザー実機検証後）
   - Issue #3 に完了コメントを投稿：本 spec のパス、Task 7 のエビデンスファイルパス、変更ファイル一覧、テスト結果を記載
   - Issue #3 を Close
   - _Requirements: 全件（成果物受渡）_

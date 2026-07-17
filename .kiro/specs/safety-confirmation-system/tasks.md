@@ -1112,13 +1112,13 @@ PBT ライブラリは Phase 0 で確定する言語に応じて選定（TypeScr
   - _Requirements: 9.4, 9.5_
   - _Done When: OTHER → 再発信 → 上限 → UNREACHABLE 確定の流れが動作_
 
-- [~] 14.5 統合テスト：60 分タイムアウト
+- [ ] 14.5 統合テスト：60 分タイムアウト
   - SFN 実行を意図的に遅延させ、60 分超過で TIMEOUT 確定
   - 未確定 Response が UNREACHABLE に強制更新、SNS 通知メール受信
   - _Requirements: 14.4, 14.5_
   - _Done When: TIMEOUT シナリオが完走し、メール通知が届く_
 
-- [~] 14.6 統合テスト：録音 → S3 → Transcribe → メタ書込 → 署名付き URL
+- [ ] 14.6 統合テスト：録音 → S3 → Transcribe → メタ書込 → 署名付き URL
   - 録音 60 秒以内、Transcribe 30 秒以内、メタ 10 秒以内、URL 15 分有効
   - _Requirements: 6.3, 10.2, 10.5, 10.7_
   - _Done When: 各タイミング測定で要件を満たし、再生で音声・テキストが取得できる_

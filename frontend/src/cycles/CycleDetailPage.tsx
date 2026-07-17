@@ -252,8 +252,8 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
           安否確認情報を取得中…
         </p>
       ) : (
-        <section aria-labelledby="cycle-info-heading" style={blockStyle}>
-          <h2 id="cycle-info-heading">安否確認詳細情報</h2>
+        <details style={blockStyle}>
+          <summary style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }}>安否確認詳細情報</summary>
           <dl style={dlStyle}>
             <InfoRow label="確認ID" testId="detail-cycle-id">
               {detail.cycleId}
@@ -283,7 +283,7 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
               起動から 90 日が経過しているため、録音 / 通話内容は再生できません。
             </p>
           )}
-        </section>
+        </details>
       )}
 
       <section aria-labelledby="responses-heading" style={blockStyle}>

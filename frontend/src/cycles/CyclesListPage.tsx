@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { CycleApiError, CycleClient, type CycleSummary } from '../api/cycleClient';
 
@@ -32,6 +32,7 @@ export interface CyclesListPageProps {
 export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
   const cycleClient = useMemo(() => props.client ?? new CycleClient(), [props.client]);
   const pageSize = props.pageSize ?? CYCLES_PAGE_SIZE;
+  const navigate = useNavigate();
 
   const [cycles, setCycles] = useState<readonly CycleSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +103,9 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
         <p data-testid="cycles-empty">過去の安否確認はまだありません。</p>
       ) : (
         <>
+          <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+            ※ 行をクリックすると詳細を表示します
+          </p>
           <p data-testid="cycles-pagination-summary">
             全 {cycles.length} 件中 {start + 1} - {Math.min(end, cycles.length)} 件を表示 （ページ{' '}
             {currentPage + 1} / {totalPages}）
@@ -116,26 +120,22 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
                 <th>Mode</th>
                 <th>Dict Version</th>
                 <th>完了時刻</th>
-                <th>操作</th>
               </tr>
             </thead>
             <tbody>
               {pageCycles.map((c) => (
-                <tr key={c.cycleId} data-testid={`cycle-row-${c.cycleId}`}>
+                <tr
+                  key={c.cycleId}
+                  data-testid={`cycle-row-${c.cycleId}`}
+                  onClick={() => { navigate(`/cycles/${encodeURIComponent(c.cycleId)}`); }}
+                  className="clickable-row"
+                >
                   <td>{c.cycleId}</td>
                   <td>{c.startedAt}</td>
                   <td>{formatCycleStatus(c.status)}</td>
                   <td>{formatCycleMode(c.mode)}</td>
                   <td>{c.dictionaryVersion}</td>
                   <td>{c.completedAt ?? '-'}</td>
-                  <td>
-                    <Link
-                      to={`/cycles/${encodeURIComponent(c.cycleId)}`}
-                      data-testid={`cycle-detail-link-${c.cycleId}`}
-                    >
-                      <button type="button" className="btn-icon" aria-label="詳細">🔍</button>
-                    </Link>
-                  </td>
                 </tr>
               ))}
             </tbody>

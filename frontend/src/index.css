@@ -42,3 +42,14 @@ table th {
 .btn-icon-danger:hover {
   opacity: 0.7;
 }
+
+/* Clickable table rows */
+table tbody tr.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+/* Hover highlight for all table rows (readability) */
+table tbody tr:hover td {
+  background-color: #dbeafe !important;
+}
