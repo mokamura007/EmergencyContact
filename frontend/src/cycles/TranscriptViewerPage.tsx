@@ -135,10 +135,10 @@ export function TranscriptViewerPage(props: TranscriptViewerPageProps = {}): JSX
           marginBottom: '1rem',
         }}
       >
-        <h1>Transcript 全文</h1>
+        <h1>通話内容 全文</h1>
         {cycleId !== '' && (
           <Link to={`/cycles/${encodeURIComponent(cycleId)}`}>
-            <button type="button">サイクル詳細へ戻る</button>
+            <button type="button">安否確認 詳細へ戻る</button>
           </Link>
         )}
       </header>

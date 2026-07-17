@@ -59,7 +59,7 @@ export interface DictionaryManagementPageProps {
 const CATEGORY_LABELS: Readonly<Record<DictionaryCategory, string>> = {
   SAFE: 'SAFE(無事)',
   INJURED: 'INJURED(怪我)',
-  UNAVAILABLE: 'UNAVAILABLE(応答不可)',
+  UNAVAILABLE: 'UNAVAILABLE(活動不能)',
 };
 
 const CONFLICT_BANNER_MESSAGE =

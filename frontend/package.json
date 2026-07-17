@@ -17,6 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@picocss/pico": "^2.1.1",
     "amazon-cognito-identity-js": "6.3.12",
     "react": "18.3.1",
     "react-dom": "18.3.1",

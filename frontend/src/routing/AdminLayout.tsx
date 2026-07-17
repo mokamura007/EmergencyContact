@@ -38,32 +38,29 @@ export function AdminLayout({ authProvider }: AdminLayoutProps = {}): JSX.Elemen
   }, [provider, navigate]);
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif' }}>
-      <header
-        style={{
-          padding: '1rem 2rem',
-          borderBottom: '1px solid #d1d5db',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <strong>安否確認システム 管理サイト</strong>
-        <nav
-          aria-label="グローバルナビゲーション"
-          style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-        >
-          <Link to="/" data-testid="admin-layout-home-link">
-            <button type="button" aria-label="ダッシュボードへ戻る">
-              ダッシュボードへ戻る
-            </button>
-          </Link>
-          <button type="button" onClick={onSignOut} data-testid="admin-layout-signout">
-            ログアウト
-          </button>
+    <div className="container">
+      <header>
+        <nav>
+          <ul>
+            <li>
+              <strong>安否確認システム 管理サイト</strong>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <Link to="/" data-testid="admin-layout-home-link">
+                <button type="button" className="outline">ダッシュボードへ戻る</button>
+              </Link>
+            </li>
+            <li>
+              <button type="button" onClick={onSignOut} data-testid="admin-layout-signout" className="outline secondary">
+                ログアウト
+              </button>
+            </li>
+          </ul>
         </nav>
       </header>
-      <main style={{ padding: '2rem' }}>
+      <main>
         <Outlet />
       </main>
     </div>
@@ -85,13 +82,13 @@ export function AdminHome(): JSX.Element {
           <Link to="/employees">社員マスタ管理</Link>
         </li>
         <li>
-          <Link to="/cycles/new">サイクル起動</Link>
+          <Link to="/cycles/new">安否確認 起動</Link>
         </li>
         <li>
-          <Link to="/cycles">サイクル履歴</Link>
+          <Link to="/cycles">安否確認 履歴</Link>
         </li>
         <li>
-          <Link to="/inbound">インバウンド着信履歴</Link>
+          <Link to="/inbound">着信履歴</Link>
         </li>
         <li>
           <Link to="/dictionary">キーワード辞書管理</Link>

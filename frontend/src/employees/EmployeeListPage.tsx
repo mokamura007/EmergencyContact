@@ -37,6 +37,33 @@ interface ConfirmTarget {
   readonly action: ConfirmAction;
 }
 
+type SortKey = 'name' | 'phoneNumber' | 'isAdmin' | 'status';
+type SortDir = 'asc' | 'desc';
+
+function compareEmployees(a: EmployeeSummary, b: EmployeeSummary, key: SortKey, dir: SortDir): number {
+  let cmp = 0;
+  switch (key) {
+    case 'name':
+      cmp = a.name.localeCompare(b.name, 'ja');
+      break;
+    case 'phoneNumber':
+      cmp = a.phoneNumber.localeCompare(b.phoneNumber);
+      break;
+    case 'isAdmin':
+      cmp = (a.isAdmin ? 1 : 0) - (b.isAdmin ? 1 : 0);
+      break;
+    case 'status':
+      cmp = ((a.deleted ?? false) ? 1 : 0) - ((b.deleted ?? false) ? 1 : 0);
+      break;
+  }
+  return dir === 'asc' ? cmp : -cmp;
+}
+
+function sortIndicator(current: SortKey, target: SortKey, dir: SortDir): string {
+  if (current !== target) return '';
+  return dir === 'asc' ? ' ▲' : ' ▼';
+}
+
 export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.Element {
   const employeeClient = useMemo(() => client ?? new EmployeeClient(), [client]);
 
@@ -46,6 +73,23 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const sortedEmployees = useMemo(() => {
+    return [...employees].sort((a, b) => compareEmployees(a, b, sortKey, sortDir));
+  }, [employees, sortKey, sortDir]);
+
+  const toggleSort = useCallback((key: SortKey) => {
+    setSortKey((prev) => {
+      if (prev === key) {
+        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortDir('asc');
+      }
+      return key;
+    });
+  }, []);
 
   const loadEmployees = useCallback(
     (withDeleted: boolean) => {
@@ -174,51 +218,55 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
       ) : employees.length === 0 ? (
         <p>社員レコードはまだ登録されていません。</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <figure>
+        <table>
           <thead>
             <tr>
-              <th style={cellStyle}>氏名</th>
-              <th style={cellStyle}>電話番号</th>
-              <th style={cellStyle}>管理者</th>
-              <th style={cellStyle}>状態</th>
-              <th style={cellStyle}>操作</th>
+              <th style={{ cursor: 'pointer' }} onClick={() => { toggleSort('name'); }}>氏名{sortIndicator(sortKey, 'name', sortDir)}</th>
+              <th style={{ cursor: 'pointer' }} onClick={() => { toggleSort('phoneNumber'); }}>電話番号{sortIndicator(sortKey, 'phoneNumber', sortDir)}</th>
+              <th style={{ cursor: 'pointer' }} onClick={() => { toggleSort('isAdmin'); }}>管理者{sortIndicator(sortKey, 'isAdmin', sortDir)}</th>
+              <th style={{ cursor: 'pointer' }} onClick={() => { toggleSort('status'); }}>状態{sortIndicator(sortKey, 'status', sortDir)}</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            {employees.map((emp) => {
+            {sortedEmployees.map((emp) => {
               const isDeleted = emp.deleted === true;
               const showCognitoDelete = isDeleted && emp.isAdmin;
               return (
                 <tr key={emp.employeeId}>
-                  <td style={cellStyle}>{emp.name}</td>
-                  <td style={cellStyle}>{e164ToDomestic(emp.phoneNumber)}</td>
-                  <td style={cellStyle}>{emp.isAdmin ? '○' : ''}</td>
-                  <td style={cellStyle}>{isDeleted ? '削除済' : 'アクティブ'}</td>
-                  <td style={cellStyle}>
+                  <td>{emp.name}</td>
+                  <td>{e164ToDomestic(emp.phoneNumber)}</td>
+                  <td>{emp.isAdmin ? '○' : ''}</td>
+                  <td>{isDeleted ? '削除済' : 'アクティブ'}</td>
+                  <td>
                     {!isDeleted && (
                       <>
-                        <Link to={`/employees/${encodeURIComponent(emp.employeeId)}/edit`}>
-                          <button type="button">編集</button>
-                        </Link>{' '}
+                        <Link to={`/employees/${encodeURIComponent(emp.employeeId)}/edit`} aria-label={`${emp.name}を編集`}>
+                          <button type="button" className="btn-icon" aria-label="編集">✏️</button>
+                        </Link>
                         <button
                           type="button"
+                          className="btn-icon-danger"
+                          aria-label={`${emp.name}を削除`}
                           onClick={() => {
                             requestDelete(emp);
                           }}
                         >
-                          削除
+                          🗑️
                         </button>
                       </>
                     )}
                     {showCognitoDelete && (
                       <button
                         type="button"
+                        className="btn-icon-danger"
+                        aria-label={`${emp.name}のCognitoアカウントを削除`}
                         onClick={() => {
                           requestCognitoDelete(emp);
                         }}
-                        style={{ background: '#b91c1c', color: '#fff' }}
                       >
-                        Cognito 削除
+                        🔐
                       </button>
                     )}
                   </td>
@@ -227,16 +275,12 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
             })}
           </tbody>
         </table>
+        </figure>
       )}
 
       {confirmTarget !== null && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="employee-confirm-title"
-          style={dialogStyle}
-        >
-          <div style={dialogInnerStyle}>
+        <dialog open role="dialog" aria-modal="true" aria-labelledby="employee-confirm-title">
+          <article>
             {confirmTarget.action === 'delete' ? (
               <>
                 <h2 id="employee-confirm-title">削除の確認</h2>
@@ -258,15 +302,15 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
                 </p>
               </>
             )}
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button type="button" onClick={cancelConfirm} disabled={submitting}>
+            <footer style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button type="button" className="secondary" onClick={cancelConfirm} disabled={submitting}>
                 キャンセル
               </button>
               <button
                 type="button"
                 onClick={performConfirm}
                 disabled={submitting}
-                style={{ background: '#b91c1c', color: '#fff' }}
+                className="contrast"
               >
                 {submitting
                   ? '実行中…'
@@ -274,34 +318,10 @@ export function EmployeeListPage({ client }: EmployeeListPageProps = {}): JSX.El
                     ? '削除する'
                     : 'Cognito 削除する'}
               </button>
-            </div>
-          </div>
-        </div>
+            </footer>
+          </article>
+        </dialog>
       )}
     </section>
   );
 }
-
-const cellStyle: React.CSSProperties = {
-  border: '1px solid #d1d5db',
-  padding: '0.5rem',
-  textAlign: 'left',
-};
-
-const dialogStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 10,
-};
-
-const dialogInnerStyle: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: '0.5rem',
-  padding: '1.5rem',
-  maxWidth: '480px',
-  width: '90%',
-};

@@ -126,7 +126,7 @@ export function InboundTranscriptViewerPage(
           marginBottom: '1rem',
         }}
       >
-        <h1>インバウンド Transcript 全文</h1>
+        <h1>着信 通話内容 全文</h1>
         <Link to="/inbound">
           <button type="button">着信履歴へ戻る</button>
         </Link>

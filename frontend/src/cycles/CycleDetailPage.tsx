@@ -38,6 +38,7 @@ import {
 import { RecordingApiError, RecordingClient, type PresignedArtifact } from '../api/recordingClient';
 
 import { isRetentionExpired } from './cycleExpiry';
+import { formatCycleMode, formatCycleStatus, formatVoiceStatus } from './labels';
 
 export interface CycleDetailPageProps {
   /** テスト DI：未指定なら `new CycleClient()`。 */
@@ -73,6 +74,36 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rowStates, setRowStates] = useState<Readonly<Record<string, PerRowState>>>({});
+  const [responseSortKey, setResponseSortKey] = useState<'contact' | 'status' | null>(null);
+  const [responseSortDir, setResponseSortDir] = useState<'asc' | 'desc'>('asc');
+
+  const sortedItems = useMemo(() => {
+    if (page === null || responseSortKey === null) return page?.items ?? [];
+    return [...page.items].sort((a, b) => {
+      let cmp = 0;
+      if (responseSortKey === 'contact') {
+        const aVal = isContacted(a) ? 1 : 0;
+        const bVal = isContacted(b) ? 1 : 0;
+        cmp = aVal - bVal;
+      } else {
+        const aVal = a.voiceStatus ?? '';
+        const bVal = b.voiceStatus ?? '';
+        cmp = aVal.localeCompare(bVal);
+      }
+      return responseSortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [page, responseSortKey, responseSortDir]);
+
+  const toggleResponseSort = useCallback((key: 'contact' | 'status') => {
+    setResponseSortKey((prev) => {
+      if (prev === key) {
+        setResponseSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setResponseSortDir('asc');
+      }
+      return key;
+    });
+  }, []);
 
   const loadDetail = useCallback(() => {
     if (cycleId === '') return;
@@ -83,12 +114,12 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
       } catch (err) {
         if (err instanceof CycleApiError) {
           setErrorMessage(
-            `サイクル詳細の取得に失敗しました（HTTP ${err.status.toString()}）: ${err.serverMessage}`,
+            `詳細の取得に失敗しました（HTTP ${err.status.toString()}）: ${err.serverMessage}`,
           );
         } else if (err instanceof Error) {
-          setErrorMessage(`サイクル詳細の取得に失敗しました: ${err.message}`);
+          setErrorMessage(`詳細の取得に失敗しました: ${err.message}`);
         } else {
-          setErrorMessage('サイクル詳細の取得に失敗しました。');
+          setErrorMessage('詳細の取得に失敗しました。');
         }
       }
     })();
@@ -186,8 +217,8 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
   if (cycleId === '') {
     return (
       <section>
-        <h1>サイクル詳細</h1>
-        <p role="alert">Cycle ID が指定されていません。</p>
+        <h1>安否確認 詳細</h1>
+        <p role="alert">確認IDが指定されていません。</p>
       </section>
     );
   }
@@ -204,7 +235,7 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
           marginBottom: '1rem',
         }}
       >
-        <h1>サイクル詳細</h1>
+        <h1>安否確認 詳細</h1>
         <Link to="/cycles">
           <button type="button">一覧へ戻る</button>
         </Link>
@@ -218,20 +249,20 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
 
       {detail === null ? (
         <p role="status" aria-live="polite">
-          サイクル情報を取得中…
+          安否確認情報を取得中…
         </p>
       ) : (
         <section aria-labelledby="cycle-info-heading" style={blockStyle}>
-          <h2 id="cycle-info-heading">Cycle 情報</h2>
+          <h2 id="cycle-info-heading">安否確認詳細情報</h2>
           <dl style={dlStyle}>
-            <InfoRow label="Cycle ID" testId="detail-cycle-id">
+            <InfoRow label="確認ID" testId="detail-cycle-id">
               {detail.cycleId}
             </InfoRow>
             <InfoRow label="ステータス" testId="detail-status">
-              {detail.status}
+              {formatCycleStatus(detail.status)}
             </InfoRow>
             <InfoRow label="Mode" testId="detail-mode">
-              {detail.mode ?? '-'}
+              {formatCycleMode(detail.mode)}
             </InfoRow>
             <InfoRow label="起動時刻" testId="detail-started-at">
               {detail.startedAt}
@@ -249,52 +280,48 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
               data-testid="detail-retention-expired-banner"
               style={warningBannerStyle}
             >
-              起動から 90 日が経過しているため、録音 / Transcript は再生できません。
+              起動から 90 日が経過しているため、録音 / 通話内容は再生できません。
             </p>
           )}
         </section>
       )}
 
       <section aria-labelledby="responses-heading" style={blockStyle}>
-        <h2 id="responses-heading">社員別 Response 一覧</h2>
+        <h2 id="responses-heading">社員別 反応 一覧</h2>
         {loading ? (
           <p role="status" aria-live="polite">
             読み込み中…
           </p>
         ) : page === null || page.items.length === 0 ? (
-          <p data-testid="responses-empty">Response はまだ登録されていません。</p>
+          <p data-testid="responses-empty">反応はまだ登録されていません。</p>
         ) : (
           <>
-            <table style={tableStyle} data-testid="responses-table">
+            <figure>
+            <table data-testid="responses-table">
               <thead>
                 <tr>
-                  <th style={cellStyle}>社員 ID</th>
-                  <th style={cellStyle}>氏名</th>
-                  <th style={cellStyle}>Voice_Status</th>
-                  <th style={cellStyle}>通話結果コード</th>
-                  <th style={cellStyle}>発信回数</th>
-                  <th style={cellStyle}>最終発信時刻</th>
-                  <th style={cellStyle}>Transcript 抜粋</th>
-                  <th style={cellStyle}>操作</th>
+                  <th>氏名</th>
+                  <th style={{ cursor: 'pointer' }} onClick={() => { toggleResponseSort('contact'); }}>連絡{responseSortKey === 'contact' ? (responseSortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
+                  <th style={{ cursor: 'pointer' }} onClick={() => { toggleResponseSort('status'); }}>状況{responseSortKey === 'status' ? (responseSortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
+                  <th>通話内容 抜粋</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
-                {page.items.map((row) => {
+                {sortedItems.map((row) => {
                   const seq = row.retryCount > 0 ? row.retryCount.toString() : '1';
                   const hasRecording = row.retryCount > 0;
                   const rowState = rowStates[row.employeeId];
+                  const contacted = isContacted(row);
                   return (
                     <tr key={row.employeeId} data-testid={`response-row-${row.employeeId}`}>
-                      <td style={cellStyle}>{row.employeeId}</td>
-                      <td style={cellStyle}>{row.employeeName ?? '-'}</td>
-                      <td style={cellStyle}>{row.voiceStatus ?? '-'}</td>
-                      <td style={cellStyle}>{row.callResultCode ?? '-'}</td>
-                      <td style={cellStyle}>{row.retryCount}</td>
-                      <td style={cellStyle}>{row.lastCalledAt ?? '-'}</td>
-                      <td style={cellStyle} data-testid={`response-excerpt-${row.employeeId}`}>
+                      <td>{row.employeeName ?? '-'}</td>
+                      <td>{contacted ? '✅ 済' : '❌ 未'}</td>
+                      <td>{formatVoiceStatus(row.voiceStatus)}</td>
+                      <td data-testid={`response-excerpt-${row.employeeId}`}>
                         {row.transcriptExcerpt ?? '-'}
                       </td>
-                      <td style={cellStyle}>
+                      <td>
                         <RecordingControls
                           row={row}
                           seq={seq}
@@ -312,6 +339,7 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
                 })}
               </tbody>
             </table>
+            </figure>
             <nav
               aria-label="ページ送り"
               style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}
@@ -338,6 +366,17 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
       </section>
     </section>
   );
+}
+
+/**
+ * 連絡済み判定：voiceStatus に基づく。
+ * - SAFE / INJURED / UNAVAILABLE / OTHER → 連絡済み（通話が成立した）
+ * - PENDING / UNREACHABLE → 未連絡
+ */
+function isContacted(row: CycleResponseRow): boolean {
+  const status = row.voiceStatus;
+  if (status === null) return false;
+  return status !== 'PENDING' && status !== 'UNREACHABLE';
 }
 
 function RecordingControls({
@@ -371,7 +410,7 @@ function RecordingControls({
           録音再生
         </button>{' '}
         <span aria-disabled="true" data-testid={`transcript-disabled-${row.employeeId}`}>
-          Transcript 全文
+          通話内容 全文
         </span>
         {disabledReason !== null && (
           <div data-testid={`recording-disabled-reason-${row.employeeId}`}>{disabledReason}</div>
@@ -397,7 +436,7 @@ function RecordingControls({
           )}/${encodeURIComponent(seq)}`}
           data-testid={`transcript-link-${row.employeeId}`}
         >
-          Transcript 全文
+          通話内容 全文
         </Link>
       </div>
     );
@@ -419,7 +458,7 @@ function RecordingControls({
         )}/${encodeURIComponent(seq)}`}
         data-testid={`transcript-link-${row.employeeId}`}
       >
-        Transcript 全文
+        通話内容 全文
       </Link>
       {state?.recordingError !== undefined && (
         <p
@@ -452,18 +491,6 @@ function InfoRow({
     </div>
   );
 }
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-};
-
-const cellStyle: React.CSSProperties = {
-  border: '1px solid #d1d5db',
-  padding: '0.5rem',
-  textAlign: 'left',
-  verticalAlign: 'top',
-};
 
 const blockStyle: React.CSSProperties = {
   marginTop: '1.5rem',

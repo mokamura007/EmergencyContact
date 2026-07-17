@@ -97,9 +97,9 @@ describe('AdminLayout', () => {
 
     // AdminHome のメニューリンク存在を検証
     expect(screen.getByRole('link', { name: '社員マスタ管理' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'サイクル起動' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'サイクル履歴' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'インバウンド着信履歴' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '安否確認 起動' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '安否確認 履歴' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '着信履歴' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'キーワード辞書管理' })).toBeInTheDocument();
   });
 });
