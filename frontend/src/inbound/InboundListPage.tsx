@@ -43,6 +43,7 @@ import {
 } from '../api/inboundClient';
 import { RecordingApiError, RecordingClient, type PresignedArtifact } from '../api/recordingClient';
 import { isRetentionExpired } from '../cycles/cycleExpiry';
+import { formatJst } from '../cycles/formatTime';
 import { formatVoiceStatus } from '../cycles/labels';
 
 export interface InboundListPageProps {
@@ -266,7 +267,7 @@ function InboundRow({
 
   return (
     <tr data-testid={`inbound-row-${row.contactId}`}>
-      <td>{row.receivedAt}</td>
+      <td>{formatJst(row.receivedAt)}</td>
       <td data-testid={`inbound-caller-${row.contactId}`}>
         {row.callerNumberMasked}
       </td>

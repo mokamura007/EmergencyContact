@@ -26,6 +26,7 @@ import { Link } from 'react-router-dom';
 
 import { CycleApiError, CycleClient, type CreateCycleResult } from '../api/cycleClient';
 
+import { formatJst } from './formatTime';
 import { formatCycleStatus } from './labels';
 
 /** バックエンド `cycle_api/handler.py` の既定値と一致させる。 */
@@ -192,9 +193,9 @@ export function CycleStartPage({
               </dd>
             </div>
             <div style={resultRow}>
-              <dt style={resultLabel}>Started At</dt>
+              <dt style={resultLabel}>起動時刻</dt>
               <dd data-testid="cycle-result-started-at" style={resultValue}>
-                {result.startedAt}
+                {formatJst(result.startedAt)}
               </dd>
             </div>
           </dl>

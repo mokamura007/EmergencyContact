@@ -38,6 +38,7 @@ import {
 import { RecordingApiError, RecordingClient, type PresignedArtifact } from '../api/recordingClient';
 
 import { isRetentionExpired } from './cycleExpiry';
+import { formatJst } from './formatTime';
 import { formatCycleMode, formatCycleStatus, formatVoiceStatus } from './labels';
 
 export interface CycleDetailPageProps {
@@ -265,10 +266,10 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
               {formatCycleMode(detail.mode)}
             </InfoRow>
             <InfoRow label="起動時刻" testId="detail-started-at">
-              {detail.startedAt}
+              {formatJst(detail.startedAt)}
             </InfoRow>
             <InfoRow label="完了時刻" testId="detail-completed-at">
-              {detail.completedAt ?? '-'}
+              {formatJst(detail.completedAt)}
             </InfoRow>
             <InfoRow label="辞書バージョン" testId="detail-dictionary-version">
               {detail.dictionaryVersion.toString()}

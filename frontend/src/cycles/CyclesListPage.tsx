@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CycleApiError, CycleClient, type CycleSummary } from '../api/cycleClient';
 
 import { formatCycleMode, formatCycleStatus } from './labels';
+import { formatJst } from './formatTime';
 
 /** 1 ページあたりの表示件数（Requirement 12.1）。 */
 export const CYCLES_PAGE_SIZE = 50;
@@ -131,11 +132,11 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
                   className="clickable-row"
                 >
                   <td>{c.cycleId}</td>
-                  <td>{c.startedAt}</td>
+                  <td>{formatJst(c.startedAt)}</td>
                   <td>{formatCycleStatus(c.status)}</td>
                   <td>{formatCycleMode(c.mode)}</td>
                   <td>{c.dictionaryVersion}</td>
-                  <td>{c.completedAt ?? '-'}</td>
+                  <td>{formatJst(c.completedAt)}</td>
                 </tr>
               ))}
             </tbody>
