@@ -270,10 +270,13 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
             <InfoRow label="完了時刻" testId="detail-completed-at">
               {detail.completedAt ?? '-'}
             </InfoRow>
-            <InfoRow label="Dict Version" testId="detail-dictionary-version">
+            <InfoRow label="辞書バージョン" testId="detail-dictionary-version">
               {detail.dictionaryVersion.toString()}
             </InfoRow>
           </dl>
+          <p style={{ color: '#6b7280', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+            ※ 辞書バージョン：この安否確認で通話内容の判定に使用されたキーワード辞書の版番号です
+          </p>
           {expired && (
             <p
               role="status"

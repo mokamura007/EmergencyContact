@@ -180,7 +180,7 @@ export function CycleStartPage({
               </dd>
             </div>
             <div style={resultRow}>
-              <dt style={resultLabel}>Dictionary Version</dt>
+              <dt style={resultLabel}>辞書バージョン</dt>
               <dd data-testid="cycle-result-dictionary-version" style={resultValue}>
                 {result.dictionaryVersion.toString()}
               </dd>

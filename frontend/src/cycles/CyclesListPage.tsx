@@ -118,7 +118,7 @@ export function CyclesListPage(props: CyclesListPageProps = {}): JSX.Element {
                 <th>起動時刻</th>
                 <th>ステータス</th>
                 <th>Mode</th>
-                <th>Dict Version</th>
+                <th>辞書Ver.</th>
                 <th>完了時刻</th>
               </tr>
             </thead>
