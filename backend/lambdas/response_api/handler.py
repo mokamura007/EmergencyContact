@@ -40,6 +40,7 @@ LOGGER.setLevel(logging.INFO)
 RESPONSE_TABLE_NAME = os.environ["RESPONSE_TABLE_NAME"]
 EMPLOYEE_TABLE_NAME = os.environ["EMPLOYEE_TABLE_NAME"]
 TRANSCRIPT_META_TABLE_NAME = os.environ["TRANSCRIPT_META_TABLE_NAME"]
+INBOUND_CONTACT_TABLE_NAME = os.environ.get("INBOUND_CONTACT_TABLE_NAME", "")
 
 PAGE_SIZE = 50
 
@@ -47,6 +48,7 @@ _DDB = boto3.resource("dynamodb")
 _RESPONSE_TABLE = _DDB.Table(RESPONSE_TABLE_NAME)
 _EMPLOYEE_TABLE = _DDB.Table(EMPLOYEE_TABLE_NAME)
 _TRANSCRIPT_META_TABLE = _DDB.Table(TRANSCRIPT_META_TABLE_NAME)
+_INBOUND_CONTACT_TABLE = _DDB.Table(INBOUND_CONTACT_TABLE_NAME) if INBOUND_CONTACT_TABLE_NAME else None
 
 
 def _response(status: int, body: Any) -> dict[str, Any]:
@@ -190,9 +192,59 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
             return _list_responses(path_params, query_params)
         if method == "GET" and resource == "/cycles/{id}/responses/{employeeId}":
             return _get_single_response(path_params)
+        if method == "GET" and resource == "/inbound":
+            return _list_inbound_contacts(query_params)
         return _response(405, {"error": f"Method {method} not allowed on {resource}"})
     except ValueError as exc:
         return _response(400, {"error": str(exc)})
     except ClientError as exc:
         LOGGER.error("ClientError on %s %s: %s", method, resource, exc)
         raise
+
+
+def _list_inbound_contacts(query_params: dict[str, Any]) -> dict[str, Any]:
+    """Return paginated InboundContact items (receivedAt descending).
+
+    Uses Scan with ExclusiveStartKey for pagination. InboundContact table
+    has contactId as PK. For proper ordering we would need a GSI on
+    receivedAt, but for now we scan and sort in-memory (acceptable for
+    small datasets in dev). In production, a GSI should be added.
+    """
+    if _INBOUND_CONTACT_TABLE is None:
+        return _response(500, {"error": "INBOUND_CONTACT_TABLE_NAME not configured"})
+
+    next_token_raw = query_params.get("nextToken")
+    kwargs: dict[str, Any] = {"Limit": PAGE_SIZE}
+    if isinstance(next_token_raw, str) and next_token_raw:
+        try:
+            kwargs["ExclusiveStartKey"] = json.loads(next_token_raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid nextToken: {exc.msg}") from exc
+
+    resp = _INBOUND_CONTACT_TABLE.scan(**kwargs)
+    raw_items = resp.get("Items", [])
+
+    # Sort by receivedAt descending
+    raw_items.sort(key=lambda x: x.get("receivedAt", ""), reverse=True)
+
+    items: list[dict[str, Any]] = []
+    for row in raw_items:
+        employee_id = row.get("employeeId")
+        employee_name = _resolve_employee_name(employee_id) if employee_id else None
+        items.append({
+            "contactId": row.get("contactId"),
+            "receivedAt": row.get("receivedAt"),
+            "callerNumberMasked": row.get("callerNumberMasked", "***"),
+            "cycleId": row.get("cycleId"),
+            "employeeName": employee_name,
+            "flow": row.get("flow"),
+            "voiceStatus": row.get("voiceStatus"),
+            "transcriptExcerpt": row.get("transcriptExcerpt"),
+        })
+
+    next_token = None
+    last_key = resp.get("LastEvaluatedKey")
+    if last_key is not None:
+        next_token = json.dumps(last_key, default=str)
+
+    return _response(200, {"items": items, "pageSize": PAGE_SIZE, "nextToken": next_token})

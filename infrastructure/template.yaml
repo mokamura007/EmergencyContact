@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+﻿AWSTemplateFormatVersion: "2010-09-09"
 
 Description: >
   Safety Confirmation System - Single CloudFormation Stack.
@@ -1789,10 +1789,12 @@ Resources:
                 Action:
                   - dynamodb:GetItem
                   - dynamodb:Query
+                  - dynamodb:Scan
                 Resource:
                   - !GetAtt ResponseTable.Arn
                   - !GetAtt EmployeeTable.Arn
                   - !GetAtt TranscriptMetaTable.Arn
+                  - !GetAtt InboundContactTable.Arn
         - PolicyName: CmkDecryptViaDynamoDB
           PolicyDocument:
             Version: "2012-10-17"
@@ -1834,6 +1836,7 @@ Resources:
           RESPONSE_TABLE_NAME: !Ref ResponseTable
           EMPLOYEE_TABLE_NAME: !Ref EmployeeTable
           TRANSCRIPT_META_TABLE_NAME: !Ref TranscriptMetaTable
+          INBOUND_CONTACT_TABLE_NAME: !Ref InboundContactTable
 
   # --- RecordingApi IAM Execution Role (Phase 5.5) ---
   # Read-only on Cycle / InboundContact tables (for the 90-day check
@@ -4145,6 +4148,19 @@ Resources:
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DictionaryApiFn.Arn}/invocations"
 
   # --- /inbound ---
+  InboundListGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref InboundResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResponseApiFn.Arn}/invocations"
+
   InboundContactIdRecordingGetMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -4244,7 +4260,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4270,7 +4286,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4296,7 +4312,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4322,7 +4338,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4348,7 +4364,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4374,7 +4390,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4400,7 +4416,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4426,7 +4442,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4452,7 +4468,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4478,7 +4494,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4504,7 +4520,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4530,7 +4546,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4556,7 +4572,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4582,7 +4598,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4608,7 +4624,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4634,7 +4650,33 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
+            ResponseTemplates:
+              application/json: ""
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+
+  InboundListOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref InboundResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4660,7 +4702,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4686,7 +4728,7 @@ Resources:
           - StatusCode: 200
             ResponseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
             ResponseTemplates:
               application/json: ""
@@ -4712,7 +4754,7 @@ Resources:
       StatusCode: "401"
       ResponseParameters:
         gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
         gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
 
   ApiGatewayResponseDefault4xx:
@@ -4722,7 +4764,7 @@ Resources:
       ResponseType: DEFAULT_4XX
       ResponseParameters:
         gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
         gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
 
   ApiGatewayResponseDefault5xx:
@@ -4732,7 +4774,7 @@ Resources:
       ResponseType: DEFAULT_5XX
       ResponseParameters:
         gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Idempotency-Key'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key'"
         gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
 
   # ===== Phase 5.7: API Gateway Deployment + Stage =====
@@ -4805,6 +4847,7 @@ Resources:
       - KeywordDictionaryCategoryKeywordDeleteMethod
       - InboundContactIdRecordingGetMethod
       - InboundContactIdTranscriptGetMethod
+      - InboundListGetMethod
       - AuthRecordFailureOptionsMethod
       - CyclesOptionsMethod
       - CyclesIdOptionsMethod
@@ -4823,6 +4866,7 @@ Resources:
       - KeywordDictionaryCategoryKeywordOptionsMethod
       - InboundContactIdRecordingOptionsMethod
       - InboundContactIdTranscriptOptionsMethod
+      - InboundListOptionsMethod
       - ApiGatewayResponseUnauthorized
       - ApiGatewayResponseDefault4xx
       - ApiGatewayResponseDefault5xx

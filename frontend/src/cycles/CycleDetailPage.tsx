@@ -38,6 +38,7 @@ import {
 import { RecordingApiError, RecordingClient, type PresignedArtifact } from '../api/recordingClient';
 
 import { isRetentionExpired } from './cycleExpiry';
+import { formatJst } from './formatTime';
 import { formatCycleMode, formatCycleStatus, formatVoiceStatus } from './labels';
 
 export interface CycleDetailPageProps {
@@ -252,8 +253,8 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
           安否確認情報を取得中…
         </p>
       ) : (
-        <section aria-labelledby="cycle-info-heading" style={blockStyle}>
-          <h2 id="cycle-info-heading">安否確認詳細情報</h2>
+        <details style={blockStyle}>
+          <summary style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }}>安否確認詳細情報</summary>
           <dl style={dlStyle}>
             <InfoRow label="確認ID" testId="detail-cycle-id">
               {detail.cycleId}
@@ -265,15 +266,18 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
               {formatCycleMode(detail.mode)}
             </InfoRow>
             <InfoRow label="起動時刻" testId="detail-started-at">
-              {detail.startedAt}
+              {formatJst(detail.startedAt)}
             </InfoRow>
             <InfoRow label="完了時刻" testId="detail-completed-at">
-              {detail.completedAt ?? '-'}
+              {formatJst(detail.completedAt)}
             </InfoRow>
-            <InfoRow label="Dict Version" testId="detail-dictionary-version">
+            <InfoRow label="辞書バージョン" testId="detail-dictionary-version">
               {detail.dictionaryVersion.toString()}
             </InfoRow>
           </dl>
+          <p style={{ color: '#6b7280', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+            ※ 辞書バージョン：この安否確認で通話内容の判定に使用されたキーワード辞書の版番号です
+          </p>
           {expired && (
             <p
               role="status"
@@ -283,7 +287,7 @@ export function CycleDetailPage(props: CycleDetailPageProps = {}): JSX.Element {
               起動から 90 日が経過しているため、録音 / 通話内容は再生できません。
             </p>
           )}
-        </section>
+        </details>
       )}
 
       <section aria-labelledby="responses-heading" style={blockStyle}>

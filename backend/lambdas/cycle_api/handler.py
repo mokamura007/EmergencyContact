@@ -371,12 +371,12 @@ def _get_cycle_detail(path_params: dict[str, Any]) -> dict[str, Any]:
 
 
 def _get_cycle_status(path_params: dict[str, Any]) -> dict[str, Any]:
-    """Return {summary, items, degraded}.
+    """Return {cycleId, status, summary, items, degraded}.
 
-    Phase 5.3 implementation: `items` is intentionally empty because the
-    Response table is populated by the SFN flow (Phase 6+) which is not
-    yet wired up. `degraded` is hardcoded False until Status_Viewer
-    (Phase 11/12) defines the contract.
+    Phase 10.6 contract: フロントエンドの CycleStatusSnapshot 型に合わせた形式。
+    summary には targetTotal / dispatched / responded / unreachable / byStatus を返す。
+    Response テーブルからの集計は Phase 16+ で追加予定。現状は Cycle アイテムの
+    targetCount を targetTotal として使い、items は空配列。
     """
     cycle_id = path_params.get("id")
     if not isinstance(cycle_id, str) or not cycle_id:
@@ -384,16 +384,31 @@ def _get_cycle_status(path_params: dict[str, Any]) -> dict[str, Any]:
     cycle = _CYCLE_TABLE.get_item(Key={"cycleId": cycle_id}).get("Item")
     if cycle is None:
         return _response(404, {"error": f"Cycle not found: {cycle_id}"})
-    summary = {
+
+    target_count = int(str(cycle.get("targetCount", 0)))
+    status = str(cycle.get("status", "RUNNING"))
+
+    result = {
         "cycleId": cycle.get("cycleId"),
-        "status": cycle.get("status"),
-        "mode": cycle.get("mode"),
-        "startedAt": cycle.get("startedAt"),
-        "completedAt": cycle.get("completedAt"),
-        "dictionaryVersion": int(str(cycle.get("dictionaryVersion", 0))),
-        "targetCount": int(str(cycle.get("targetCount", 0))),
+        "status": status,
+        "summary": {
+            "targetTotal": target_count,
+            "dispatched": 0,
+            "responded": 0,
+            "unreachable": 0,
+            "byStatus": {
+                "SAFE": 0,
+                "INJURED": 0,
+                "UNAVAILABLE": 0,
+                "OTHER": 0,
+                "UNREACHABLE": 0,
+                "PENDING": target_count,
+            },
+        },
+        "items": [],
+        "degraded": [],
     }
-    return _response(200, {"summary": summary, "items": [], "degraded": False})
+    return _response(200, result)
 
 
 # --- Entry point ---

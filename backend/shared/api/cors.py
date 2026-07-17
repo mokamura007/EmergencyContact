@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import os
 
-ALLOW_HEADERS = "Content-Type,Authorization,X-Idempotency-Key"
+ALLOW_HEADERS = "Content-Type,Authorization,Idempotency-Key,X-Idempotency-Key"
 ALLOW_METHODS = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
 
 

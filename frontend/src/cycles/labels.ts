@@ -42,7 +42,7 @@ export function formatVoiceStatus(status: string | null | undefined): string {
     case 'INJURED':
       return '怪我';
     case 'UNAVAILABLE':
-      return '活動不能';
+      return '行動不能';
     case 'OTHER':
       return 'その他';
     case 'UNREACHABLE':
