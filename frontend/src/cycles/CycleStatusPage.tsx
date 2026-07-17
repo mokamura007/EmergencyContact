@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 
 import { CycleClient, type CycleStatusSnapshot } from '../api/cycleClient';
 
+import { formatCycleStatus, formatVoiceStatus } from './labels';
 import { initialStatusViewerState, renderDegraded, statusViewerReducer } from './statusReducer';
 
 /** 既定ポーリング間隔（Requirement 11.1）。 */
@@ -125,8 +126,8 @@ export function CycleStatusPage(props: CycleStatusPageProps = {}): JSX.Element {
       ) : (
         <>
           <p>
-            Cycle 状態：
-            <span data-testid="status-top">{snapshot.status}</span>
+            状態：
+            <span data-testid="status-top">{formatCycleStatus(snapshot.status)}</span>
             {state.pollingStopped && (
               <span data-testid="status-polling-stopped"> （ポーリング停止）</span>
             )}
@@ -152,7 +153,7 @@ export function CycleStatusPage(props: CycleStatusPageProps = {}): JSX.Element {
             <ul data-testid="summary-by-status" style={listStyle}>
               {Object.entries(snapshot.summary.byStatus).map(([k, v]) => (
                 <li key={k} data-testid={`status-count-${k}`}>
-                  {k}: {v}
+                  {formatVoiceStatus(k)}: {v}
                 </li>
               ))}
             </ul>
@@ -166,20 +167,18 @@ export function CycleStatusPage(props: CycleStatusPageProps = {}): JSX.Element {
               <table data-testid="status-items-table" style={tableStyle}>
                 <thead>
                   <tr>
-                    <th>社員 ID</th>
                     <th>氏名</th>
-                    <th>Voice_Status</th>
+                    <th>状況</th>
                     <th>発信回数</th>
                     <th>最終応答時刻</th>
-                    <th>Transcript 抜粋</th>
+                    <th>通話内容 抜粋</th>
                   </tr>
                 </thead>
                 <tbody>
                   {snapshot.items.map((it) => (
                     <tr key={it.employeeId} data-testid={`status-item-${it.employeeId}`}>
-                      <td>{it.employeeId}</td>
                       <td>{it.name}</td>
-                      <td data-testid={`item-status-${it.employeeId}`}>{it.currentStatus}</td>
+                      <td data-testid={`item-status-${it.employeeId}`}>{formatVoiceStatus(it.currentStatus)}</td>
                       <td>{it.callAttempts}</td>
                       <td>{it.lastResponseAt ?? '未応答'}</td>
                       <td data-testid={`item-excerpt-${it.employeeId}`}>{it.transcriptExcerpt}</td>

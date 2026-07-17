@@ -90,11 +90,11 @@ describe('CycleStatusPage', () => {
     expect(screen.getByTestId('summary-dispatched')).toHaveTextContent('2');
     expect(screen.getByTestId('summary-responded')).toHaveTextContent('1');
     expect(screen.getByTestId('summary-unreachable')).toHaveTextContent('0');
-    expect(screen.getByTestId('status-count-SAFE')).toHaveTextContent('SAFE: 1');
-    expect(screen.getByTestId('status-count-PENDING')).toHaveTextContent('PENDING: 2');
-    expect(screen.getByTestId('status-top')).toHaveTextContent('RUNNING');
-    expect(screen.getByTestId('item-status-emp-A')).toHaveTextContent('SAFE');
-    expect(screen.getByTestId('item-status-emp-B')).toHaveTextContent('PENDING');
+    expect(screen.getByTestId('status-count-SAFE')).toHaveTextContent('無事: 1');
+    expect(screen.getByTestId('status-count-PENDING')).toHaveTextContent('未応答: 2');
+    expect(screen.getByTestId('status-top')).toHaveTextContent('実行中');
+    expect(screen.getByTestId('item-status-emp-A')).toHaveTextContent('無事');
+    expect(screen.getByTestId('item-status-emp-B')).toHaveTextContent('未応答');
     expect(screen.getByTestId('item-excerpt-emp-A')).toHaveTextContent('無事です');
     // 未応答の lastResponseAt は「未応答」と表示。
     expect(screen.getByTestId('status-item-emp-B')).toHaveTextContent('未応答');
@@ -135,7 +135,7 @@ describe('CycleStatusPage', () => {
     // 以後 interval を超えて待っても呼出は増えない。
     await sleep(SHORT_INTERVAL_MS * 3 + 30);
     expect(getStatus.mock.calls.length).toBe(1);
-    expect(screen.getByTestId('status-top')).toHaveTextContent('COMPLETED');
+    expect(screen.getByTestId('status-top')).toHaveTextContent('完了');
   });
 
   it('status=TIMEOUT の応答到達でもポーリングが停止する', async () => {
@@ -147,7 +147,7 @@ describe('CycleStatusPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('status-top')).toHaveTextContent('TIMEOUT');
+      expect(screen.getByTestId('status-top')).toHaveTextContent('タイムアウト');
     });
     expect(screen.getByTestId('status-polling-stopped')).toBeInTheDocument();
 
