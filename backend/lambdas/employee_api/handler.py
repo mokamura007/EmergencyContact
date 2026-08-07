@@ -48,6 +48,7 @@ from botocore.exceptions import ClientError
 from shared.api.cors import with_cors_headers
 from shared.audit.logger import write_audit_log
 from shared.auth.authorization import ADMINISTRATOR_GROUP, is_authorized
+from shared.crypto import encrypt_field, decrypt_field, is_encrypted, compute_blind_index
 from shared.employee.csv_parser import parse_employee_csv
 from shared.employee.validate import (
     domestic_to_e164,
@@ -63,6 +64,8 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
+
+ENCRYPTION_ENABLED = os.environ.get("FIELD_ENCRYPTION_ENABLED", "false").lower() == "true"
 
 EMPLOYEE_TABLE_NAME = os.environ["EMPLOYEE_TABLE_NAME"]
 COGNITO_USER_POOL_ID = os.environ["COGNITO_USER_POOL_ID"]
@@ -142,11 +145,42 @@ def _audit(event_type: str, principal: str, employee_id: str, phone: str | None 
     )
 
 
+# --------- Field-level encryption helpers ---------
+
+
+def _encrypt(value: str) -> str:
+    """Encrypt a field value if encryption is enabled."""
+    if not ENCRYPTION_ENABLED or not value:
+        return value
+    return encrypt_field(value)
+
+
+def _decrypt(value: str) -> str:
+    """Decrypt a field value, handling mixed encrypted/plaintext data."""
+    if not value:
+        return value
+    if is_encrypted(value):
+        return decrypt_field(value)
+    return value  # plaintext (pre-migration data)
+
+
 # --------- DynamoDB helpers ---------
 
 
 def _phone_already_registered(phone: str) -> bool:
-    """Check the PhoneNumberIndex GSI for an active row with this phone."""
+    """Check for an active row with this phone number.
+
+    When encryption is enabled, uses the blind index for lookup.
+    Otherwise falls back to the PhoneNumberIndex GSI.
+    """
+    if ENCRYPTION_ENABLED:
+        blind = compute_blind_index(phone)
+        resp = _TABLE.scan(
+            FilterExpression="phoneNumberBlindIndex = :bi AND deleted = :f",
+            ExpressionAttributeValues={":bi": blind, ":f": False},
+        )
+        return len(resp.get("Items", [])) > 0
+    # Legacy: use PhoneNumberIndex GSI
     resp = _TABLE.query(
         IndexName="PhoneNumberIndex",
         KeyConditionExpression="phoneNumber = :p",
@@ -240,8 +274,9 @@ def _create_employee(body: dict[str, Any], principal: str) -> dict[str, Any]:
     now_iso = _now_iso()
     item: dict[str, Any] = {
         "employeeId": employee_id,
-        "name": name,
-        "phoneNumber": phone,
+        "name": _encrypt(name),
+        "phoneNumber": _encrypt(phone),
+        "phoneNumberBlindIndex": compute_blind_index(phone) if ENCRYPTION_ENABLED else "",
         "role": "admin" if is_admin else "employee",
         "deleted": False,
         "createdAt": now_iso,
@@ -303,8 +338,8 @@ def _list_employees(event: dict[str, Any]) -> dict[str, Any]:
                 continue
             entry: dict[str, Any] = {
                 "employeeId": it.get("employeeId"),
-                "name": it.get("name"),
-                "phoneNumber": it.get("phoneNumber"),
+                "name": _decrypt(it.get("name", "")),
+                "phoneNumber": _decrypt(it.get("phoneNumber", "")),
                 "isAdmin": it.get("role") == "admin",
                 "deleted": row_deleted,
             }
@@ -326,8 +361,8 @@ def _get_employee_by_id(path_params: dict[str, Any]) -> dict[str, Any]:
         200,
         {
             "employeeId": item.get("employeeId"),
-            "name": item.get("name"),
-            "phoneNumber": item.get("phoneNumber"),
+            "name": _decrypt(item.get("name", "")),
+            "phoneNumber": _decrypt(item.get("phoneNumber", "")),
             "isAdmin": item.get("role") == "admin",
             "createdAt": item.get("createdAt"),
             "updatedAt": item.get("updatedAt"),
@@ -345,8 +380,8 @@ def _update_employee(
     if existing is None or existing.get("deleted", False):
         return _response(404, {"error": f"Employee not found: {employee_id}"})
 
-    new_name = body.get("name", existing.get("name"))
-    new_phone = body.get("phoneNumber", existing.get("phoneNumber"))
+    new_name = body.get("name", _decrypt(existing.get("name", "")))
+    new_phone = body.get("phoneNumber", _decrypt(existing.get("phoneNumber", "")))
     if not is_valid_name(new_name):
         raise ValueError("name is invalid")
     if not isinstance(new_phone, str) or (not is_valid_e164(new_phone) and not is_valid_domestic_jp(new_phone)):
@@ -357,16 +392,20 @@ def _update_employee(
     # Normalize to E.164 for storage
     new_phone = domestic_to_e164(new_phone)
 
-    if new_phone != existing.get("phoneNumber") and _phone_already_registered(new_phone):
+    # Decrypt existing phone for comparison (may be encrypted in DB)
+    existing_phone_plain = _decrypt(existing.get("phoneNumber", ""))
+
+    if new_phone != existing_phone_plain and _phone_already_registered(new_phone):
         return _response(409, {"error": "Phone number already registered"})
 
     _TABLE.update_item(
         Key={"employeeId": employee_id},
-        UpdateExpression="SET #n = :n, phoneNumber = :p, updatedAt = :u",
+        UpdateExpression="SET #n = :n, phoneNumber = :p, phoneNumberBlindIndex = :bi, updatedAt = :u",
         ExpressionAttributeNames={"#n": "name"},
         ExpressionAttributeValues={
-            ":n": new_name,
-            ":p": new_phone,
+            ":n": _encrypt(new_name),
+            ":p": _encrypt(new_phone),
+            ":bi": compute_blind_index(new_phone) if ENCRYPTION_ENABLED else "",
             ":u": _now_iso(),
         },
     )
@@ -391,16 +430,18 @@ def _delete_employee(path_params: dict[str, Any], principal: str) -> dict[str, A
     _TABLE.update_item(
         Key={"employeeId": employee_id},
         UpdateExpression=(
-            "SET deleted = :d, phoneNumber = :nullPhone, updatedAt = :u "
+            "SET deleted = :d, phoneNumber = :nullPhone, "
+            "phoneNumberBlindIndex = :emptyBI, updatedAt = :u "
             "REMOVE cognitoSub"
         ),
         ExpressionAttributeValues={
             ":d": True,
             ":nullPhone": "",
+            ":emptyBI": "",
             ":u": _now_iso(),
         },
     )
-    _audit("EMPLOYEE_DELETE", principal, employee_id, existing.get("phoneNumber"))
+    _audit("EMPLOYEE_DELETE", principal, employee_id, _decrypt(existing.get("phoneNumber", "")))
     return _response(200, {"employeeId": employee_id, "deleted": True})
 
 
@@ -453,8 +494,11 @@ def _import_csv(body: dict[str, Any], principal: str) -> dict[str, Any]:
                         "TableName": EMPLOYEE_TABLE_NAME,
                         "Item": {
                             "employeeId": {"S": str(uuid.uuid4())},
-                            "name": {"S": row.name},
-                            "phoneNumber": {"S": row.phone_number},
+                            "name": {"S": _encrypt(row.name)},
+                            "phoneNumber": {"S": _encrypt(row.phone_number)},
+                            "phoneNumberBlindIndex": {
+                                "S": compute_blind_index(row.phone_number) if ENCRYPTION_ENABLED else ""
+                            },
                             "role": {"S": "employee"},
                             "deleted": {"BOOL": False},
                             "createdAt": {"S": now_iso},
@@ -502,11 +546,18 @@ def _rollback_inserted(phones: list[str]) -> None:
     """Best-effort delete of rows inserted by earlier batches in a failed import."""
     for phone in phones:
         try:
-            resp = _TABLE.query(
-                IndexName="PhoneNumberIndex",
-                KeyConditionExpression="phoneNumber = :p",
-                ExpressionAttributeValues={":p": phone},
-            )
+            if ENCRYPTION_ENABLED:
+                blind = compute_blind_index(phone)
+                resp = _TABLE.scan(
+                    FilterExpression="phoneNumberBlindIndex = :bi",
+                    ExpressionAttributeValues={":bi": blind},
+                )
+            else:
+                resp = _TABLE.query(
+                    IndexName="PhoneNumberIndex",
+                    KeyConditionExpression="phoneNumber = :p",
+                    ExpressionAttributeValues={":p": phone},
+                )
             for it in resp.get("Items", []):
                 _TABLE.delete_item(Key={"employeeId": it["employeeId"]})
         except ClientError as cleanup_exc:
