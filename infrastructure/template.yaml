@@ -1601,6 +1601,14 @@ Resources:
                 Condition:
                   StringEquals:
                     kms:ViaService: !Sub "dynamodb.${AWS::Region}.amazonaws.com"
+        - PolicyName: FieldEncryptionKmsDecrypt
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt KmsCmk.Arn
 
   # --- EmployeeApi Lambda Function (Phase 5.2) ---
   # I/O-heavy on the CSV-import path (up to 300 rows / 12 transact
@@ -1657,6 +1665,10 @@ Resources:
           # 17.7, 2026-06-28); stg / prod secrets must be created
           # before their respective first deploy.
           EMPLOYEE_ANONYMIZE_SALT: !Sub "{{resolve:secretsmanager:safety-confirmation/${EnvironmentName}/employee-anonymize-salt:SecretString:salt}}"
+          # Field-level encryption (Phase 18): AES-256-GCM with cached data key.
+          FIELD_ENCRYPTION_ENABLED: "true"
+          FIELD_ENCRYPTION_KEY_ENCRYPTED: !Sub "{{resolve:ssm:/safety-confirmation/${EnvironmentName}/field-encryption-key}}"
+          BLIND_INDEX_HMAC_KEY: !Sub "{{resolve:ssm:/safety-confirmation/${EnvironmentName}/blind-index-hmac-key}}"
 
   # --- CycleApi IAM Execution Role (Phase 5.3) ---
   # Cycle table CRUD (incl. StatusStartedAtIndex Query for the existing-
