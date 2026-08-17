@@ -37,6 +37,9 @@ from shared.api.cors import with_cors_headers
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
+# Field encryption support: decrypt employee names when reading from DB
+ENCRYPTION_ENABLED = os.environ.get("FIELD_ENCRYPTION_ENABLED", "false").lower() == "true"
+
 RESPONSE_TABLE_NAME = os.environ["RESPONSE_TABLE_NAME"]
 EMPLOYEE_TABLE_NAME = os.environ["EMPLOYEE_TABLE_NAME"]
 TRANSCRIPT_META_TABLE_NAME = os.environ["TRANSCRIPT_META_TABLE_NAME"]
@@ -72,7 +75,18 @@ def _resolve_employee_name(employee_id: str) -> str | None:
     if item is None:
         return None
     name = item.get("name")
-    return name if isinstance(name, str) else None
+    if not isinstance(name, str):
+        return None
+    # Decrypt if encrypted
+    if ENCRYPTION_ENABLED:
+        try:
+            from shared.crypto import decrypt_field, is_encrypted
+            if is_encrypted(name):
+                return decrypt_field(name)
+        except Exception as exc:
+            LOGGER.warning("Failed to decrypt employee name for %s: %s", employee_id, exc)
+            return name
+    return name
 
 
 def _latest_transcript_excerpt(cycle_id: str, employee_id: str) -> str | None:

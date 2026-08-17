@@ -36,6 +36,13 @@ New-Item -ItemType Directory -Path $DestPython -Force | Out-Null
 # Copy backend/shared/* into the staging tree.
 Copy-Item -Path (Join-Path $Source "*") -Destination $DestPython -Recurse -Force
 
+# Install third-party dependencies required by shared modules.
+# cryptography is needed for shared/crypto/envelope.py (AES-256-GCM).
+# Install for Linux ARM64 (Lambda runtime target).
+$DepsTarget = Join-Path $LayerRoot "python"
+Write-Host "Installing third-party dependencies into Layer..."
+pip install cryptography --target $DepsTarget --platform manylinux2014_aarch64 --only-binary=:all: --quiet 2>&1 | Out-Null
+
 # Strip __pycache__ and *.pyc that may have been copied along.
 Get-ChildItem -Path $LayerRoot -Recurse -Directory -Filter "__pycache__" `
     | ForEach-Object { Remove-Item -Recurse -Force $_.FullName }
